@@ -1,2 +1,2 @@
-# mezzo
-A Haskell library for typesafe music composition
+# Mezzo
+A Haskell library for typesafe music composition.
