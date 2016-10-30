@@ -1,14 +1,15 @@
 name:                mezzo
 version:             0.1.0.0
-synopsis:            Initial project template from stack
-description:         Please see README.md
-homepage:            https://github.com/githubuser/mezzo#readme
+synopsis:            Typesafe music composition
+description:         A Haskell music composition library that enforces common
+                     musical rules in the type system.
+homepage:            https://github.com/DimaSamoz/mezzo#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
-copyright:           2016 Author name here
-category:            Web
+author:              Dima Szamozvancev
+maintainer:          ds709@cam.ac.uk
+copyright:           2016 Dima Samozvancev
+category:            Music
 build-type:          Simple
 -- extra-source-files:
 cabal-version:       >=1.10
@@ -38,4 +39,4 @@ test-suite mezzo-test
 
 source-repository head
   type:     git
-  location: https://github.com/githubuser/mezzo
+  location: https://github.com/DimaSamoz/mezzo
