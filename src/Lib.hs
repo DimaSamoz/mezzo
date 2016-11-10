@@ -1,4 +1,5 @@
-{-# LANGUAGE TypeInType, GADTs, TypeFamilies, TypeOperators, TypeApplications, UndecidableInstances, FlexibleInstances, RankNTypes #-}
+{-# LANGUAGE TypeInType, GADTs, TypeFamilies, TypeOperators, FlexibleContexts,
+    TypeApplications, UndecidableInstances, FlexibleInstances, RankNTypes, ConstraintKinds #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 module Lib
@@ -102,7 +103,7 @@ data Interval :: IntervalClass -> IntervalSize -> Type where
     Interval :: Interval ic is
 
 type family Shrink i where
-    Shrink (Interval Perf Unison) = Interval Perf Unison
+    Shrink (Interval Perf Unison) = TypeError (Text "Can't diminish unisons.")
     Shrink (Interval Perf is) = Interval Dim is
     Shrink (Interval Min is) = Interval Dim is
     Shrink (Interval Maj is) = Interval Min is
@@ -111,14 +112,27 @@ type family Shrink i where
     Shrink (Interval Aug Fifth) = Interval Perf Fifth
     Shrink (Interval Aug Octave) = Interval Perf Octave
     Shrink (Interval Aug is) = Interval Maj is
-    Shrink (Interval Dim Unison) = TypeError (Text "Can't have diminished unisons.")
-    Shrink (Interval Dim is) = Interval Maj (IntSizePred is)
+    Shrink (Interval Dim Unison) = TypeError (Text "Can't diminish unisons.")
+    Shrink (Interval Dim Second) = TypeError (Text "Can't diminish unisons.")
+    Shrink (Interval Dim Fifth) = Interval Perf Fourth
+    Shrink (Interval Dim Sixth) = Interval Dim Fifth
+    Shrink (Interval Dim is) = Interval Min (IntSizePred is)
 
 type family Expand i where
-    Expand (Interval Perf Octave) = Interval Perf Octave
+    Expand (Interval Perf Octave) = Interval Aug Octave
     Expand (Interval Perf is) = Interval Aug is
     Expand (Interval Maj is) = Interval Aug is
     Expand (Interval Min is) = Interval Maj is
+    Expand (Interval Dim Unison) = TypeError (Text "Can't diminish unisons.")
+    Expand (Interval Dim Fourth) = Interval Perf Fourth
+    Expand (Interval Dim Fifth) = Interval Perf Fifth
+    Expand (Interval Dim Octave) = Interval Perf Octave
+    Expand (Interval Dim is) = Interval Min is
+    Expand (Interval Aug Third) = Interval Aug Fourth
+    Expand (Interval Aug Fourth) = Interval Perf Fifth
+    Expand (Interval Aug Seventh) = Interval Aug Octave
+    Expand (Interval Aug Octave) = TypeError (Text "Compound intervals are not supported.")
+    Expand (Interval Aug is) = Interval Maj (IntSizeSucc is)
 
 type family OctSucc (o :: Oct) :: Oct where
     OctSucc Oct_1 = Oct0
@@ -130,10 +144,10 @@ type family OctSucc (o :: Oct) :: Oct where
     OctSucc Oct5 = Oct6
     OctSucc Oct6 = Oct7
     OctSucc Oct7 = Oct8
-    OctSucc Oct8 = Oct8
+    OctSucc Oct8 = TypeError (Text "Octave too high.")
 
 type family OctPred (o :: Oct) :: Oct where
-    OctPred Oct_1 = Oct_1
+    OctPred Oct_1 = TypeError (Text "Octave too low.")
     OctPred Oct0 = Oct_1
     OctPred Oct1 = Oct0
     OctPred Oct2 = Oct1
@@ -188,31 +202,65 @@ type family HalfStepUp p where
     HalfStepUp (Pitch E acc o) = Pitch F acc o
     HalfStepUp (Pitch pc Flat o) = Pitch pc Natural o
     HalfStepUp (Pitch pc Natural o) = Pitch pc Sharp o
-    HalfStepUp (Pitch pc Sharp o) = Pitch (ClassSucc pc) Sharp o
+    HalfStepUp (Pitch pc Sharp o) = Pitch (ClassSucc pc) Natural o
+
+type family HalfStepDown p where
+    HalfStepDown (Pitch C acc o) = Pitch B acc (OctPred o)
+    HalfStepDown (Pitch F acc o) = Pitch E acc o
+    HalfStepDown (Pitch pc Flat o) = Pitch (ClassPred pc) Natural o
+    HalfStepDown (Pitch pc Natural o) = Pitch pc Flat o
+    HalfStepDown (Pitch pc Sharp o) = Pitch pc Natural o
+
+type family If (b :: Bool) t e where
+    If True t e = t
+    If False t e = e
 
 type family MakeInterval p1 p2 where
-    MakeInterval (Pitch C Natural o1) (Pitch C Natural o1) = Interval Perf Unison
-    MakeInterval (Pitch C Natural o1) (Pitch D Natural o1) = Interval Maj Second
-    MakeInterval (Pitch C Natural o1) (Pitch E Natural o1) = Interval Maj Third
-    MakeInterval (Pitch C Natural o1) (Pitch F Natural o1) = Interval Perf Fourth
-    MakeInterval (Pitch C Natural o1) (Pitch G Natural o1) = Interval Perf Fifth
-    MakeInterval (Pitch C Natural o1) (Pitch A Natural o1) = Interval Maj Sixth
-    MakeInterval (Pitch C Natural o1) (Pitch B Natural o1) = Interval Maj Seventh
-    MakeInterval (Pitch C Natural o1) (Pitch C Natural o2) = Interval Perf Octave
-    MakeInterval (Pitch C Natural o1) (Pitch pc2 Sharp o1) =
-            Expand (MakeInterval (Pitch C Natural o1) (Pitch pc2 Natural o1))
-    MakeInterval (Pitch C Natural o1) (Pitch pc2 Flat o1) =
-            Shrink (MakeInterval (Pitch C Natural o1) (Pitch pc2 Natural o1))
-    MakeInterval (Pitch C Flat o1) (Pitch pc2 acc o1) =
-            Expand (MakeInterval (Pitch C Natural o1) (Pitch pc2 acc o1))
-    MakeInterval (Pitch C Sharp o1) (Pitch pc2 acc o1) =
-            Shrink (MakeInterval (Pitch C Natural o1) (Pitch pc2 acc o1))
-
-
+    MakeInterval p p = Interval Perf Unison
+    MakeInterval (Pitch C Natural o) (Pitch D Natural o) = Interval Maj Second
+    MakeInterval (Pitch C Natural o) (Pitch E Natural o) = Interval Maj Third
+    MakeInterval (Pitch C Natural o) (Pitch F Natural o) = Interval Perf Fourth
+    MakeInterval (Pitch C Natural o) (Pitch G Natural o) = Interval Perf Fifth
+    MakeInterval (Pitch C Natural o) (Pitch A Natural o) = Interval Maj Sixth
+    MakeInterval (Pitch C Natural o) (Pitch B Natural o) = Interval Maj Seventh
+    MakeInterval (Pitch C Natural o) (Pitch C Natural o2) = Interval Perf Octave
+    MakeInterval (Pitch C Natural o) (Pitch pc2 Sharp o) =
+            Expand (MakeInterval (Pitch C Natural o) (Pitch pc2 Natural o))
+    MakeInterval (Pitch C Natural o) (Pitch pc2 Flat o) =
+            Shrink (MakeInterval (Pitch C Natural o) (Pitch pc2 Natural o))
+    MakeInterval (Pitch C Flat o) (Pitch pc2 acc o) =
+            Expand (MakeInterval (Pitch C Natural o) (Pitch pc2 acc o))
+    MakeInterval (Pitch C Sharp o) (Pitch pc2 acc o) =
+            Shrink (MakeInterval (Pitch C Natural o) (Pitch pc2 acc o))
+    MakeInterval (Pitch pc1 acc1 o) (Pitch pc2 acc2 o) =
+            MakeInterval (Pitch (ClassPred pc1) acc1 o) (Pitch (ClassPred pc2) acc2 o)
+    MakeInterval (Pitch pc1 acc1 o1) (Pitch pc2 acc2 o2) =
+            MakeInterval (HalfStepDown (Pitch pc1 acc1 o1)) (HalfStepDown (Pitch pc2 acc2 o2))
     MakeInterval _ _ = TypeError (Text "Invalid interval.")
 
-x :: Proxy (MakeInterval (Pitch C Sharp  Oct3) (Pitch G Flat Oct3))
+x :: MakeInterval (Pitch A Natural Oct3) (Pitch C Sharp Oct4)
 x = undefined
+
+class ValidInterval i
+instance TypeError (Text "Can't have minor seconds in chords.") => ValidInterval (Interval Aug Unison)
+instance TypeError (Text "Can't have minor seconds in chords.") => ValidInterval (Interval Min Second)
+instance TypeError (Text "Can't have major sevenths in chords.") => ValidInterval (Interval Maj Seventh)
+instance TypeError (Text "Can't have major sevenths in chords.") => ValidInterval (Interval Dim Octave)
+instance {-# OVERLAPPABLE #-} ValidInterval i
+
+
+data ValidTest where
+    V :: ValidInterval (MakeInterval (Pitch pc1 a1 o1) (Pitch pc2 a2 o2))
+            => Note pc1 a1 o1 d1 -> Note pc2 a2 o2 d2 -> ValidTest
+
+as :: ValidTest
+as = V n1 n2
+
+n1 :: Note C Natural Oct3 Half
+n1 = undefined
+
+n2 :: Note B Natural Oct3 Half
+n2 = undefined
 
 y :: Proxy (OctSucc Oct8)
 y = undefined
