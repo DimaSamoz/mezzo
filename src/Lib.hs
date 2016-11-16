@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, GADTs, TypeFamilies, TypeOperators, FlexibleContexts,
+{-# LANGUAGE TypeInType, GADTs, TypeFamilies, TypeOperators, FlexibleContexts, MultiParamTypeClasses,
     TypeApplications, UndecidableInstances, FlexibleInstances, RankNTypes, ConstraintKinds #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
@@ -109,20 +109,38 @@ test2 = Proxy @(Pitch C Sharp Oct4)
 data Music :: forall u p q. Matrix u p q -> Type where
     Prim :: Unit u => u -> Music ((u :- Nil) :- Nil)
     (:|:) :: Music m1 -> Music m2 -> Music (m1 +|+ m2)
-    (:-:) :: Ensure (AllValidLeaps m1 m2) => Music m1 -> Music m2 -> Music (m1 +-+ m2)
+    (:-:) :: AllValidLeaps m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
 
-type family Last (v :: Vec a n) :: a where
-    Last (x :- Nil) = x
-    Last (x :- xs) = Last xs
+-- type family ValidLeap (v1 :: Vec a n) (v2 :: Vec a m) :: Constraint where
+--     ValidLeap Nil _ = Valid
+--     ValidLeap _ Nil = Valid
+--     ValidLeap (v1 :- Nil) (v2 :- vs2) = ValidNoteLeap v1 v2
+--     ValidLeap (_ :- vs1) vs2 = ValidLeap vs1 vs2
 
-type family ValidLeap v1 v2 :: Bool where
-    ValidLeap _ ((Rest d) :- _) = True
-    ValidLeap (v) (n :- ns) = (ValidMelInterval (MakeInterval (Last v) n))
-    -- ValidLeap (v) (n :- ns) = If ((Last v) .~. (Rest d)) (True) (ValidMelInterval (MakeInterval (Last v) n))
+class ValidLeap a b
+instance ValidLeap Nil a
+instance ValidLeap a Nil
+instance ValidNoteLeap v1 v2 => ValidLeap (v1 :- Nil) (v2 :- vs2)
+instance {-# OVERLAPPABLE #-}  ValidLeap vs1 vs2 => ValidLeap (v :- vs1) vs2
 
-type family AllValidLeaps (m1 :: Matrix a p r) (m2 :: Matrix a p q) :: Bool where
-    AllValidLeaps Nil Nil = True
-    AllValidLeaps (row1 :- rest1) (row2 :- rest2) = ValidLeap row1 row2 `And` AllValidLeaps rest1 rest2
+class ValidNoteLeap n1 n2
+instance ValidNoteLeap (Rest d) a
+instance ValidNoteLeap a (Rest d)
+instance ValidMelInterval (MakeInterval n1 n2) => ValidNoteLeap n1 n2
+
+
+-- type family ValidNoteLeap n1 n2 :: Constraint where
+--     ValidNoteLeap (Rest d) _ = Valid
+--     ValidNoteLeap _ (Rest d) = Valid
+--     ValidNoteLeap n1 n2 = ValidMelInterval (MakeInterval n1 n2)
+
+class AllValidLeaps m1 m2
+instance AllValidLeaps Nil Nil
+instance (ValidLeap row1 row2, AllValidLeaps rest1 rest2) => AllValidLeaps (row1 :- rest1) (row2 :- rest2)
+
+-- type family AllValidLeaps (m1 :: Matrix a p r) (m2 :: Matrix a p q) :: Bool where
+--     AllValidLeaps Nil Nil = True
+--     AllValidLeaps (row1 :- rest1) (row2 :- rest2) = ValidLeap row1 row2 `And` AllValidLeaps rest1 rest2
 
 type family And (b1 :: Bool) (b2 :: Bool) :: Bool where
     And b1 b2 = If (b1) (b2) False
@@ -131,13 +149,19 @@ type family Or (b1 :: Bool) (b2 :: Bool) :: Bool where
     Or False False = False
     Or _ _ = True
 
-type family ValidMelInterval i :: Bool where
-    ValidMelInterval (Interval Aug _) = TypeError (Text "Augmented melodic intervals are not permitted.")
-    ValidMelInterval (Interval Dim _) = TypeError (Text "Diminished melodic intervals are not permitted.")
-    ValidMelInterval (Interval _ Seventh) = TypeError (Text "Seventh intervals are not permitted in melody.")
-    ValidMelInterval (Interval _ _) = True
+class ValidMelInterval i
+instance TypeError (Text "Augmented melodic intervals are not permitted.") => ValidMelInterval (Interval Aug a)
+instance TypeError (Text "Augmented melodic intervals are not permitted.") => ValidMelInterval (Interval Dim a)
+instance TypeError (Text "Seventh intervals are not permitted in melody.") => ValidMelInterval (Interval a Seventh)
+instance ValidMelInterval (Interval a b)
 
-invLeap :: Proxy (ValidLeap (Note C Natural Oct3 Half :- Nil) (Note F Sharp Oct3 Half :- Nil))
+-- type family ValidMelInterval i :: Constraint where
+--     ValidMelInterval (Interval Aug _) = TypeError (Text "Augmented melodic intervals are not permitted.")
+--     ValidMelInterval (Interval Dim _) = TypeError (Text "Diminished melodic intervals are not permitted.")
+--     ValidMelInterval (Interval _ Seventh) = TypeError (Text "Seventh intervals are not permitted in melody.")
+--     ValidMelInterval (Interval _ _) = Valid
+
+invLeap :: Proxy (ValidLeap (Note C Natural Oct3 Half :- Nil) (Note G Flat Oct3 Half :- Nil))
 invLeap = undefined
 
 type family OrdPair p1 p2 :: (Nat, Nat) where
@@ -157,14 +181,12 @@ primN = Prim (Note (Pitch @F @Sharp @Oct3) (Dur @Half))
 primMel :: Music ((Rest Half :- Nil) :- (Nil ++ ((Note F Sharp Oct3 Half :- Nil) :- Nil)))
 primMel = primR :|: primN
 
+bbt :: Proxy (MakeInterval (Pitch F Natural Oct3) (Pitch B Natural Oct3))
+bbt = undefined
 
 bb =
     (Prim (Note (Pitch @C @Natural @Oct3) (Dur @Eighth))) :-:
-    (Prim (Note (Pitch @E @Sharp @Oct3) (Dur @Eighth))) :-:
-    (Prim (Note (Pitch @C @Natural @Oct3) (Dur @Eighth))) :-:
-    (Prim (Note (Pitch @E @Natural @Oct3) (Dur @Eighth))) :-:
-    (Prim (Note (Pitch @G @Natural @Oct3) (Dur @Quarter))) :-:
-    (Prim (Note (Pitch @G @Natural @Oct3) (Dur @Quarter)))
+    (Prim (Note (Pitch @E @Natural @Oct3) (Dur @Eighth)))
 
 bt = ( bb) :|: bb
 
