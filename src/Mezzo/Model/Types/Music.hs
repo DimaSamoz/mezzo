@@ -1,4 +1,4 @@
-module Mezzo.Model.Types.Families
+module Mezzo.Model.Types.Music
     ( someFunc
     ) where
 

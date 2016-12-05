@@ -21,7 +21,7 @@ library
                      , Mezzo.Model
                      , Mezzo.Model.Types
                      , Mezzo.Model.Types.Prim
-                     , Mezzo.Model.Types.Families
+                     , Mezzo.Model.Types.Music
                      , Mezzo.Model.Constraints
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
