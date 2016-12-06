@@ -1,4 +1,5 @@
-{-# LANGUAGE TypeInType, TypeOperators, TypeFamilies, GADTs, UndecidableInstances #-}
+{-# LANGUAGE TypeInType, TypeOperators, TypeFamilies, GADTs,
+    UndecidableInstances, ConstraintKinds #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
@@ -30,6 +31,10 @@ module Mezzo.Model.Types.Prim
     , If
     , type (.&&.)
     , type (.||.)
+    -- * Constraints
+    , Valid
+    , Invalid
+    , AllSatisfy
     ) where
 
 import Data.Kind
@@ -99,3 +104,19 @@ type family (b1 :: Bool) .&&. (b2 :: Bool) :: Bool where
 -- | Disjunction of type-level Booleans
 type family (b1 :: Bool) .||. (b2 :: Bool) :: Bool where
     b1 .||. b2 = If b1 True b2
+
+-------------------------------------------------------------------------------
+-- Constraints
+-------------------------------------------------------------------------------
+
+-- | Valid base constraint.
+type Valid = (() :: Constraint)
+
+-- | Invalid base constraint.
+type Invalid = True ~ False
+
+-- | Create a new constraint which is valid only if every element in the given
+-- vector satisfies the given unary constraint.
+type family AllSatisfy (c :: a -> Constraint) (xs :: Vector a n) :: Constraint where
+    AllSatisfy c Nil = Valid
+    AllSatisfy c (x :- xs) = ((c x), AllSatisfy c xs)
