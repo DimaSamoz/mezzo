@@ -31,6 +31,7 @@ module Mezzo.Model.Types.Prim
     , If
     , type (.&&.)
     , type (.||.)
+    , type (.~.)
     -- * Constraints
     , Valid
     , Invalid
@@ -47,6 +48,7 @@ infixl 4 +|+
 infixl 4 +-+
 infixl 3 .&&.
 infixl 3 .||.
+infixl 5 .~.
 
 -------------------------------------------------------------------------------
 -- Type-level vectors and matrices
@@ -104,6 +106,11 @@ type family (b1 :: Bool) .&&. (b2 :: Bool) :: Bool where
 -- | Disjunction of type-level Booleans
 type family (b1 :: Bool) .||. (b2 :: Bool) :: Bool where
     b1 .||. b2 = If b1 True b2
+
+-- | Equality of types.
+type family (a :: k) .~. (b :: k) :: Bool where
+    a .~. a = True
+    a .~. b = False
 
 -------------------------------------------------------------------------------
 -- Constraints
