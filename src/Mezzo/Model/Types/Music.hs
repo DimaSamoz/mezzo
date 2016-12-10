@@ -137,7 +137,7 @@ data Music :: forall pt p q. Matrix pt p q -> Type where
     Rest :: Dur d -> Music ((Silence +*+ d) :- Nil)
     -- | Sequential or melodic composition of music.
     (:|:) :: ValidMelComp m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
-    -- | Parallel or harmotic composition of music.
+    -- | Parallel or harmonic composition of music.
     (:-:) :: ValidHarmComp m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
 
 -- | A type encapsulating every 'Music' composition.
