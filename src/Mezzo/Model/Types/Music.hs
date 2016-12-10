@@ -210,7 +210,7 @@ instance {-# OVERLAPPABLE #-} (ValidMelAppend row1 row2, ValidMelConcat rest1 re
 ---- Harmonic constraints
 
 -- | Ensures that two pieces of music can be composed in parallel.
-type ValidHarmComp m1 m2 = (AllSatisfy OnlyValidHarmDyads (Transpose (m1 +|+ m2)))
+type ValidHarmComp m1 m2 = (AllSatisfy OnlyValidHarmDyads (Transpose (m1 +-+ m2)))
 
 -- | Ensures that harmonic intervals are valid.
 --
