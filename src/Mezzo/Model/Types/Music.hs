@@ -45,6 +45,9 @@ import GHC.TypeLits
 
 import Mezzo.Model.Types.Prim
 
+infixl 4 :|:
+infixl 4 :-:
+
 -------------------------------------------------------------------------------
 -- Note properties
 -- The "minimum complete definition" for musical notes and rests.
