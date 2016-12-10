@@ -19,10 +19,10 @@
 module Mezzo.Model.Types.Music
     (
     -- * Note properties
-      PitchClass
-    , Accidental
-    , OctaveNum
-    , Duration
+      PitchClass (..)
+    , Accidental (..)
+    , OctaveNum (..)
+    , Duration (..)
     -- ** Singleton types for note properties
     , PC (..)
     , Acc (..)
