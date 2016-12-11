@@ -7,8 +7,9 @@ import Control.Exception (evaluate)
 import Test.ShouldNotTypecheck (shouldNotTypecheck)
 import Control.DeepSeq
 
-import Mezzo.Model.Types.Prim
-import Mezzo.Model.Types.Music
+import Mezzo.Model.Prim
+import Mezzo.Model.Types
+import Mezzo.Model.Music
 
 main :: IO ()
 main = hspec $ do
