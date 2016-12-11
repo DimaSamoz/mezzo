@@ -29,6 +29,8 @@ module Mezzo.Model.Types
     , Dur (..)
     -- * Pitches
     , PitchType (..)
+    , type (<<=?)
+    , type (<<?)
     -- * Intervals
     , IntervalSize (..)
     , IntervalClass (..)
@@ -215,9 +217,13 @@ type family NatToPitch (n :: Nat) where
     NatToPitch 1 = Pitch C Sharp Oct_1
     NatToPitch n = HalfStepUp (NatToPitch (n - 1))
 
--- | Comparison of pitches.
+-- | Greater than or equal to for pitches.
 type family (p1 :: PitchType) <<=? (p2 :: PitchType) where
     p1 <<=? p2 = PitchToNat p1 <=? PitchToNat p2
+
+-- | Greater than for pitches.
+type family (p1 :: PitchType) <<? (p2 :: PitchType) where
+    p1 <<? p2 = (p1 <<=? p2) .&&. Not (p1 .~. p2)
 
 -- | Increment an octave.
 type family OctSucc (o :: OctaveNum) :: OctaveNum where
