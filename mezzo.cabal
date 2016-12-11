@@ -22,7 +22,6 @@ library
                      , Mezzo.Model.Prim
                      , Mezzo.Model.Music
                      , Mezzo.Model.Types
-                     , Mezzo.Model.Constraints
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
   default-language:    Haskell2010
