@@ -31,6 +31,7 @@ module Mezzo.Model.Prim
     , Transpose
     -- * Booleans
     , If
+    , Not
     , type (.&&.)
     , type (.||.)
     , type (.~.)
@@ -112,11 +113,16 @@ type family If (b :: Bool) (t :: k) (e :: k) :: k where
     If True  t e = t
     If False t e = e
 
--- | Conjunction of type-level Booleans
+-- | Negation of type-level Booleans.
+type family Not (a :: Bool) :: Bool where
+    Not True = False
+    Not False = True
+
+-- | Conjunction of type-level Booleans.
 type family (b1 :: Bool) .&&. (b2 :: Bool) :: Bool where
     b1 .&&. b2 = If b1 b2 False
 
--- | Disjunction of type-level Booleans
+-- | Disjunction of type-level Booleans.
 type family (b1 :: Bool) .||. (b2 :: Bool) :: Bool where
     b1 .||. b2 = If b1 True b2
 
