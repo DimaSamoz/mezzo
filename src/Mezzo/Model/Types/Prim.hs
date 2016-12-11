@@ -21,7 +21,7 @@ module Mezzo.Model.Types.Prim
     (
     -- * Vectors and matrices
       Vector (..)
-    , Matrix (..)
+    , Matrix
     , type (++)
     , type (+*+)
     , type (+|+)
