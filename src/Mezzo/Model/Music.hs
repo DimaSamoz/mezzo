@@ -119,7 +119,7 @@ instance {-# OVERLAPPABLE #-} ValidMelAppend vs1 vs2 => ValidMelAppend (v :- vs1
 --  * both of them are empty or
 --  * all of the row vectors can be appended.
 class ValidMelConcat (m1 :: Matrix t p q) (m2 :: Matrix t p r)
-instance {-# OVERLAPPING #-} ValidMelConcat Nil Nil
+instance {-# OVERLAPPING #-}   ValidMelConcat Nil Nil
 instance {-# OVERLAPPABLE #-} (ValidMelAppend row1 row2, ValidMelConcat rest1 rest2)
                                 => ValidMelConcat (row1 :- rest1) (row2 :- rest2)
 
@@ -137,11 +137,16 @@ type ValidHarmComp m1 m2 = (AllSatisfy OnlyValidHarmDyads (Transpose (m1 +-+ m2)
 --  * a major seventh or
 --  * an augmented octave.
 class ValidHarmInterval (i :: IntervalType)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have minor seconds in chords.") => ValidHarmInterval (Interval Aug Unison)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have minor seconds in chords.") => ValidHarmInterval (Interval Min Second)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have major sevenths in chords.") => ValidHarmInterval (Interval Maj Seventh)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have major sevenths in chords.") => ValidHarmInterval (Interval Dim Octave)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have augmented octaves in chords.") => ValidHarmInterval (Interval Aug Octave)
+instance {-# OVERLAPPING #-}  TypeError (Text "Can't have minor seconds in chords.")
+                                => ValidHarmInterval (Interval Aug Unison)
+instance {-# OVERLAPPING #-}  TypeError (Text "Can't have minor seconds in chords.")
+                                => ValidHarmInterval (Interval Min Second)
+instance {-# OVERLAPPING #-}  TypeError (Text "Can't have major sevenths in chords.")
+                                => ValidHarmInterval (Interval Maj Seventh)
+instance {-# OVERLAPPING #-}  TypeError (Text "Can't have major sevenths in chords.")
+                                => ValidHarmInterval (Interval Dim Octave)
+instance {-# OVERLAPPING #-}  TypeError (Text "Can't have augmented octaves in chords.")
+                                => ValidHarmInterval (Interval Aug Octave)
 instance {-# OVERLAPPABLE #-} ValidHarmInterval i
 
 -- | Ensures that two pitches form valid harmonic dyad (interval).
@@ -151,9 +156,9 @@ instance {-# OVERLAPPABLE #-} ValidHarmInterval i
 --  * at least one of them is silent (i.e. it is a rest) or
 --  * they form a valid harmonic interval.
 class ValidHarmDyad (p1 :: PitchType) (p2 :: PitchType)
-instance {-# OVERLAPPING #-} ValidHarmDyad Silence Silence
-instance {-# OVERLAPPING #-} ValidHarmDyad (Pitch pc acc oct) Silence
-instance {-# OVERLAPPING #-} ValidHarmDyad Silence (Pitch pc acc oct)
+instance {-# OVERLAPPING #-}  ValidHarmDyad Silence Silence
+instance {-# OVERLAPPING #-}  ValidHarmDyad (Pitch pc acc oct) Silence
+instance {-# OVERLAPPING #-}  ValidHarmDyad Silence (Pitch pc acc oct)
 instance {-# OVERLAPPABLE #-} ValidHarmInterval (MakeInterval a b) => ValidHarmDyad a b
 
 -- | Ensures that pitch vectors contain only valid harmonic dyads.
@@ -165,10 +170,11 @@ instance {-# OVERLAPPABLE #-} ValidHarmInterval (MakeInterval a b) => ValidHarmD
 --  * the head forms valid harmonic dyads with all pitches in the tail and
 --    the tail contains only valid harmonic dyad.
 class OnlyValidHarmDyads (v :: Vector PitchType n)
-instance {-# OVERLAPPING #-} OnlyValidHarmDyads Nil
-instance {-# OVERLAPPING #-} OnlyValidHarmDyads (p :- Nil)
-instance {-# OVERLAPPING #-} ValidHarmDyad p1 p2 => OnlyValidHarmDyads (p1 :- p2 :- Nil)
-instance {-# OVERLAPPABLE #-} (AllSatisfy (ValidHarmDyad p) ps, OnlyValidHarmDyads ps) => OnlyValidHarmDyads (p :- ps)
+instance {-# OVERLAPPING #-}   OnlyValidHarmDyads Nil
+instance {-# OVERLAPPING #-}   OnlyValidHarmDyads (p :- Nil)
+instance {-# OVERLAPPING #-}   ValidHarmDyad p1 p2 => OnlyValidHarmDyads (p1 :- p2 :- Nil)
+instance {-# OVERLAPPABLE #-} (AllSatisfy (ValidHarmDyad p) ps, OnlyValidHarmDyads ps)
+                                => OnlyValidHarmDyads (p :- ps)
 
 -------------------------------------------------------------------------------
 -- Interval construction
