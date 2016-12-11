@@ -3,7 +3,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Mezzo.Model.Types.Music
+-- Module      :  Mezzo.Model.Music
 -- Description :  Mezzo music types
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
@@ -16,7 +16,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Mezzo.Model.Types.Music
+module Mezzo.Model.Music
     (
     -- * Note properties
       PitchClass (..)
@@ -43,10 +43,11 @@ module Mezzo.Model.Types.Music
 import Data.Kind
 import GHC.TypeLits
 
-import Mezzo.Model.Types.Prim
+import Mezzo.Model.Prim
 
 infixl 4 :|:
 infixl 4 :-:
+infixl 3 <<=?
 
 -------------------------------------------------------------------------------
 -- Note properties

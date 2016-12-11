@@ -4,7 +4,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Mezzo.Model.Types.Prim
+-- Module      :  Mezzo.Model.Prim
 -- Description :  Mezzo type primitives
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
@@ -17,7 +17,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Mezzo.Model.Types.Prim
+module Mezzo.Model.Prim
     (
     -- * Vectors and matrices
       Vector (..)
