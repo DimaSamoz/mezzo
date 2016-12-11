@@ -21,6 +21,8 @@ module Mezzo.Model.Prim
     (
     -- * Vectors and matrices
       Vector (..)
+    , Head
+    , Last
     , Matrix
     , type (++)
     , type (+*+)
@@ -58,6 +60,17 @@ infixl 5 .~.
 data Vector :: Type -> Nat -> Type where
     Nil  :: Vector t 0
     (:-) :: t -> Vector t (n - 1) -> Vector t n
+
+-- | Get the first element of the vector.
+type family Head (v :: Vector t n) :: t where
+    Head Nil      = TypeError (Text "Vector has no head element.")
+    Head (v :- _) = v
+
+-- | Get the last element of the vector.
+type family Last (v :: Vector t n) :: t where
+    Last Nil        = TypeError (Text "Vector has no last element.")
+    Last (v :- Nil) = v
+    Last (_ :- vs)  = Last vs
 
 -- | A dimension-indexed matrix.
 type Matrix t p q = Vector (Vector t q) p

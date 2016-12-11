@@ -108,8 +108,7 @@ instance {-# OVERLAPPABLE #-} ValidMelInterval (MakeInterval a b) => ValidMelLea
 class ValidMelAppend (a :: Vector PitchType n) (b :: Vector PitchType m)
 instance {-# OVERLAPPING #-}  ValidMelAppend Nil a
 instance {-# OVERLAPPING #-}  ValidMelAppend a Nil
-instance {-# OVERLAPS #-}     ValidMelLeap v1 v2 => ValidMelAppend (v1 :- Nil) (v2 :- vs2)
-instance {-# OVERLAPPABLE #-} ValidMelAppend vs1 vs2 => ValidMelAppend (v :- vs1) vs2
+instance {-# OVERLAPPABLE #-} ValidMelLeap (Last vs1) v2 => ValidMelAppend vs1 (v2 :- vs2)
 
 -- | Ensures that two pitch matrices can be horizontally concatenated.
 --
