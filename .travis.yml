@@ -7,6 +7,11 @@ sudo: false
 # Choose a lightweight base image; we provide our own build tools.
 language: c
 
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+
 # Caching so the next build will be fast too.
 cache:
   directories:
