@@ -39,6 +39,9 @@ module Mezzo.Model.Prim
     , Valid
     , Invalid
     , AllSatisfy
+    , AllPairsSatisfy
+    , SatisfiesAll
+    , AllSatisfyAll
     ) where
 
 import Data.Kind
@@ -143,6 +146,34 @@ type Invalid = True ~ False
 
 -- | Create a new constraint which is valid only if every element in the given
 -- vector satisfies the given unary constraint.
-type family AllSatisfy (c :: a -> Constraint) (xs :: Vector a n) :: Constraint where
-    AllSatisfy c Nil = Valid
+-- Analogue of 'map' for constraints and vectors.
+type family AllSatisfy (c  :: a -> Constraint)
+                       (xs :: Vector a n)
+                           :: Constraint where
+    AllSatisfy c Nil       = Valid
     AllSatisfy c (x :- xs) = ((c x), AllSatisfy c xs)
+
+-- | Create a new constraint which is valid only if every pair of elements in
+-- the given vectors satisfy the given binary constraint.
+-- Analogue of 'zipWith' for constraints and vectors.
+type family AllPairsSatisfy (c  :: a -> b -> Constraint)
+                            (xs :: Vector a n) (ys :: Vector b n)
+                                :: Constraint where
+    AllPairsSatisfy c Nil Nil             = Valid
+    AllPairsSatisfy c (x :- xs) (y :- ys) = ((c x y), AllPairsSatisfy c xs ys)
+
+-- | Create a new constraint which is valid only if the given value satisfies
+-- every unary constraint in the given list.
+type family SatisfiesAll (cs :: [a -> Constraint])
+                         (xs :: a)
+                             :: Constraint where
+    SatisfiesAll '[] a      = Valid
+    SatisfiesAll (c : cs) a = (c a, SatisfiesAll cs a)
+
+-- | Create a new constraint which is valid only if every element in the given
+-- vector satisfies every unary constraint in the given list.
+type family AllSatisfyAll (c1 :: [a -> Constraint])
+                          (xs :: Vector a n)
+                              :: Constraint where
+    AllSatisfyAll _ Nil = Valid
+    AllSatisfyAll cs (v :- vs) = (SatisfiesAll cs v, AllSatisfyAll cs vs)
