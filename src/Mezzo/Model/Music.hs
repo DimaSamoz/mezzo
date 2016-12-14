@@ -27,6 +27,7 @@ import Data.Kind
 import GHC.TypeLits
 
 import Mezzo.Model.Prim
+import Mezzo.Model.Harmony
 import Mezzo.Model.Types
 
 infixl 4 :|:
@@ -45,6 +46,7 @@ infixl 4 :-:
 --  * Width (number of temporal units) of two parallelly composed pieces must be equal.
 --  * Sequentially composed voices cannot have any augmented, diminished or seventh leaps.
 --  * Parallelly composed pieces cannot have any minor second or major seventh harmonic intervals.
+--  * Music must not contain parallel or concealed unisons, fifths or octaves.
 --
 data Music :: forall pt p q. Matrix pt p q -> Type where
     -- | A note specified by a pitch class, accidental, octave and duration.
@@ -67,7 +69,8 @@ data Score = forall m. Score (Music m)
 ---- Melodic constraints
 
 -- | Ensures that two pieces of music can be composed sequentially.
-type ValidMelComp m1 m2 = (ValidMelConcat m1 m2)
+type ValidMelComp m1 m2 = ( ValidMelConcat m1 m2
+                          , ValidMelMatrixMotion m1 m2)
 
 -- | Ensures that melodic intervals are valid.
 --
@@ -77,14 +80,14 @@ type ValidMelComp m1 m2 = (ValidMelConcat m1 m2)
 --  * any diminished interval or
 --  * any seventh interval.
 class ValidMelInterval (i :: IntervalType)
-instance {-# OVERLAPPING #-}  ValidMelInterval (Interval Aug Unison)
-instance {-# OVERLAPS #-}     TypeError (Text "Augmented melodic intervals are not permitted.")
+instance {-# OVERLAPPING #-}       ValidMelInterval (Interval Aug Unison)
+instance {-# OVERLAPS #-} TypeError (Text "Augmented melodic intervals are not permitted.")
                                 => ValidMelInterval (Interval Aug a)
-instance {-# OVERLAPS #-}     TypeError (Text "Diminished melodic intervals are not permitted.")
+instance {-# OVERLAPS #-} TypeError (Text "Diminished melodic intervals are not permitted.")
                                 => ValidMelInterval (Interval Dim a)
-instance {-# OVERLAPPING #-}  TypeError (Text "Seventh intervals are not permitted in melody.")
+instance {-# OVERLAPPING #-} TypeError (Text "Seventh intervals are not permitted in melody.")
                                 => ValidMelInterval (Interval a Seventh)
-instance {-# OVERLAPPABLE #-} ValidMelInterval i
+instance {-# OVERLAPPABLE #-}      ValidMelInterval i
 
 -- | Ensures that two pitches form valid melodic leaps.
 --
@@ -117,7 +120,7 @@ instance {-# OVERLAPPABLE #-} ValidMelLeap (Last vs1) v2 => ValidMelAppend vs1 (
 --  * both of them are empty or
 --  * all of the row vectors can be appended.
 class ValidMelConcat (m1 :: Matrix t p q) (m2 :: Matrix t p r)
-instance {-# OVERLAPPING #-}   ValidMelConcat Nil Nil
+instance {-# OVERLAPPING #-}       ValidMelConcat Nil Nil
 instance {-# OVERLAPPABLE #-} (ValidMelAppend row1 row2, ValidMelConcat rest1 rest2)
                                 => ValidMelConcat (row1 :- rest1) (row2 :- rest2)
 
@@ -125,7 +128,8 @@ instance {-# OVERLAPPABLE #-} (ValidMelAppend row1 row2, ValidMelConcat rest1 re
 ---- Harmonic constraints
 
 -- | Ensures that two pieces of music can be composed in parallel.
-type ValidHarmComp m1 m2 = (AllSatisfy OnlyValidHarmDyads (Transpose (m1 +-+ m2)))
+-- type ValidHarmComp m1 m2 = (AllSatisfy OnlyValidHarmDyads (Transpose (m1 +-+ m2)))
+type ValidHarmComp m1 m2 = (ValidHarmConcat m1 m2)
 
 -- | Ensures that harmonic intervals are valid.
 --
@@ -135,17 +139,17 @@ type ValidHarmComp m1 m2 = (AllSatisfy OnlyValidHarmDyads (Transpose (m1 +-+ m2)
 --  * a major seventh or
 --  * an augmented octave.
 class ValidHarmInterval (i :: IntervalType)
-instance {-# OVERLAPPING #-}  TypeError (Text "Can't have minor seconds in chords.")
+instance {-# OVERLAPPING #-} TypeError (Text "Can't have minor seconds in chords.")
                                 => ValidHarmInterval (Interval Aug Unison)
-instance {-# OVERLAPPING #-}  TypeError (Text "Can't have minor seconds in chords.")
+instance {-# OVERLAPPING #-} TypeError (Text "Can't have minor seconds in chords.")
                                 => ValidHarmInterval (Interval Min Second)
-instance {-# OVERLAPPING #-}  TypeError (Text "Can't have major sevenths in chords.")
+instance {-# OVERLAPPING #-} TypeError (Text "Can't have major sevenths in chords.")
                                 => ValidHarmInterval (Interval Maj Seventh)
-instance {-# OVERLAPPING #-}  TypeError (Text "Can't have major sevenths in chords.")
+instance {-# OVERLAPPING #-} TypeError (Text "Can't have major sevenths in chords.")
                                 => ValidHarmInterval (Interval Dim Octave)
-instance {-# OVERLAPPING #-}  TypeError (Text "Can't have augmented octaves in chords.")
+instance {-# OVERLAPPING #-} TypeError (Text "Can't have augmented octaves in chords.")
                                 => ValidHarmInterval (Interval Aug Octave)
-instance {-# OVERLAPPABLE #-} ValidHarmInterval i
+instance {-# OVERLAPPABLE #-}      ValidHarmInterval i
 
 -- | Ensures that two pitches form valid harmonic dyad (interval).
 --
@@ -159,17 +163,85 @@ instance {-# OVERLAPPING #-}  ValidHarmDyad (Pitch pc acc oct) Silence
 instance {-# OVERLAPPING #-}  ValidHarmDyad Silence (Pitch pc acc oct)
 instance {-# OVERLAPPABLE #-} ValidHarmInterval (MakeInterval a b) => ValidHarmDyad a b
 
--- | Ensures that pitch vectors contain only valid harmonic dyads.
+-- | Ensures that two pitch vectors form pairwise valid harmonic dyads.
+class ValidHarmDyadsInVectors (v1 :: Vector PitchType l) (v2 :: Vector PitchType l)
+instance AllPairsSatisfy ValidHarmDyad v1 v2 => ValidHarmDyadsInVectors v1 v2
+
+-- | Ensures that two pitch matrices can be vertically concatenated.
 --
--- A vector contains only valid harmonic intervals if
+-- Two pitch matrices can be vertically concatenated if
 --
---  * it is empty or a singleton vector or
---  * it contains two pitches that form valid harmonic dyads or
---  * the head forms valid harmonic dyads with all pitches in the tail and
---    the tail contains only valid harmonic dyad.
-class OnlyValidHarmDyads (v :: Vector PitchType n)
-instance {-# OVERLAPPING #-}   OnlyValidHarmDyads Nil
-instance {-# OVERLAPPING #-}   OnlyValidHarmDyads (p :- Nil)
-instance {-# OVERLAPPING #-}   ValidHarmDyad p1 p2 => OnlyValidHarmDyads (p1 :- p2 :- Nil)
-instance {-# OVERLAPPABLE #-} (AllSatisfy (ValidHarmDyad p) ps, OnlyValidHarmDyads ps)
-                                => OnlyValidHarmDyads (p :- ps)
+--  * the top one is empty or
+--  * all but the first voice can be concatenated, and the first voice
+--    forms valid harmonic dyads with every other voice and follows the rules
+--    of valid harmonic motion.
+class ValidHarmConcat (m1 :: Matrix t p q) (m2 :: Matrix t r q)
+instance {-# OVERLAPPING #-}       ValidHarmConcat Nil vs
+instance {-# OVERLAPPABLE #-} ( ValidHarmConcat vs us
+                              , AllSatisfyAll [ ValidHarmDyadsInVectors v
+                                              , ValidHarmMotionInVectors v] us)
+                                => ValidHarmConcat (v :- vs) us
+
+
+---- Voice leading constraints
+
+-- | Ensures that four pitches (representing two consequent intervals) follow
+-- the rules for valid harmonic motion.
+--
+-- Harmonic motion is not permitted if
+--
+--  * it is direct motion into a perfect interval (this covers parallel and
+--    concealed fifths, octaves and unisons).
+type family ValidMotion (p1 :: PitchType) (p2 :: PitchType)
+                        (q1 :: PitchType) (q2 :: PitchType)
+                            :: Constraint where
+    ValidMotion Silence _ _ _ = Valid
+    ValidMotion _ Silence _ _ = Valid
+    ValidMotion _ _ Silence _ = Valid
+    ValidMotion _ _ _ Silence = Valid
+    ValidMotion p1 p2 q1 q2   =
+            If ((p1 .~. q1) .||. (p2 .~. q2))
+                (ObliqueMotion (MakeInterval p1 p2) (MakeInterval q1 q2))
+                (If (p1 <<? q1)
+                    (If (p2 <<? q2)
+                        (DirectMotion (MakeInterval p1 p2) (MakeInterval q1 q2))
+                        (ContraryMotion (MakeInterval p1 p2) (MakeInterval q1 q2)))
+                    (If (p2 <<? q2)
+                        (ContraryMotion (MakeInterval p1 p2) (MakeInterval q1 q2))
+                        (DirectMotion (MakeInterval p1 p2) (MakeInterval q1 q2))))
+
+-- | Ensures that the interval formed by the first pitch and the last element
+-- of the first pitch vector can move to the interval formed by the second
+-- pitch and the first element of the second pitch vector.
+class ValidMelPitchVectorMotion (p1 :: PitchType) (p2 :: PitchType) (v1 :: Vector PitchType p) (v2 :: Vector PitchType q)
+instance {-# OVERLAPPING #-}    ValidMelPitchVectorMotion p1 p2 Nil Nil
+instance {-# OVERLAPPABLE #-} ValidMotion p1 (Last v1) p2 (Head v2)
+                            =>  ValidMelPitchVectorMotion p1 p2 v1 v2
+-- Can't have v1 be Nil and v2 be not Nil, since if v1 under p1 is not nil, there
+-- must be an accompanying voice under p2
+
+-- | Ensures that two pitch matrices follow the rules of motion when
+-- horizontally concatenated.
+--
+-- Two horizontally concatenated pitch matrices follow the rules of harmonic motion if
+--
+--  * both are nil matrices or
+--  * their lower voices can be concatenated and the joining elements of the
+--    top voice form intervals with the joining elements of the other voices
+--    which follow the rules of harmonic motion.
+class ValidMelMatrixMotion (m1 :: Matrix PitchType p q) (m2 :: Matrix PitchType p r)
+instance {-# OVERLAPPING #-}       ValidMelMatrixMotion Nil Nil
+instance {-# OVERLAPPABLE #-} ( ValidMelMatrixMotion vs1 vs2
+                              , AllPairsSatisfy (ValidMelPitchVectorMotion (Last v1) (Head v2)) vs1 vs2)
+                                => ValidMelMatrixMotion (v1 :- vs1) (v2 :- vs2)
+
+-- | Ensures that two pitch vectors form pairwise intervals which follow the
+-- rules of harmonic motion.
+class ValidHarmMotionInVectors (v :: Vector PitchType p) (u :: Vector PitchType p)
+instance {-# OVERLAPPING #-}       ValidHarmMotionInVectors Nil Nil
+instance {-# OVERLAPPING #-}       ValidHarmMotionInVectors (p :- Nil) (q :- Nil)
+instance {-# OVERLAPPING #-} ValidMotion p1 q1 p2 q2
+                                => ValidHarmMotionInVectors (p1 :- p2 :- Nil) (q1 :- q2 :- Nil)
+instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
+                              , ValidHarmMotionInVectors ps qs)
+                                => ValidHarmMotionInVectors (p :- ps) (q :- qs)
