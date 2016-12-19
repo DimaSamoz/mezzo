@@ -39,17 +39,24 @@ instance NFData (Dur dur) where
     rnf !_ = ()
 
 
---
+-- t =
+--         ((Note (PC @E) (Acc @Natural) (Oct @Oct4) (Dur @1))
+--             :|:
+--         (Note (PC @D) (Acc @Natural) (Oct @Oct4) (Dur @1)))
+--         :-:
+--         (Rest (Dur @2))
+
+
 -- bb =
---     ((Note (PC @G) (Acc @Natural) (Oct @Oct3) (Dur @1)) :-:
---     (Note (PC @B) (Acc @Natural) (Oct @Oct3) (Dur @1)) :-:
---     (Note (PC @D) (Acc @Natural) (Oct @Oct4) (Dur @1)) :-:
---     (Note (PC @F) (Acc @Sharp) (Oct @Oct4) (Dur @1)))
+--     ((Note (PC @G) (Acc @Natural) (Oct @Oct3) (Dur @32)) :-:
+--     (Note (PC @B) (Acc @Natural) (Oct @Oct3) (Dur @32)) :-:
+--     (Note (PC @D) (Acc @Natural) (Oct @Oct4) (Dur @32)) :-:
+--     (Note (PC @F) (Acc @Natural) (Oct @Oct4) (Dur @32)))
 --     :|:
---     ((Note (PC @G) (Acc @Natural) (Oct @Oct3) (Dur @1)) :-:
---     (Note (PC @C) (Acc @Natural) (Oct @Oct4) (Dur @1)) :-:
---     (Note (PC @E) (Acc @Natural) (Oct @Oct4) (Dur @1)) :-:
---     ((Rest (Dur @1))))
+--     ((Note (PC @G) (Acc @Natural) (Oct @Oct3) (Dur @32)) :-:
+--     (Note (PC @C) (Acc @Natural) (Oct @Oct4) (Dur @32)) :-:
+--     (Note (PC @E) (Acc @Natural) (Oct @Oct4) (Dur @32)) :-:
+--     ((Rest (Dur @16)) :|: ((Rest (Dur @16)))))
 --
 -- tch =
 --     (((Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @1)) :-:
@@ -66,60 +73,60 @@ instance NFData (Dur dur) where
 
 --
 -- t =
---     ((Note (PC @E) (Acc @Natural) (Oct @Oct4) (Dur @1))
+--     ((Note (PC @C) (Acc @Natural) (Oct @Oct3) (Dur @1))
 --         :|:
---     (Note (PC @D) (Acc @Natural) (Oct @Oct4) (Dur @1)))
+--     (Note (PC @D) (Acc @Natural) (Oct @Oct3) (Dur @1)))
 --     :-:
---     ((Note (PC @C) (Acc @Natural) (Oct @Oct4) (Dur @1))
+--     ((Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @1))
 --         :|:
---     (Note (PC @G) (Acc @Natural) (Oct @Oct3) (Dur @1)))
+--     (Note (PC @A) (Acc @Natural) (Oct @Oct3) (Dur @1)))
 
-
+--
 chopR =
-        ((Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @2)) :-:
-        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @2)) :-:
-        (Note (PC @C) (Acc @Sharp) (Oct @Oct4) (Dur @2)))
+        ((Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @8)) :-:
+        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @8)) :-:
+        (Note (PC @C) (Acc @Sharp) (Oct @Oct4) (Dur @8)))
         :|:
-        ((Rest (Dur @1)) :-: (Rest (Dur @1)) :-: (Rest (Dur @1)))
+        ((Rest (Dur @4)) :-: (Rest (Dur @4)) :-: (Rest (Dur @4)))
         :|:
-        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @1)) :-:
-        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @1)) :-:
-        (Note (PC @B) (Acc @Natural) (Oct @Oct3) (Dur @1)))
+        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @4)) :-:
+        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @4)) :-:
+        (Note (PC @B) (Acc @Natural) (Oct @Oct3) (Dur @4)))
         :|:
-        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @2)) :-:
-        (Note (PC @F) (Acc @Sharp) (Oct @Oct3) (Dur @2)) :-:
-        (Note (PC @A) (Acc @Natural) (Oct @Oct3) (Dur @2)))
+        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @8)) :-:
+        (Note (PC @F) (Acc @Sharp) (Oct @Oct3) (Dur @8)) :-:
+        (Note (PC @A) (Acc @Natural) (Oct @Oct3) (Dur @8)))
         :|:
-        ((Rest (Dur @1)) :-: (Rest (Dur @1)) :-: (Rest (Dur @1)))
+        ((Rest (Dur @4)) :-: (Rest (Dur @4)) :-: (Rest (Dur @4)))
         :|:
-        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @1)) :-:
-        (Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @1)) :-:
-        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @1)))
+        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @4)) :-:
+        (Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @4)) :-:
+        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @4)))
         :|:
-        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @2)) :-:
-        (Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @2)) :-:
-        (Note (PC @G) (Acc @Natural) (Oct @Oct3) (Dur @2)))
+        ((Note (PC @C) (Acc @Sharp) (Oct @Oct3) (Dur @8)) :-:
+        (Note (PC @E) (Acc @Natural) (Oct @Oct3) (Dur @8)) :-:
+        (Note (PC @G) (Acc @Natural) (Oct @Oct3) (Dur @8)))
         :|:
-        ((Note (PC @B) (Acc @Sharp) (Oct @Oct2) (Dur @2)) :-:
-        (Note (PC @D) (Acc @Sharp) (Oct @Oct3) (Dur @2)) :-:
-        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @2)))
+        ((Note (PC @B) (Acc @Sharp) (Oct @Oct2) (Dur @8)) :-:
+        (Note (PC @D) (Acc @Sharp) (Oct @Oct3) (Dur @8)) :-:
+        (Note (PC @G) (Acc @Sharp) (Oct @Oct3) (Dur @8)))
 
 chopL =
-        (Note (PC @C) (Acc @Sharp) (Oct @Oct1) (Dur @2))
+        (Note (PC @C) (Acc @Sharp) (Oct @Oct1) (Dur @8))
         :|:
-        (Rest (Dur @1))
+        (Rest (Dur @4))
         :|:
-        (Note (PC @C) (Acc @Sharp) (Oct @Oct2) (Dur @1))
+        (Note (PC @C) (Acc @Sharp) (Oct @Oct2) (Dur @4))
         :|:
-        (Note (PC @F) (Acc @Sharp) (Oct @Oct2) (Dur @2))
+        (Note (PC @F) (Acc @Sharp) (Oct @Oct2) (Dur @8))
         :|:
-        (Rest (Dur @1))
+        (Rest (Dur @4))
         :|:
-        (Note (PC @C) (Acc @Sharp) (Oct @Oct2) (Dur @1))
+        (Note (PC @C) (Acc @Sharp) (Oct @Oct2) (Dur @4))
         :|:
-        (Note (PC @A) (Acc @Natural) (Oct @Oct1) (Dur @2))
+        (Note (PC @A) (Acc @Natural) (Oct @Oct1) (Dur @8))
         :|:
-        (Note (PC @G) (Acc @Sharp) (Oct @Oct1) (Dur @2))
+        (Note (PC @G) (Acc @Sharp) (Oct @Oct1) (Dur @8))
 
 chop :: Score
 chop = Score $ chopL :-: chopR
