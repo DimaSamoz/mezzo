@@ -149,10 +149,10 @@ type family FragmentMatByVec (m :: Matrix t q p) (v :: Vector t p) :: Matrix t q
 -- vector must also appear in the first.
 type family FragmentVecByVec (v :: Vector t p) (u :: Vector t p) :: Vector t p where
     FragmentVecByVec Nil _ = Nil
-    -- | If the lengths of the first element match up, they are not fragmented.
+    -- If the lengths of the first element match up, they are not fragmented.
     FragmentVecByVec (v :* (T :: Times k) :- vs) (u :* (T :: Times k) :- us) =
             v ** k :- (FragmentVecByVec vs us)
-    -- | If the length of the first element don't match up, we fragment the element
+    -- If the length of the first element don't match up, we fragment the element
     -- by the shortest of the two lengths, and add the remainder as a separate element.
     FragmentVecByVec (v :* (T :: Times k) :- vs) (u :* (T :: Times l) :- us) =
         If (k <=? l)
