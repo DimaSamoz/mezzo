@@ -225,73 +225,125 @@ type family (p1 :: PitchType) <<=? (p2 :: PitchType) where
 type family (p1 :: PitchType) <<? (p2 :: PitchType) where
     p1 <<? p2 = (p1 <<=? p2) .&&. Not (p1 .~. p2)
 
+-- | Convert an octave to a natural number.
+type family OctToNat (o :: OctaveNum) :: Nat where
+    OctToNat Oct_1 = 0
+    OctToNat Oct0  = 1
+    OctToNat Oct1  = 2
+    OctToNat Oct2  = 3
+    OctToNat Oct3  = 4
+    OctToNat Oct4  = 5
+    OctToNat Oct5  = 6
+    OctToNat Oct6  = 7
+    OctToNat Oct7  = 8
+    OctToNat Oct8  = 9
+
+-- | Convert a natural number to an octave.
+type family NatToOct (n :: Nat) :: OctaveNum where
+    NatToOct 0 = Oct_1
+    NatToOct 1 = Oct0
+    NatToOct 2 = Oct1
+    NatToOct 3 = Oct2
+    NatToOct 4 = Oct3
+    NatToOct 5 = Oct4
+    NatToOct 6 = Oct5
+    NatToOct 7 = Oct6
+    NatToOct 8 = Oct7
+    NatToOct 9 = Oct8
+    NatToOct _ = TypeError (Text "Invalid octave.")
+
+-- | Increase the octave by the given number.
+type family IncreaseOctave (o :: OctaveNum) (n :: Nat) :: OctaveNum where
+    IncreaseOctave o n = NatToOct (OctToNat o + n)
+
+-- | Decrease the octave by the given number.
+type family DecreaseOctave (o :: OctaveNum) (n :: Nat) :: OctaveNum where
+    DecreaseOctave o n = NatToOct (OctToNat o - n)
+
 -- | Increment an octave.
 type family OctSucc (o :: OctaveNum) :: OctaveNum where
-    OctSucc Oct_1 = Oct0
-    OctSucc Oct0  = Oct1
-    OctSucc Oct1  = Oct2
-    OctSucc Oct2  = Oct3
-    OctSucc Oct3  = Oct4
-    OctSucc Oct4  = Oct5
-    OctSucc Oct5  = Oct6
-    OctSucc Oct6  = Oct7
-    OctSucc Oct7  = Oct8
-    OctSucc Oct8  = TypeError (Text "Octave is too high.")
+    OctSucc o = IncreaseOctave o 1
 
 -- | Decrement an octave.
 type family OctPred (o :: OctaveNum) :: OctaveNum where
-    OctPred Oct_1 = TypeError (Text "Octave is too low.")
-    OctPred Oct0 = Oct_1
-    OctPred Oct1 = Oct0
-    OctPred Oct2 = Oct1
-    OctPred Oct3 = Oct2
-    OctPred Oct4 = Oct3
-    OctPred Oct5 = Oct4
-    OctPred Oct6 = Oct5
-    OctPred Oct7 = Oct6
-    OctPred Oct8 = Oct7
+    OctPred o = DecreaseOctave o 1
+
+-- | Convert a pitch class to a natural number.
+type family ClassToNat (pc :: PitchClass) :: Nat where
+    ClassToNat C = 0
+    ClassToNat D = 1
+    ClassToNat E = 2
+    ClassToNat F = 3
+    ClassToNat G = 4
+    ClassToNat A = 5
+    ClassToNat B = 6
+
+-- | Convert a natural number to a pitch class.
+-- Numbers are taken modulo 7: e.g. 8 corresponds to the pitch 8 mod 7 = 1 = D
+type family NatToClass (n :: Nat) :: PitchClass where
+    NatToClass 0 = C
+    NatToClass 1 = D
+    NatToClass 2 = E
+    NatToClass 3 = F
+    NatToClass 4 = G
+    NatToClass 5 = A
+    NatToClass 6 = B
+    NatToClass n = NatToClass (n - 7)
+
+-- | Increase the pitch class by a given number.
+type family IncreaseClass (pc :: PitchClass) (n :: Nat) :: PitchClass where
+    IncreaseClass pc n = NatToClass (ClassToNat pc + n)
+
+-- | Decrease the pitch class by a given number.
+type family DecreaseClass (pc :: PitchClass) (n :: Nat) :: PitchClass where
+    DecreaseClass pc n = NatToClass (ClassToNat pc - n)
 
 -- | Increment a pitch class.
-type family ClassSucc (c :: PitchClass) :: PitchClass where
-    ClassSucc C = D
-    ClassSucc D = E
-    ClassSucc E = F
-    ClassSucc F = G
-    ClassSucc G = A
-    ClassSucc A = B
-    ClassSucc B = C
+type family ClassSucc (pc :: PitchClass) :: PitchClass where
+    ClassSucc pc = IncreaseClass pc 1
 
 -- | Decrement a pitch class.
-type family ClassPred (c :: PitchClass) :: PitchClass where
-    ClassPred C = B
-    ClassPred D = C
-    ClassPred E = D
-    ClassPred F = E
-    ClassPred G = F
-    ClassPred A = G
-    ClassPred B = A
+type family ClassPred (pc :: PitchClass) :: PitchClass where
+    ClassPred pc = DecreaseClass pc 1
+
+-- | Convert an interval size to a natural number.
+type family IntSizeToNat (is :: IntervalSize) :: Nat where
+    IntSizeToNat Unison  = 0
+    IntSizeToNat Second  = 1
+    IntSizeToNat Third   = 2
+    IntSizeToNat Fourth  = 3
+    IntSizeToNat Fifth   = 4
+    IntSizeToNat Sixth   = 5
+    IntSizeToNat Seventh = 6
+    IntSizeToNat Octave  = 7
+
+-- | Convert a natural number to an interval size.
+type family NatToIntSize (n :: Nat) :: IntervalSize where
+    NatToIntSize 0 = Unison
+    NatToIntSize 1 = Second
+    NatToIntSize 2 = Third
+    NatToIntSize 3 = Fourth
+    NatToIntSize 4 = Fifth
+    NatToIntSize 5 = Sixth
+    NatToIntSize 6 = Seventh
+    NatToIntSize 7 = Octave
+    NatToIntSize _ = TypeError (Text "Invalid interval size.")
+
+-- | Increase the interval size by a given number.
+type family IncreaseIntSize (is :: IntervalSize) (n :: Nat) :: IntervalSize where
+    IncreaseIntSize is n = NatToIntSize (IntSizeToNat is + n)
+
+-- | Decrease the interval size by a given number.
+type family DecreaseIntSize (is :: IntervalSize) (n :: Nat) :: IntervalSize where
+    DecreaseIntSize is n = NatToIntSize (IntSizeToNat is - n)
 
 -- | Increment an interval size.
 type family IntSizeSucc (is :: IntervalSize) :: IntervalSize where
-    IntSizeSucc Unison  = Second
-    IntSizeSucc Second  = Third
-    IntSizeSucc Third   = Fourth
-    IntSizeSucc Fourth  = Fifth
-    IntSizeSucc Fifth   = Sixth
-    IntSizeSucc Sixth   = Seventh
-    IntSizeSucc Seventh = Octave
-    IntSizeSucc Octave  = Octave
+    IntSizeSucc is = IncreaseIntSize is 1
 
 -- | Decrement an interval size.
 type family IntSizePred (is :: IntervalSize) :: IntervalSize where
-    IntSizePred Unison  = Unison
-    IntSizePred Second  = Unison
-    IntSizePred Third   = Second
-    IntSizePred Fourth  = Third
-    IntSizePred Fifth   = Fourth
-    IntSizePred Sixth   = Fifth
-    IntSizePred Seventh = Sixth
-    IntSizePred Octave  = Seventh
+    IntSizePred is = DecreaseIntSize is 1
 
 -- | Move a pitch up by a semitone.
 type family HalfStepUp (p :: PitchType) :: PitchType where
