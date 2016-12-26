@@ -32,6 +32,9 @@ module Mezzo.Model.Types
     , type (=?=)
     , type (<<=?)
     , type (<<?)
+    -- * Specialised musical vector types
+    , Voice
+    , Partiture
     -- * Intervals
     , IntervalSize (..)
     , IntervalClass (..)
@@ -97,6 +100,16 @@ data PitchType where
     Pitch :: PitchClass -> Accidental -> OctaveNum -> PitchType
     -- | Silence, the pitch of rests.
     Silence :: PitchType
+
+-------------------------------------------------------------------------------
+-- Type specialisations
+-------------------------------------------------------------------------------
+
+-- | A 'Voice' is made up of a sequence of pitch repetitions.
+type Voice l = OptVector PitchType l
+
+-- | A 'Partiture' is made up of a fixed number of voices.
+type Partiture n l = Matrix PitchType n l
 
 -------------------------------------------------------------------------------
 -- Intervals

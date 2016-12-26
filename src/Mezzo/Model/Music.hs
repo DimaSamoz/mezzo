@@ -50,7 +50,7 @@ infixl 4 :-:
 --  * Parallelly composed pieces cannot have any minor second or major seventh harmonic intervals.
 --  * Music must not contain parallel or concealed unisons, fifths or octaves.
 --
-data Music :: forall pt p q. Matrix pt p q -> Type where
+data Music :: forall n l. Partiture n l -> Type where
     -- | A note specified by a pitch class, accidental, octave and duration.
     Note :: PC pc -> Acc acc -> Oct oct -> Dur d -> Music (From (Pitch pc acc oct) d)
     -- | A rest specified by a duration.
@@ -103,28 +103,28 @@ instance {-# OVERLAPPING #-}  ValidMelLeap Silence (Pitch pc acc oct)
 instance {-# OVERLAPPING #-}  ValidMelLeap (Pitch pc acc oct) Silence
 instance {-# OVERLAPPABLE #-} ValidMelInterval (MakeInterval a b) => ValidMelLeap a b
 
--- | Ensures that two pitch vectors can be appended.
+-- | Ensures that two voices can be appended.
 --
--- Two pitch vectors can be appended if
+-- Two voices can be appended if
 --
 --  * at least one of them is empty or
 --  * the last pitch of the first vector forms a valid melodic leap
 --    with the first pitch of the second vector.
-class ValidMelAppend (a :: Vector PitchType n) (b :: Vector PitchType m)
-instance {-# OVERLAPPING #-}  ValidMelAppend Nil a
-instance {-# OVERLAPPING #-}  ValidMelAppend a Nil
+class ValidMelAppend (a :: Voice l1) (b :: Voice l2)
+instance {-# OVERLAPPING #-}  ValidMelAppend End a
+instance {-# OVERLAPPING #-}  ValidMelAppend a End
 instance {-# OVERLAPPABLE #-} ValidMelLeap (Last vs1) v2 => ValidMelAppend vs1 (v2 :* d :- vs2)
 
--- | Ensures that two pitch matrices can be horizontally concatenated.
+-- | Ensures that two partitures can be horizontally concatenated.
 --
--- Two pitch matrices can be horizontally concatenated if
+-- Two part lists can be horizontally concatenated if
 --
 --  * both of them are empty or
---  * all of the row vectors can be appended.
-class ValidMelConcat (m1 :: Matrix t p q) (m2 :: Matrix t p r)
-instance {-# OVERLAPPING #-}       ValidMelConcat Nil Nil
-instance {-# OVERLAPPABLE #-} (ValidMelAppend row1 row2, ValidMelConcat rest1 rest2)
-                                => ValidMelConcat (row1 :* d1 :- rest1) (row2 :* d2  :- rest2)
+--  * all of the voices can be appended.
+class ValidMelConcat (ps1 :: Partiture n l1) (ps2 :: Partiture n l2)
+instance {-# OVERLAPPING #-}       ValidMelConcat None None
+instance {-# OVERLAPPABLE #-} (ValidMelAppend v1 v2, ValidMelConcat vs1 vs2)
+                                => ValidMelConcat (v1 :-- vs1) (v2 :-- vs2)
 
 
 ---- Harmonic constraints
@@ -164,24 +164,24 @@ instance {-# OVERLAPPING #-}  ValidHarmDyad (Pitch pc acc oct) Silence
 instance {-# OVERLAPPING #-}  ValidHarmDyad Silence (Pitch pc acc oct)
 instance {-# OVERLAPPABLE #-} ValidHarmInterval (MakeInterval a b) => ValidHarmDyad a b
 
--- | Ensures that two pitch vectors form pairwise valid harmonic dyads.
-class ValidHarmDyadsInVectors (v1 :: Vector PitchType l) (v2 :: Vector PitchType l)
+-- | Ensures that two voices form pairwise valid harmonic dyads.
+class ValidHarmDyadsInVectors (v1 :: Voice l) (v2 :: Voice l)
 instance AllPairsSatisfy ValidHarmDyad v1 v2 => ValidHarmDyadsInVectors v1 v2
 
--- | Ensures that two pitch matrices can be vertically concatenated.
+-- | Ensures that two partitures can be vertically concatenated.
 --
--- Two pitch matrices can be vertically concatenated if
+-- Two partitures can be vertically concatenated if
 --
 --  * the top one is empty or
 --  * all but the first voice can be concatenated, and the first voice
 --    forms valid harmonic dyads with every other voice and follows the rules
 --    of valid harmonic motion.
-class ValidHarmConcat (ms :: (Matrix t p q, Matrix t r q))
-instance {-# OVERLAPPING #-}       ValidHarmConcat '(Nil, vs)
+class ValidHarmConcat (ps :: (Partiture n1 l, Partiture n2 l))
+instance {-# OVERLAPPING #-}       ValidHarmConcat '(None, vs)
 instance {-# OVERLAPPABLE #-} ( ValidHarmConcat '(vs, us)
                               , AllSatisfyAll [ ValidHarmDyadsInVectors v
                                               , ValidHarmMotionInVectors v] us)
-                                => ValidHarmConcat '((v :* d :- vs), us)
+                                => ValidHarmConcat '((v :-- vs), us)
 
 
 ---- Voice leading constraints
@@ -212,35 +212,35 @@ type family ValidMotion (p1 :: PitchType) (p2 :: PitchType)
                         (DirectMotion (MakeInterval p1 p2) (MakeInterval q1 q2))))
 
 -- | Ensures that the interval formed by the first pitch and the last element
--- of the first pitch vector can move to the interval formed by the second
--- pitch and the first element of the second pitch vector.
-class ValidMelPitchVectorMotion (p1 :: PitchType) (p2 :: PitchType) (v1 :: Vector PitchType p) (v2 :: Vector PitchType q)
-instance {-# OVERLAPPING #-}    ValidMelPitchVectorMotion p1 p2 Nil Nil
+-- of the first voice can move to the interval formed by the second
+-- pitch and the first element of the second voice.
+class ValidMelPitchVectorMotion (p1 :: PitchType) (p2 :: PitchType) (v1 :: Voice l1) (v2 :: Voice l2)
+instance {-# OVERLAPPING #-}    ValidMelPitchVectorMotion p1 p2 End End
 instance {-# OVERLAPPABLE #-} ValidMotion p1 (Last v1) p2 (Head v2)
                             =>  ValidMelPitchVectorMotion p1 p2 v1 v2
--- Can't have v1 be Nil and v2 be not Nil, since if v1 under p1 is not nil, there
+-- Can't have v1 be End and v2 be not End, since if v1 under p1 is not nil, there
 -- must be an accompanying voice under p2
 
--- | Ensures that two pitch matrices follow the rules of motion when
+-- | Ensures that two partitures follow the rules of motion when
 -- horizontally concatenated.
 --
--- Two horizontally concatenated pitch matrices follow the rules of harmonic motion if
+-- Two horizontally concatenated partitures follow the rules of harmonic motion if
 --
---  * both are nil matrices or
+--  * both are empty or
 --  * their lower voices can be concatenated and the joining elements of the
 --    top voice form intervals with the joining elements of the other voices
 --    which follow the rules of harmonic motion.
-class ValidMelMatrixMotion (m1 :: Matrix PitchType p q) (m2 :: Matrix PitchType p r)
-instance {-# OVERLAPPING #-}       ValidMelMatrixMotion Nil Nil
+class ValidMelMatrixMotion (ps1 :: Partiture n l1) (ps2 :: Partiture n l2)
+instance {-# OVERLAPPING #-}       ValidMelMatrixMotion None None
 instance {-# OVERLAPPABLE #-} ( ValidMelMatrixMotion vs1 vs2
-                              , AllPairsSatisfy (ValidMelPitchVectorMotion (Last v1) (Head v2)) vs1 vs2)
-                                => ValidMelMatrixMotion (v1 :* d1 :- vs1) (v2 :* d2 :- vs2)
+                              , AllPairsSatisfy' (ValidMelPitchVectorMotion (Last v1) (Head v2)) vs1 vs2)
+                                => ValidMelMatrixMotion (v1 :-- vs1) (v2 :-- vs2)
 
--- | Ensures that two pitch vectors form pairwise intervals which follow the
+-- | Ensures that two voices form pairwise intervals which follow the
 -- rules of harmonic motion.
-class ValidHarmMotionInVectors (v :: Vector PitchType p) (u :: Vector PitchType p)
-instance {-# OVERLAPPING #-}       ValidHarmMotionInVectors Nil Nil
-instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- Nil) (q :* d2 :- Nil)
+class ValidHarmMotionInVectors (v1 :: Voice l) (v2 :: Voice p)
+instance {-# OVERLAPPING #-}       ValidHarmMotionInVectors End End
+instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- End) (q :* d2 :- End)
 instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
                               , ValidHarmMotionInVectors ps qs)
                                 => ValidHarmMotionInVectors (p :* d1 :- ps) (q :* d2 :- qs)
