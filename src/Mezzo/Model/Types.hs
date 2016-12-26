@@ -29,6 +29,7 @@ module Mezzo.Model.Types
     , Dur (..)
     -- * Pitches
     , PitchType (..)
+    , type (=?=)
     , type (<<=?)
     , type (<<?)
     -- * Intervals
@@ -229,6 +230,24 @@ type family (p1 :: PitchType) <<=? (p2 :: PitchType) where
 -- | Greater than for pitches.
 type family (p1 :: PitchType) <<? (p2 :: PitchType) where
     p1 <<? p2 = (p1 <<=? p2) .&&. Not (p1 .~. p2)
+
+-- | Enharmonic equality of pitches.
+type family (p :: PitchType) =?= (q :: PitchType) :: Bool where
+    Silence             =?= Silence             = True
+    Silence             =?= _                   = False
+    _                   =?= Silence             = False
+    Pitch pc acc oct    =?= Pitch pc acc oct    = True
+    Pitch C Flat o1     =?= Pitch B Natural o2  = o1 .~. OctSucc o2
+    Pitch C Natural o1  =?= Pitch B Sharp o2    = o1 .~. OctSucc o2
+    Pitch E Natural oct =?= Pitch F Flat oct    = True
+    Pitch E Sharp oct   =?= Pitch F Natural oct = True
+    Pitch F Flat oct    =?= Pitch E Natural oct = True
+    Pitch F Natural oct =?= Pitch E Sharp oct   = True
+    Pitch B Natural o1  =?= Pitch C Flat o2     = OctSucc o1 .~. o2
+    Pitch B Sharp o1    =?= Pitch C Natural o2  = OctSucc o1 .~. o2
+    Pitch pc1 Sharp oct =?= Pitch pc2 Flat oct  = ClassSucc pc1 .~. pc2
+    Pitch pc1 Flat oct  =?= Pitch pc2 Sharp oct = pc1 .~. ClassSucc pc2
+    _                   =?= _                   = False
 
 -- | Convert an octave to a natural number.
 type family OctToNat (o :: OctaveNum) :: Nat where
