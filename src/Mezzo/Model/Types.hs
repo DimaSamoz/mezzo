@@ -214,6 +214,11 @@ type family PitchToNat (p :: PitchType) :: Nat where
     PitchToNat (Pitch C Natural Oct_1) = 0
     PitchToNat (Pitch C Sharp Oct_1)   = 1
     PitchToNat (Pitch D Flat Oct_1)    = 1
+    PitchToNat (Pitch C Natural Oct1)  = 36
+    PitchToNat (Pitch C Natural Oct2)  = 48
+    PitchToNat (Pitch C Natural Oct3)  = 60
+    PitchToNat (Pitch C Natural Oct4)  = 72
+    PitchToNat (Pitch C Natural Oct5)  = 84
     PitchToNat p                       = 1 + PitchToNat (HalfStepDown p)
 
 -- | Convert a natural number to a suitable pitch.
