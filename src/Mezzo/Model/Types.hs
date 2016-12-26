@@ -36,6 +36,10 @@ module Mezzo.Model.Types
     , IntervalClass (..)
     , IntervalType (..)
     , MakeInterval
+    , RaiseBy
+    , LowerBy
+    , RaiseByOct
+    , LowerByOct
     ) where
 
 import GHC.TypeLits
@@ -43,6 +47,7 @@ import GHC.TypeLits
 import Mezzo.Model.Prim
 
 infixl 3 <<=?
+infixl 3 <<?
 
 -------------------------------------------------------------------------------
 -- Note properties
@@ -345,6 +350,28 @@ type family IntSizeSucc (is :: IntervalSize) :: IntervalSize where
 type family IntSizePred (is :: IntervalSize) :: IntervalSize where
     IntSizePred is = DecreaseIntSize is 1
 
+-- | Calculate the width of an interval in half-steps.
+type family IntervalWidth (i :: IntervalType) :: Nat where
+    IntervalWidth (Interval Dim Unison)  = TypeError (Text "Can't diminish unisons.")
+    IntervalWidth (Interval Perf Unison) = 0
+    IntervalWidth (Interval Aug Unison)  = 1
+    IntervalWidth (Interval Dim Fourth)  = 4
+    IntervalWidth (Interval Perf Fourth) = 5
+    IntervalWidth (Interval Aug Fourth)  = 6
+    IntervalWidth (Interval Dim Fifth)   = 6
+    IntervalWidth (Interval Perf Fifth)  = 7
+    IntervalWidth (Interval Aug Fifth)   = 8
+    IntervalWidth (Interval Dim Octave)  = 11
+    IntervalWidth (Interval Perf Octave) = 12
+    IntervalWidth (Interval Aug Octave)  = 13
+    IntervalWidth (Interval Maj Second)  = 2
+    IntervalWidth (Interval Maj Third)   = 4
+    IntervalWidth (Interval Maj Sixth)   = 9
+    IntervalWidth (Interval Maj Seventh) = 11
+    IntervalWidth (Interval Aug is)      = IntervalWidth (Interval Maj is) + 1
+    IntervalWidth (Interval Min is)      = IntervalWidth (Interval Maj is) - 1
+    IntervalWidth (Interval Dim is)      = IntervalWidth (Interval Maj is) - 2
+
 -- | Move a pitch up by a semitone.
 type family HalfStepUp (p :: PitchType) :: PitchType where
     HalfStepUp Silence              = Silence
@@ -362,3 +389,33 @@ type family HalfStepDown (p :: PitchType) :: PitchType where
     HalfStepDown (Pitch pc Flat    o) = Pitch (ClassPred pc) Natural o
     HalfStepDown (Pitch pc Natural o) = Pitch pc Flat o
     HalfStepDown (Pitch pc Sharp   o) = Pitch pc Natural o
+
+-- | Move a pitch up by the specified number of semitones.
+type family HalfStepsUpBy (p :: PitchType) (n :: Nat) :: PitchType where
+    HalfStepsUpBy p 0 = p
+    HalfStepsUpBy p n = HalfStepUp (HalfStepsUpBy p (n - 1))
+
+-- | Move a pitch down by the specified number of semitones.
+type family HalfStepsDownBy (p :: PitchType) (n :: Nat) :: PitchType where
+    HalfStepsDownBy p 0 = p
+    HalfStepsDownBy p n = HalfStepDown (HalfStepsDownBy p (n - 1))
+
+-- | Raise a pitch by an interval.
+type family RaiseBy (p :: PitchType) (i :: IntervalType) :: PitchType where
+    RaiseBy Silence _        = Silence
+    RaiseBy _       Compound = TypeError (Text "Can't shift by compound interval")
+    RaiseBy p       i        = HalfStepsUpBy p (IntervalWidth i)
+
+-- | Lower a pitch by an interval.
+type family LowerBy (p :: PitchType) (i :: IntervalType) :: PitchType where
+    LowerBy Silence _        = Silence
+    LowerBy _       Compound = TypeError (Text "Can't shift by compound interval")
+    LowerBy p       i        = HalfStepsDownBy p (IntervalWidth i)
+
+-- | Raise a pitch by an octave.
+type family RaiseByOct (p :: PitchType) :: PitchType where
+    RaiseByOct p = RaiseBy p (Interval Perf Octave)
+
+-- | Lower a pitch by an octave.
+type family LowerByOct (p :: PitchType) :: PitchType where
+    LowerByOct p = LowerBy p (Interval Perf Octave)
