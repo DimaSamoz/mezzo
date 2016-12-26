@@ -20,12 +20,12 @@
 module Mezzo.Model.Prim
     (
     -- * Vectors and matrices
-      Elem (..)
+      Vector (..)
+    , Elem (..)
     , type (**)
-    , Vector (..)
+    , OptVector (..)
     , Head
     , Last
-    , IsEmpty
     , Matrix
     , type (++)
     , type (+*+)
@@ -44,6 +44,7 @@ module Mezzo.Model.Prim
     , Invalid
     , AllSatisfy
     , AllPairsSatisfy
+    , AllPairsSatisfy'
     , SatisfiesAll
     , AllSatisfyAll
     -- * Other
@@ -68,6 +69,11 @@ infixl 5 .~.
 -- Type-level vectors and matrices
 -------------------------------------------------------------------------------
 
+-- | Simple length-indexed vector.
+data Vector :: Type -> Nat -> Type where
+    None :: Vector t 0
+    (:--) :: t -> Vector t (n - 1) -> Vector t n
+
 -- | Singleton type for the number of repetitions of an element.
 data Times (n :: Nat) where
     T :: Times n
@@ -82,48 +88,47 @@ type family (v :: t) ** (d :: Nat) :: Elem t d where
     v ** d = v :* (T :: Times d)
 
 -- | A length-indexed vector, optimised for repetitions.
-data Vector :: Type -> Nat -> Type where
-    Nil  :: Vector t 0
-    (:-) :: Elem t l -> Vector t (n - l) -> Vector t n
+data OptVector :: Type -> Nat -> Type where
+    End  :: OptVector t 0
+    (:-) :: Elem t l -> OptVector t (n - l) -> OptVector t n
 
 -- | Get the first element of the vector.
-type family Head (v :: Vector t n) :: t where
-    Head Nil           = TypeError (Text "Vector has no head element.")
+type family Head (v :: OptVector t n) :: t where
+    Head End           = TypeError (Text "Vector has no head element.")
     Head (v :* _ :- _) = v
 
 -- | Get the last element of the vector.
-type family Last (v :: Vector t n) :: t where
-    Last Nil             = TypeError (Text "Vector has no last element.")
-    Last (v :* _ :- Nil) = v
+type family Last (v :: OptVector t n) :: t where
+    Last End             = TypeError (Text "Vector has no last element.")
+    Last (v :* _ :- End) = v
     Last (_ :- vs)       = Last vs
 
--- | Returns 'True' if the input vector is empty, 'False' otherwise.
-type family IsEmpty (v :: Vector t n) :: Bool where
-    IsEmpty Nil = True
-    IsEmpty _   = False
-
 -- | A dimension-indexed matrix.
-type Matrix t p q = Vector (Vector t q) p
+type Matrix t p q = Vector (OptVector t q) p
 
 -- | Type-level vector appending.
-type family (x :: Vector t n) ++ (y :: Vector t m) :: Vector t (n + m) where
-    Nil       ++ y = y
-    (x :- xs) ++ y = x :- (xs ++ y)
+type family (x :: OptVector t n) ++ (y :: OptVector t m) :: OptVector t (n + m) where
+    End       ++ ys = ys
+    (x :- xs) ++ ys = x :- (xs ++ ys)
 
--- | Repeat the value the specified number of times to create a new 'Vector'.
-type family (a :: t) +*+ (n :: Nat) :: Vector t n where
-    x +*+ 0 = Nil
-    x +*+ n = x ** n :- Nil
+type family (x :: Vector t n) ++. (y :: Vector t m) :: Vector t (n + m) where
+    None       ++. ys = ys
+    (x :-- xs) ++. ys = x :-- (xs ++. ys)
+
+-- | Repeat the value the specified number of times to create a new 'OptVector'.
+type family (a :: t) +*+ (n :: Nat) :: OptVector t n where
+    x +*+ 0 = End
+    x +*+ n = x ** n :- End
 
 -- | Create a new one-row matrix from the specified type and duration.
 type family From (v :: t) (d :: Nat) :: Matrix t 1 d where
-    From v d = ((v +*+ d) ** 1) :- Nil
+    From v d = (v +*+ d) :-- None
 
 -- | Horizontal concatenation of type-level matrices.
 -- Places the first matrix to the left of the second.
 type family (a :: Matrix t p q) +|+ (b :: Matrix t p r) :: Matrix t p (q + r) where
-    Nil              +|+ Nil              = Nil
-    (r1 :* _ :- rs1) +|+ (r2 :* _ :- rs2) = ((r1 ++ r2) ** 1) :- (rs1 +|+ rs2)
+    None         +|+ None         = None
+    (r1 :-- rs1) +|+ (r2 :-- rs2) = (r1 ++ r2) :-- (rs1 +|+ rs2)
 
 -- | Vertical concatenation of type-level matrices.
 -- Places the first matrix on top of the second.
@@ -132,29 +137,30 @@ type family (a :: Matrix t p r) +-+ (b :: Matrix t q r) :: Matrix t (p + q) r wh
 
 -- | Concatenates a type-level pair of vectors.
 type family ConcatPair (vs :: (Vector t p, Vector t q)) :: Vector t (p + q) where
-    ConcatPair '(v1, v2) = v1 ++ v2
+    ConcatPair '(v1, v2) = v1 ++. v2
 
 -- | Vertically aligns two matrices by separating elements so that the element
 -- boundaries line up.
 type family Align (a :: Matrix t p r) (b :: Matrix t q r) :: (Matrix t p r, Matrix t q r) where
-    Align Nil m = '(Nil, m)
-    Align m Nil = '(m, Nil)
-    Align m1 m2 = '(FragmentMatByVec m1 (Head m2), FragmentMatByVec m2 (Head m1))
+    Align None m = '(None, m)
+    Align m None = '(m, None)
+    Align (r1 :-- rs1) (r2 :-- rs2) =
+            '(FragmentMatByVec (r1 :-- rs1) r2, FragmentMatByVec (r2 :-- rs2) r1)
 
 -- | Fragments a matrix by a vector: all the element boundaries in the vector must
 -- also appear in the fragmented matrix.
-type family FragmentMatByVec (m :: Matrix t q p) (v :: Vector t p) :: Matrix t q p where
-    FragmentMatByVec Nil _            = Nil
-    FragmentMatByVec (r :* _ :- rs) v = (FragmentVecByVec r v) ** 1 :- FragmentMatByVec rs v
+type family FragmentMatByVec (m :: Matrix t q p) (v :: OptVector t p) :: Matrix t q p where
+    FragmentMatByVec None       _ = None
+    FragmentMatByVec (r :-- rs) v = FragmentVecByVec r v :-- FragmentMatByVec rs v
 
 -- | Fragments a vector by another vector: all the element boundaries in the second
 -- vector must also appear in the first.
-type family FragmentVecByVec (v :: Vector t p) (u :: Vector t p) :: Vector t p where
-    FragmentVecByVec Nil _ = Nil
+type family FragmentVecByVec (v :: OptVector t p) (u :: OptVector t p) :: OptVector t p where
+    FragmentVecByVec End _ = End
     -- If the lengths of the first element match up, they are not fragmented.
     FragmentVecByVec (v :* (T :: Times k) :- vs) (u :* (T :: Times k) :- us) =
             v ** k :- (FragmentVecByVec vs us)
-    -- If the length of the first element don't match up, we fragment the element
+    -- If the lengths of the first elements don't match up, we fragment the element
     -- by the shortest of the two lengths, and add the remainder as a separate element.
     FragmentVecByVec (v :* (T :: Times k) :- vs) (u :* (T :: Times l) :- us) =
         If (k <=? l)
@@ -173,7 +179,7 @@ type family If (b :: Bool) (t :: k) (e :: k) :: k where
 
 -- | Negation of type-level Booleans.
 type family Not (a :: Bool) :: Bool where
-    Not True = False
+    Not True  = False
     Not False = True
 
 -- | Conjunction of type-level Booleans.
@@ -203,26 +209,35 @@ type Invalid = True ~ False
 -- vector satisfies the given unary constraint.
 -- Analogue of 'map' for constraints and vectors.
 type family AllSatisfy (c  :: a -> Constraint)
-                       (xs :: Vector a n)
+                       (xs :: OptVector a n)
                            :: Constraint where
-    AllSatisfy c Nil       = Valid
+    AllSatisfy c End            = Valid
     AllSatisfy c (x :* _ :- xs) = ((c x), AllSatisfy c xs)
+
+-- | Create a new constraint which is valid only if every pair of elements in
+-- the given optimised vectors satisfy the given binary constraint.
+-- Analogue of 'zipWith' for constraints and optimised vectors.
+type family AllPairsSatisfy (c  :: a -> b -> Constraint)
+                            (xs :: OptVector a n) (ys :: OptVector b n)
+                                :: Constraint where
+    AllPairsSatisfy c End            End            = Valid
+    AllPairsSatisfy c (x :* _ :- xs) (y :* _ :- ys) = ((c x y), AllPairsSatisfy c xs ys)
 
 -- | Create a new constraint which is valid only if every pair of elements in
 -- the given vectors satisfy the given binary constraint.
 -- Analogue of 'zipWith' for constraints and vectors.
-type family AllPairsSatisfy (c  :: a -> b -> Constraint)
+type family AllPairsSatisfy' (c  :: a -> b -> Constraint)
                             (xs :: Vector a n) (ys :: Vector b n)
                                 :: Constraint where
-    AllPairsSatisfy c Nil Nil                       = Valid
-    AllPairsSatisfy c (x :* _ :- xs) (y :* _ :- ys) = ((c x y), AllPairsSatisfy c xs ys)
+    AllPairsSatisfy' c None       None       = Valid
+    AllPairsSatisfy' c (x :-- xs) (y :-- ys) = ((c x y), AllPairsSatisfy' c xs ys)
 
 -- | Create a new constraint which is valid only if the given value satisfies
 -- every unary constraint in the given list.
 type family SatisfiesAll (cs :: [a -> Constraint])
                          (xs :: a)
                              :: Constraint where
-    SatisfiesAll '[] a      = Valid
+    SatisfiesAll '[]      a = Valid
     SatisfiesAll (c : cs) a = (c a, SatisfiesAll cs a)
 
 -- | Create a new constraint which is valid only if every element in the given
@@ -230,8 +245,8 @@ type family SatisfiesAll (cs :: [a -> Constraint])
 type family AllSatisfyAll (c1 :: [a -> Constraint])
                           (xs :: Vector a n)
                               :: Constraint where
-    AllSatisfyAll _ Nil             = Valid
-    AllSatisfyAll cs (v :* _ :- vs) = (SatisfiesAll cs v, AllSatisfyAll cs vs)
+    AllSatisfyAll _ None        = Valid
+    AllSatisfyAll cs (v :-- vs) = (SatisfiesAll cs v, AllSatisfyAll cs vs)
 
 -------------------------------------------------------------------------------
 -- Other
