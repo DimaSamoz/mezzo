@@ -46,6 +46,8 @@ module Mezzo.Model.Prim
     , AllPairsSatisfy
     , SatisfiesAll
     , AllSatisfyAll
+    -- * Other
+    , type (<.>)
     ) where
 
 import Data.Kind
@@ -230,3 +232,12 @@ type family AllSatisfyAll (c1 :: [a -> Constraint])
                               :: Constraint where
     AllSatisfyAll _ Nil             = Valid
     AllSatisfyAll cs (v :* _ :- vs) = (SatisfiesAll cs v, AllSatisfyAll cs vs)
+
+-------------------------------------------------------------------------------
+-- Other
+-------------------------------------------------------------------------------
+
+-- | Add an element to the end of a type-level list.
+type family (l :: [t]) <.> (e :: t) :: [t] where
+    '[]      <.> e = '[e]
+    (x : xs) <.> e = x : (xs <.> e)
