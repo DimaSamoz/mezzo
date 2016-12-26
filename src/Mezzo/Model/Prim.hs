@@ -25,9 +25,12 @@ module Mezzo.Model.Prim
     , type (**)
     , OptVector (..)
     , Head
+    , Head'
     , Last
+    , Tail'
     , Matrix
     , type (++)
+    , type (:-|)
     , type (+*+)
     , From
     , type (+|+)
@@ -47,8 +50,6 @@ module Mezzo.Model.Prim
     , AllPairsSatisfy'
     , SatisfiesAll
     , AllSatisfyAll
-    -- * Other
-    , type (<.>)
     ) where
 
 import Data.Kind
@@ -57,6 +58,7 @@ import GHC.TypeLits
 infixr 6 :*
 infixr 6 **
 infixr 5 :-
+infixr 5 :--
 infixl 4 ++
 infixl 4 +*+
 infixl 4 +|+
@@ -92,10 +94,15 @@ data OptVector :: Type -> Nat -> Type where
     End  :: OptVector t 0
     (:-) :: Elem t l -> OptVector t (n - l) -> OptVector t n
 
--- | Get the first element of the vector.
+-- | Get the first element of an optimised vector.
 type family Head (v :: OptVector t n) :: t where
     Head End           = TypeError (Text "Vector has no head element.")
     Head (v :* _ :- _) = v
+
+-- | Get the first element of a simple vector.
+type family Head' (v :: Vector t n) :: t where
+    Head' None      = TypeError (Text "Vector has no head element.")
+    Head' (v :-- _) = v
 
 -- | Get the last element of the vector.
 type family Last (v :: OptVector t n) :: t where
@@ -103,17 +110,26 @@ type family Last (v :: OptVector t n) :: t where
     Last (v :* _ :- End) = v
     Last (_ :- vs)       = Last vs
 
+type family Tail' (v :: Vector t n) :: Vector t (n - 1) where
+    Tail' None = TypeError (Text "Vector has no tail.")
+    Tail' (_ :-- vs) = vs
+
 -- | A dimension-indexed matrix.
 type Matrix t p q = Vector (OptVector t q) p
 
--- | Type-level vector appending.
+-- | Append two optimised vectors.
 type family (x :: OptVector t n) ++ (y :: OptVector t m) :: OptVector t (n + m) where
     End       ++ ys = ys
     (x :- xs) ++ ys = x :- (xs ++ ys)
 
+-- | Append two simple vectors.
 type family (x :: Vector t n) ++. (y :: Vector t m) :: Vector t (n + m) where
     None       ++. ys = ys
     (x :-- xs) ++. ys = x :-- (xs ++. ys)
+
+-- | Add an element to the end of a simple vector.
+type family (v :: Vector t (n - 1)) :-| (e :: t) :: Vector t n where
+    v :-| e = v ++. (e :-- None)
 
 -- | Repeat the value the specified number of times to create a new 'OptVector'.
 type family (a :: t) +*+ (n :: Nat) :: OptVector t n where
@@ -247,12 +263,3 @@ type family AllSatisfyAll (c1 :: [a -> Constraint])
                               :: Constraint where
     AllSatisfyAll _ None        = Valid
     AllSatisfyAll cs (v :-- vs) = (SatisfiesAll cs v, AllSatisfyAll cs vs)
-
--------------------------------------------------------------------------------
--- Other
--------------------------------------------------------------------------------
-
--- | Add an element to the end of a type-level list.
-type family (l :: [t]) <.> (e :: t) :: [t] where
-    '[]      <.> e = '[e]
-    (x : xs) <.> e = x : (xs <.> e)

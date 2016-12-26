@@ -1,5 +1,6 @@
 {-# LANGUAGE  TypeInType, MultiParamTypeClasses, FlexibleInstances,
     UndecidableInstances, GADTs, TypeOperators, TypeFamilies #-}
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -35,6 +36,7 @@ module Mezzo.Model.Harmony
     ) where
 
 import GHC.TypeLits
+import Data.Kind
 
 import Mezzo.Model.Types
 import Mezzo.Model.Prim
@@ -113,40 +115,41 @@ data SeventhType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | Di
 -- | The inversion of a chord.
 data Inversion = NoInv | FirstInv | SecondInv | ThirdInv
 
--- | A chord type.
-data Chord where
-    Triad        :: Root -> TriadType   -> Inversion -> Chord
-    SeventhChord :: Root -> SeventhType -> Inversion -> Chord
+-- | A chord type, indexed by the number of notes.
+data Chord :: Nat -> Type where
+    Triad        :: Root -> TriadType   -> Inversion -> Chord 3
+    SeventhChord :: Root -> SeventhType -> Inversion -> Chord 4
 
 -- | Convert a triad type to a list of intervals between the individual pitches.
-type family TriadTypeToIntervals (t :: TriadType) :: [IntervalType] where
-    TriadTypeToIntervals MajTriad = '[Interval Maj Third, Interval Min Third]
-    TriadTypeToIntervals MinTriad = '[Interval Min Third, Interval Maj Third]
-    TriadTypeToIntervals AugTriad = '[Interval Maj Third, Interval Maj Third]
-    TriadTypeToIntervals DimTriad = '[Interval Min Third, Interval Min Third]
+type family TriadTypeToIntervals (t :: TriadType) :: Vector IntervalType 2 where
+    TriadTypeToIntervals MajTriad = Interval Maj Third :-- Interval Min Third :-- None
+    TriadTypeToIntervals MinTriad = Interval Min Third :-- Interval Maj Third :-- None
+    TriadTypeToIntervals AugTriad = Interval Maj Third :-- Interval Maj Third :-- None
+    TriadTypeToIntervals DimTriad = Interval Min Third :-- Interval Min Third :-- None
 
 -- | Convert a seventh chord type to a list of intervals between the individual pitches.
-type family SeventhTypeToIntervals (s :: SeventhType) :: [IntervalType] where
-    SeventhTypeToIntervals MajSeventh     = TriadTypeToIntervals MajTriad <.> Interval Maj Third
-    SeventhTypeToIntervals MajMinSeventh  = TriadTypeToIntervals MajTriad <.> Interval Min Third
-    SeventhTypeToIntervals MinSeventh     = TriadTypeToIntervals MinTriad <.> Interval Min Third
-    SeventhTypeToIntervals HalfDimSeventh = TriadTypeToIntervals DimTriad <.> Interval Maj Third
-    SeventhTypeToIntervals DimSeventh     = TriadTypeToIntervals DimTriad <.> Interval Min Third
+type family SeventhTypeToIntervals (s :: SeventhType) :: Vector IntervalType 3 where
+    SeventhTypeToIntervals MajSeventh     = TriadTypeToIntervals MajTriad :-| Interval Maj Third
+    SeventhTypeToIntervals MajMinSeventh  = TriadTypeToIntervals MajTriad :-| Interval Min Third
+    SeventhTypeToIntervals MinSeventh     = TriadTypeToIntervals MinTriad :-| Interval Min Third
+    SeventhTypeToIntervals HalfDimSeventh = TriadTypeToIntervals DimTriad :-| Interval Maj Third
+    SeventhTypeToIntervals DimSeventh     = TriadTypeToIntervals DimTriad :-| Interval Min Third
 
 -- | Apply an inversion to a list of pitches.
-type family Invert (i :: Inversion) (ps :: [PitchType]) :: [PitchType] where
-    Invert NoInv     ps                  = ps
-    Invert FirstInv  (p1 : ps)           = ps                              <.> RaiseByOct p1
-    Invert SecondInv (p1 : p2 : ps)      = Invert FirstInv  (p1 : ps)      <.> RaiseByOct p2
-    Invert ThirdInv  (p1 : p2 : p3 : ps) = Invert SecondInv (p1 : p2 : ps) <.> RaiseByOct p3
+type family Invert (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
+    Invert NoInv ps             = ps
+    -- Need awkward workarounds because of #12564.
+    Invert FirstInv (p :-- ps)  = ps :-| RaiseByOct p
+    Invert SecondInv (p :-- ps) = Invert FirstInv (p :-- Tail' ps) :-| RaiseByOct (Head' ps)
+    Invert ThirdInv (p :-- ps)  = Invert SecondInv (p :-- (Head' (Tail' ps)) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' ps)
 
 -- | Build a list of pitches with the given intervals starting from a root.
-type family BuildOnRoot (p :: Root) (is :: [IntervalType]) :: [PitchType] where
+type family BuildOnRoot (p :: Root) (is :: Vector IntervalType n) :: Vector PitchType (n + 1) where
     BuildOnRoot Silence _  = TypeError (Text "Can't build a chord on a rest.")
-    BuildOnRoot p '[]      = '[p]
-    BuildOnRoot p (i : is) = p : BuildOnRoot (RaiseBy p i) is
+    BuildOnRoot p None      = p :-- None
+    BuildOnRoot p (i :-- is) = p :-- BuildOnRoot (RaiseBy p i) is
 
 -- | Convert a chord to a list of constituent pitches.
-type family ChordToPitchList (c :: Chord) :: [PitchType] where
+type family ChordToPitchList (c :: Chord n) :: Vector PitchType n  where
     ChordToPitchList (Triad        r t i) = Invert i (BuildOnRoot r (TriadTypeToIntervals t))
     ChordToPitchList (SeventhChord r t i) = Invert i (BuildOnRoot r (SeventhTypeToIntervals t))
