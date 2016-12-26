@@ -240,7 +240,7 @@ instance {-# OVERLAPPABLE #-} ( ValidMelMatrixMotion vs1 vs2
 -- rules of harmonic motion.
 class ValidHarmMotionInVectors (v :: Vector PitchType p) (u :: Vector PitchType p)
 instance {-# OVERLAPPING #-}       ValidHarmMotionInVectors Nil Nil
--- Issues with pattern-matching and overlapping instances makes this necessary.
-instance {-# OVERLAPPABLE #-} ( ValidMotion p q (If (IsEmpty ps) Silence (Head ps)) (If (IsEmpty qs) Silence (Head qs))
+instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- Nil) (q :* d2 :- Nil)
+instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
                               , ValidHarmMotionInVectors ps qs)
                                 => ValidHarmMotionInVectors (p :* d1 :- ps) (q :* d2 :- qs)
