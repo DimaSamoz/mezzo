@@ -2,6 +2,7 @@
     FlexibleContexts, MultiParamTypeClasses, TypeFamilies, UndecidableInstances,
     FlexibleInstances #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# OPTIONS_GHC -fplugin Mezzo.Model.Plugin #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -28,6 +29,7 @@ module Mezzo.Model.Music
     ) where
 
 import Data.Kind
+import Data.Proxy
 import GHC.TypeLits
 
 import Mezzo.Model.Prim
@@ -254,3 +256,6 @@ instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- End) (q :* d2 
 instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
                               , ValidHarmMotionInVectors ps qs)
                                 => ValidHarmMotionInVectors (p :* d1 :- ps) (q :* d2 :- qs)
+
+pluginTest :: Proxy (Pitch C Sharp Oct3) -> Proxy (Pitch D Flat Oct3)
+pluginTest = id

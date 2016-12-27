@@ -23,8 +23,11 @@ library
                      , Mezzo.Model.Music
                      , Mezzo.Model.Types
                      , Mezzo.Model.Harmony
+                     , Mezzo.Model.Plugin
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
+                     , ghc-tcplugins-extra
+                     , ghc
   default-language:    Haskell2010
 
 executable mezzo-exe
