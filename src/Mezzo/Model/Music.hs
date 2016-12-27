@@ -23,6 +23,8 @@ module Mezzo.Model.Music
     -- * Music
       Music (..)
     , Score (..)
+    -- * Harmonic constructs
+    , Chord
     ) where
 
 import Data.Kind
@@ -62,6 +64,14 @@ data Music :: forall n l. Partiture n l -> Type where
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
+
+-------------------------------------------------------------------------------
+-- Harmonic constructs
+-- Types and type synonyms constructing 'Music' instances from harmonic types.
+-------------------------------------------------------------------------------
+
+-- | A musical chord with the given reprsentation and length.
+type Chord (c :: ChordType n) (l :: Nat) = Music (ChordToPartiture c l)
 
 -------------------------------------------------------------------------------
 -- Musical constraints

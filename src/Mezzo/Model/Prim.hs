@@ -36,6 +36,7 @@ module Mezzo.Model.Prim
     , type (+|+)
     , type (+-+)
     , Align
+    , VectorToColMatrix
     -- * Booleans
     , If
     , Not
@@ -183,6 +184,10 @@ type family FragmentVecByVec (v :: OptVector t p) (u :: OptVector t p) :: OptVec
             ((v ** k) :- (FragmentVecByVec vs (u ** (l - k) :- us)))
             ((v ** l) :- (FragmentVecByVec (v ** (k - l) :- vs) us))
 
+-- | Convert a simple vector to a column matrix.
+type family VectorToColMatrix (v :: Vector t n) (l :: Nat) :: Matrix t n l where
+    VectorToColMatrix None _ = None
+    VectorToColMatrix (v :-- vs) l = ((v ** l) :- End) :-- (VectorToColMatrix vs l)
 
 -------------------------------------------------------------------------------
 -- Type-level booleans
