@@ -412,7 +412,9 @@ type family IntervalWidth (i :: IntervalType) :: Nat where
 -- | Move a pitch up by a semitone.
 type family HalfStepUp (p :: PitchType) :: PitchType where
     HalfStepUp Silence              = Silence
+    HalfStepUp (Pitch B  Flat    o) = Pitch B Natural o
     HalfStepUp (Pitch B  acc     o) = Pitch C acc (OctSucc o)
+    HalfStepUp (Pitch E  Flat    o) = Pitch E Sharp o
     HalfStepUp (Pitch E  acc     o) = Pitch F acc o
     HalfStepUp (Pitch pc Flat    o) = Pitch pc Natural o
     HalfStepUp (Pitch pc Natural o) = Pitch pc Sharp o
@@ -421,7 +423,9 @@ type family HalfStepUp (p :: PitchType) :: PitchType where
 -- | Move a pitch down by a semitone.
 type family HalfStepDown (p :: PitchType) :: PitchType where
     HalfStepDown Silence              = Silence
+    HalfStepDown (Pitch C  Sharp   o) = Pitch C Natural o
     HalfStepDown (Pitch C  acc     o) = Pitch B acc (OctPred o)
+    HalfStepDown (Pitch F  Sharp   o) = Pitch F Natural o
     HalfStepDown (Pitch F  acc     o) = Pitch E acc o
     HalfStepDown (Pitch pc Flat    o) = Pitch (ClassPred pc) Natural o
     HalfStepDown (Pitch pc Natural o) = Pitch pc Flat o
@@ -439,15 +443,19 @@ type family HalfStepsDownBy (p :: PitchType) (n :: Nat) :: PitchType where
 
 -- | Raise a pitch by an interval.
 type family RaiseBy (p :: PitchType) (i :: IntervalType) :: PitchType where
-    RaiseBy Silence _        = Silence
-    RaiseBy _       Compound = TypeError (Text "Can't shift by compound interval")
-    RaiseBy p       i        = HalfStepsUpBy p (IntervalWidth i)
+    RaiseBy Silence _           = Silence
+    RaiseBy _ Compound          = TypeError (Text "Can't shift by compound interval")
+    RaiseBy p (Interval Min is) = HalfStepDown (HalfStepsUpBy p (IntervalWidth (Interval Min is) + 1))
+    RaiseBy p (Interval Dim is) = HalfStepDown (HalfStepsUpBy p (IntervalWidth (Interval Dim is) + 1))
+    RaiseBy p i                 = HalfStepsUpBy p (IntervalWidth i)
 
 -- | Lower a pitch by an interval.
 type family LowerBy (p :: PitchType) (i :: IntervalType) :: PitchType where
-    LowerBy Silence _        = Silence
-    LowerBy _       Compound = TypeError (Text "Can't shift by compound interval")
-    LowerBy p       i        = HalfStepsDownBy p (IntervalWidth i)
+    LowerBy Silence _           = Silence
+    LowerBy _ Compound          = TypeError (Text "Can't shift by compound interval")
+    LowerBy p (Interval Maj is) = HalfStepUp (HalfStepsDownBy p (IntervalWidth (Interval Maj is) + 1))
+    LowerBy p (Interval Aug is) = HalfStepUp (HalfStepsDownBy p (IntervalWidth (Interval Aug is) + 1))
+    LowerBy p i                 = HalfStepsDownBy p (IntervalWidth i)
 
 -- | Raise a pitch by an octave.
 type family RaiseByOct (p :: PitchType) :: PitchType where
