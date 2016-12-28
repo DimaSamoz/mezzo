@@ -31,7 +31,8 @@ import Data.Kind
 import GHC.TypeLits
 
 import Mezzo.Model.Prim
-import Mezzo.Model.Harmony
+import Mezzo.Model.Harmony.Motion
+import Mezzo.Model.Harmony.Chords
 import Mezzo.Model.Types
 
 infixl 4 :|:
