@@ -40,6 +40,8 @@ module Mezzo.Model.Types
     , IntervalClass (..)
     , IntervalType (..)
     , MakeInterval
+    , HalfStepsUpBy
+    , HalfStepsDownBy
     , RaiseBy
     , LowerBy
     , RaiseByOct
