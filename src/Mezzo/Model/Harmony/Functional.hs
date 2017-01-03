@@ -25,17 +25,13 @@ import Data.Kind
 
 import Mezzo.Model.Types hiding (IntervalClass (..))
 import Mezzo.Model.Prim
-
-data KeyType = Key PitchClass Accidental Mode
-data Mode = MajorMode | MinorMode
-
-data ScaleDegree = I | II | III | IV | V | VI | VII
+import Mezzo.Model.Harmony.Chords
 
 data Quality = Maj | Min | Dom7 | Dim
 
 
-data ScaleRoot (s :: ScaleDegree) (a :: Accidental) = Root
-data ScaleChord (d :: ScaleDegree) (a :: Accidental) (q :: Quality) = SC
+
+
 
 data Degree (sd :: ScaleDegree) (q :: Quality) where
     DegChord :: ScaleChord d a q -> Degree d q
