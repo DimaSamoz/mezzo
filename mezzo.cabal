@@ -24,6 +24,7 @@ library
                      , Mezzo.Model.Types
                      , Mezzo.Model.Harmony.Motion
                      , Mezzo.Model.Harmony.Chords
+                     , Mezzo.Model.Harmony.Functional
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
   default-language:    Haskell2010

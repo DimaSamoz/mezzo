@@ -25,6 +25,7 @@ module Mezzo.Model.Music
     , Score (..)
     -- * Harmonic constructs
     , Chord
+    , Progression
     ) where
 
 import Data.Kind
@@ -33,6 +34,7 @@ import GHC.TypeLits
 import Mezzo.Model.Prim
 import Mezzo.Model.Harmony.Motion
 import Mezzo.Model.Harmony.Chords
+import Mezzo.Model.Harmony.Functional
 import Mezzo.Model.Types
 
 infixl 4 :|:
@@ -72,7 +74,10 @@ data Score = forall m. Score (Music m)
 -------------------------------------------------------------------------------
 
 -- | A musical chord with the given reprsentation and length.
-type Chord (c :: ChordType n) (l :: Nat) = Music (ChordToPartiture c l)
+type Chord (c :: ChordType n) (d :: Nat) = Music (ChordToPartiture c d)
+
+-- | A chord progression with the given scheme and chord length.
+type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceToChords p) d)
 
 -------------------------------------------------------------------------------
 -- Musical constraints
