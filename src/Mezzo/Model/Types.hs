@@ -44,6 +44,8 @@ module Mezzo.Model.Types
     , HalfStepsDownBy
     , RaiseBy
     , LowerBy
+    , RaiseAllBy
+    , LowerAllBy
     , RaiseByOct
     , LowerByOct
     ) where
@@ -458,6 +460,16 @@ type family LowerBy (p :: PitchType) (i :: IntervalType) :: PitchType where
     LowerBy p (Interval Maj is) = HalfStepUp (HalfStepsDownBy p (IntervalWidth (Interval Maj is) + 1))
     LowerBy p (Interval Aug is) = HalfStepUp (HalfStepsDownBy p (IntervalWidth (Interval Aug is) + 1))
     LowerBy p i                 = HalfStepsDownBy p (IntervalWidth i)
+
+-- | Raise multiple pitches by an interval.
+type family RaiseAllBy (ps :: Vector PitchType n) (i :: IntervalType) :: Vector PitchType n where
+    RaiseAllBy None _ = None
+    RaiseAllBy (p :-- ps) i = RaiseBy p i :-- RaiseAllBy ps i
+
+-- | Lower multiple pitches by an interval.
+type family LowerAllBy (ps :: Vector PitchType n) (i :: IntervalType) :: Vector PitchType n where
+    LowerAllBy None _ = None
+    LowerAllBy (p :-- ps) i = LowerBy p i :-- LowerAllBy ps i
 
 -- | Raise a pitch by an octave.
 type family RaiseByOct (p :: PitchType) :: PitchType where
