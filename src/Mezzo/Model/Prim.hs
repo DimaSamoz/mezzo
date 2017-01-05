@@ -28,8 +28,10 @@ module Mezzo.Model.Prim
     , Head'
     , Last
     , Tail'
+    , Init'
     , Matrix
     , type (++)
+    , type (++.)
     , type (:-|)
     , type (+*+)
     , From
@@ -111,9 +113,16 @@ type family Last (v :: OptVector t n) :: t where
     Last (v :* _ :- End) = v
     Last (_ :- vs)       = Last vs
 
+-- | Get the tail of the vector.
 type family Tail' (v :: Vector t n) :: Vector t (n - 1) where
     Tail' None = TypeError (Text "Vector has no tail.")
     Tail' (_ :-- vs) = vs
+
+-- | Get everything but the last element of the vector.
+type family Init' (v :: Vector t n) :: Vector t (n - 1) where
+    Init' None = TypeError (Text "Vector is empty.")
+    Init' (p :-- None) = None
+    Init' (p :-- ps) = p :-- Init' ps
 
 -- | A dimension-indexed matrix.
 type Matrix t p q = Vector (OptVector t q) p
