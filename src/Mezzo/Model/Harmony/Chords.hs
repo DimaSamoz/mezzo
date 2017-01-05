@@ -30,10 +30,11 @@ module Mezzo.Model.Harmony.Chords
     , Inversion (..)
     , ChordType (..)
     , ChordToPartiture
+    , ChordsToPartiture
     ) where
 
 import GHC.TypeLits
-import Data.Kind
+import Data.Kind (Type)
 
 import Mezzo.Model.Types
 import Mezzo.Model.Prim
@@ -95,7 +96,7 @@ type family DegreeOffset (m :: Mode) (d :: ScaleDegree) where
 data TriadType = MajTriad | MinTriad | AugTriad | DimTriad
 
 -- | The type of a seventh chord.
-data SeventhType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh
+data SeventhType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | Doubled TriadType
 
 -- | The inversion of a chord.
 data Inversion = NoInv | FirstInv | SecondInv | ThirdInv
@@ -123,6 +124,7 @@ type family SeventhTypeToIntervals (s :: SeventhType) :: Vector IntervalType 4 w
     SeventhTypeToIntervals MinSeventh     = TriadTypeToIntervals MinTriad :-| Interval Min Seventh
     SeventhTypeToIntervals HalfDimSeventh = TriadTypeToIntervals DimTriad :-| Interval Min Seventh
     SeventhTypeToIntervals DimSeventh     = TriadTypeToIntervals DimTriad :-| Interval Dim Seventh
+    SeventhTypeToIntervals (Doubled tt)   = TriadTypeToIntervals tt       :-| Interval Perf Octave
 
 -- | Apply an inversion to a list of pitches.
 type family Invert (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
@@ -131,6 +133,11 @@ type family Invert (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchTy
     Invert FirstInv  (p :-- ps) = ps :-| RaiseByOct p
     Invert SecondInv (p :-- ps) = Invert FirstInv (p :-- Tail' ps) :-| RaiseByOct (Head' ps)
     Invert ThirdInv  (p :-- ps) = Invert SecondInv (p :-- (Head' (Tail' ps)) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' ps)
+
+-- | Invert a doubled triad chord.
+type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
+    InvertDoubled ThirdInv ps = RaiseAllBy ps (Interval Perf Octave)
+    InvertDoubled i ps = Invert i (Init' ps) :-| (RaiseByOct (Head' (Invert i (Init' ps))))
 
 -- | Build a list of pitches with the given intervals starting from a root.
 type family BuildOnRoot (r :: Root t) (is :: Vector IntervalType n) :: Vector PitchType n where
@@ -141,8 +148,14 @@ type family BuildOnRoot (r :: Root t) (is :: Vector IntervalType n) :: Vector Pi
 -- | Convert a chord to a list of constituent pitches.
 type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
     ChordToPitchList (Triad        r t i) = Invert i (BuildOnRoot r (TriadTypeToIntervals t))
+    ChordToPitchList (SeventhChord r (Doubled tt) i)
+                                          = InvertDoubled i (BuildOnRoot r (SeventhTypeToIntervals (Doubled tt)))
     ChordToPitchList (SeventhChord r t i) = Invert i (BuildOnRoot r (SeventhTypeToIntervals t))
 
 -- | Convert a chord to a partiture with the given length (one voice for each pitch).
 type family ChordToPartiture (c :: ChordType n) (l :: Nat) :: Partiture n l where
     ChordToPartiture c l = VectorToColMatrix (ChordToPitchList c) l
+
+type family ChordsToPartiture (v :: Vector (ChordType n) l) (d :: Nat) :: Partiture n (l * d) where
+    ChordsToPartiture None l = None
+    ChordsToPartiture (c :-- cs) d = ChordToPartiture c d +|+ ChordsToPartiture cs d
