@@ -27,6 +27,7 @@ module Mezzo.Model.Harmony.Functional
     , Tonic (..)
     , Dominant (..)
     , Subdominant (..)
+    , PieceToChords
     )
     where
 
