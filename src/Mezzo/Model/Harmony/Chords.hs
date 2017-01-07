@@ -99,7 +99,7 @@ data TriadType = MajTriad | MinTriad | AugTriad | DimTriad
 data SeventhType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | Doubled TriadType
 
 -- | The inversion of a chord.
-data Inversion = NoInv | FirstInv | SecondInv | ThirdInv
+data Inversion = Inv0 | Inv1 | Inv2 | Inv3
 
 -- | A chord type, indexed by the number of notes.
 data ChordType :: Nat -> Type where
@@ -128,15 +128,15 @@ type family SeventhTypeToIntervals (s :: SeventhType) :: Vector IntervalType 4 w
 
 -- | Apply an inversion to a list of pitches.
 type family Invert (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
-    Invert NoInv     ps         = ps
+    Invert Inv0     ps         = ps
     -- Need awkward workarounds because of #12564.
-    Invert FirstInv  (p :-- ps) = ps :-| RaiseByOct p
-    Invert SecondInv (p :-- ps) = Invert FirstInv (p :-- Tail' ps) :-| RaiseByOct (Head' ps)
-    Invert ThirdInv  (p :-- ps) = Invert SecondInv (p :-- (Head' (Tail' ps)) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' ps)
+    Invert Inv1  (p :-- ps) = ps :-| RaiseByOct p
+    Invert Inv2 (p :-- ps) = Invert Inv1 (p :-- Tail' ps) :-| RaiseByOct (Head' ps)
+    Invert Inv3  (p :-- ps) = Invert Inv2 (p :-- (Head' (Tail' ps)) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' ps)
 
 -- | Invert a doubled triad chord.
 type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
-    InvertDoubled ThirdInv ps = RaiseAllBy ps (Interval Perf Octave)
+    InvertDoubled Inv3 ps = RaiseAllBy ps (Interval Perf Octave)
     InvertDoubled i ps = Invert i (Init' ps) :-| (RaiseByOct (Head' (Invert i (Init' ps))))
 
 -- | Build a list of pitches with the given intervals starting from a root.
