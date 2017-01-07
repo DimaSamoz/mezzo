@@ -87,8 +87,8 @@ type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceTo
 ---- Melodic constraints
 
 -- | Ensures that two pieces of music can be composed sequentially.
-type ValidMelComp m1 m2 = ( ValidMelConcat m1 m2
-                          , ValidMelMatrixMotion m1 m2)
+type ValidMelComp m1 m2 = ( ValidMelConcat m1 m2)
+                        --   , ValidMelMatrixMotion m1 m2)
 
 -- | Ensures that melodic intervals are valid.
 --
