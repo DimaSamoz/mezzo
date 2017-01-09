@@ -34,7 +34,6 @@ module Mezzo.Model.Prim
     , type (++.)
     , type (:-|)
     , type (+*+)
-    , From
     , type (+|+)
     , type (+-+)
     , Align
@@ -145,10 +144,6 @@ type family (v :: Vector t (n - 1)) :-| (e :: t) :: Vector t n where
 type family (a :: t) +*+ (n :: Nat) :: OptVector t n where
     x +*+ 0 = End
     x +*+ n = x ** n :- End
-
--- | Create a new one-row matrix from the specified type and duration.
-type family From (v :: t) (d :: Nat) :: Matrix t 1 d where
-    From v d = (v +*+ d) :-- None
 
 -- | Horizontal concatenation of type-level matrices.
 -- Places the first matrix to the left of the second.

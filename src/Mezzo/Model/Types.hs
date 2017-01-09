@@ -30,6 +30,7 @@ module Mezzo.Model.Types
     -- * Pitches
     , PitchType (..)
     , Pit (..)
+    , FromPitch
     , type (=?=)
     , type (<<=?)
     , type (<<?)
@@ -108,6 +109,10 @@ data PitchType where
 
 -- | The singleton type for pitches.
 data Pit (p :: PitchType) = Pit
+
+-- | Create a new partiture with one voice of the given pitch.
+type family FromPitch (v :: PitchType) (d :: Nat) :: Matrix t 1 d where
+    FromPitch v d = (v +*+ d) :-- None
 
 -------------------------------------------------------------------------------
 -- Type specialisations
