@@ -56,8 +56,8 @@ infixl 4 :-:
 --  * Music must not contain parallel or concealed unisons, fifths or octaves.
 --
 data Music :: forall n l. Partiture n l -> Type where
-    -- | A note specified by a pitch class, accidental, octave and duration.
-    Note :: PC pc -> Acc acc -> Oct oct -> Dur d -> Music (From (Pitch pc acc oct) d)
+    -- | A note specified by a pitch and a duration.
+    Note :: Pit p -> Dur d -> Music (From p d)
     -- | A rest specified by a duration.
     Rest :: Dur d -> Music (From Silence d)
     -- | Sequential or melodic composition of music.

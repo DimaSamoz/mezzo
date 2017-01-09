@@ -29,6 +29,7 @@ module Mezzo.Model.Types
     , Dur (..)
     -- * Pitches
     , PitchType (..)
+    , Pit (..)
     , type (=?=)
     , type (<<=?)
     , type (<<?)
@@ -104,6 +105,9 @@ data PitchType where
     Pitch :: PitchClass -> Accidental -> OctaveNum -> PitchType
     -- | Silence, the pitch of rests.
     Silence :: PitchType
+
+-- | The singleton type for pitches.
+data Pit (p :: PitchType) = Pit
 
 -------------------------------------------------------------------------------
 -- Type specialisations
