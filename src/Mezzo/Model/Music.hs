@@ -63,7 +63,7 @@ data Music :: forall n l. Partiture n l -> Type where
     (:|:) :: ValidMelComp m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.
     (:-:) :: ValidHarmComp m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
-    -- | A triad specified by a root, a triad type, an inversion and a duration.
+    -- | A chord specified by a chord type and a duration.
     Chord :: Cho c -> Dur d -> Music (FromChord c d)
 
 -- | A type encapsulating every 'Music' composition.
