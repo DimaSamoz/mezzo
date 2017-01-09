@@ -157,12 +157,13 @@ type family MakeInterval (p1 :: PitchType) (p2 :: PitchType) :: IntervalType whe
 type family MakeIntervalOrd (p1 :: PitchType) (p2 :: PitchType) :: IntervalType where
     -- Handling base cases.
     MakeIntervalOrd p p = Interval Perf Unison
-    MakeIntervalOrd (Pitch C acc o) (Pitch D acc o) = Interval Maj Second
-    MakeIntervalOrd (Pitch C acc o) (Pitch E acc o) = Interval Maj Third
-    MakeIntervalOrd (Pitch C acc o) (Pitch F acc o) = Interval Perf Fourth
-    MakeIntervalOrd (Pitch C acc o) (Pitch G acc o) = Interval Perf Fifth
-    MakeIntervalOrd (Pitch C acc o) (Pitch A acc o) = Interval Maj Sixth
-    MakeIntervalOrd (Pitch C acc o) (Pitch B acc o) = Interval Maj Seventh
+    MakeIntervalOrd (Pitch C Natural o) (Pitch C Sharp o) = Interval Min Second
+    MakeIntervalOrd (Pitch C acc o)     (Pitch D acc o)   = Interval Maj Second
+    MakeIntervalOrd (Pitch C acc o)     (Pitch E acc o)   = Interval Maj Third
+    MakeIntervalOrd (Pitch C acc o)     (Pitch F acc o)   = Interval Perf Fourth
+    MakeIntervalOrd (Pitch C acc o)     (Pitch G acc o)   = Interval Perf Fifth
+    MakeIntervalOrd (Pitch C acc o)     (Pitch A acc o)   = Interval Maj Sixth
+    MakeIntervalOrd (Pitch C acc o)     (Pitch B acc o)   = Interval Maj Seventh
     -- Handling perfect and augmented octaves.
     MakeIntervalOrd (Pitch C acc o1) (Pitch C acc o2) =
             If (OctSucc o1 .~. o2) (Interval Perf Octave) Compound
