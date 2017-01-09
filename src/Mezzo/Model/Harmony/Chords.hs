@@ -28,8 +28,12 @@ module Mezzo.Model.Harmony.Chords
     , TriadType (..)
     , SeventhType (..)
     , Inversion (..)
+    , TriType (..)
+    , SevType (..)
+    , Inv (..)
     , ChordType (..)
-    , ChordToPartiture
+    , Cho (..)
+    , FromChord
     , ChordsToPartiture
     ) where
 
@@ -52,21 +56,20 @@ data Mode = MajorMode | MinorMode
 -- | The seven scale degrees.
 data ScaleDegree = I | II | III | IV | V | VI | VII
 
--- | The type of a root.
-data RootType = Diatonic -- ^ A root given by a specific musical pitch.
-              | Scalar   -- ^ A root given by a scale degree in a specific key.
-
 -- | The root of a chord.
-data Root (rt :: RootType) where
+data RootType where
     -- | A pitch constructs a diatonic root.
-    PitchRoot :: PitchType -> Root Diatonic
+    PitchRoot :: PitchType -> RootType
     -- | A key and a scale degree constructs a scalar root.
-    DegreeRoot :: KeyType -> ScaleDegree -> Root Scalar
+    DegreeRoot :: KeyType -> ScaleDegree -> RootType
+
+-- | The singleton type for 'Root'.
+data Root (r :: RootType) = Root
 
 -- | Convert a root to a pitch.
 --
 -- Note: the default octave for scalar roots is 'Oct2'.
-type family RootToPitch (dr :: Root rt) :: PitchType where
+type family RootToPitch (dr :: RootType) :: PitchType where
     RootToPitch (PitchRoot p) = p
     RootToPitch (DegreeRoot (Key pc acc m) d) =
                     HalfStepsUpBy (Pitch pc acc Oct2) (DegreeOffset m d)
@@ -101,10 +104,21 @@ data SeventhType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | Di
 -- | The inversion of a chord.
 data Inversion = Inv0 | Inv1 | Inv2 | Inv3
 
+-- | The singleton type for 'TriadType'.
+data TriType (t :: TriadType) = TriType
+
+-- | The singleton type for 'SeventhType'.
+data SevType (t :: SeventhType) = SevType
+
+-- | The singleton type for 'Inversion'.
+data Inv (t :: Inversion) = Inv
+
 -- | A chord type, indexed by the number of notes.
 data ChordType :: Nat -> Type where
-    Triad        :: Root t -> TriadType   -> Inversion -> ChordType 3
-    SeventhChord :: Root t -> SeventhType -> Inversion -> ChordType 4
+    Triad :: RootType -> TriadType   -> Inversion -> ChordType 3
+    SeventhChord :: RootType -> SeventhType -> Inversion -> ChordType 4
+
+data Cho (c :: ChordType n) = Cho
 
 -- | Convert a triad type to a list of intervals between the individual pitches.
 type family TriadTypeToIntervals (t :: TriadType) :: Vector IntervalType 3 where
@@ -140,7 +154,7 @@ type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType n) :: Vector 
     InvertDoubled i ps = Invert i (Init' ps) :-| (RaiseByOct (Head' (Invert i (Init' ps))))
 
 -- | Build a list of pitches with the given intervals starting from a root.
-type family BuildOnRoot (r :: Root t) (is :: Vector IntervalType n) :: Vector PitchType n where
+type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector PitchType n where
     BuildOnRoot (PitchRoot Silence) _    = TypeError (Text "Can't build a chord on a rest.")
     BuildOnRoot r None       = None
     BuildOnRoot r (i :-- is) = RaiseBy (RootToPitch r) i :-- BuildOnRoot r is
@@ -153,9 +167,9 @@ type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
     ChordToPitchList (SeventhChord r t i) = Invert i (BuildOnRoot r (SeventhTypeToIntervals t))
 
 -- | Convert a chord to a partiture with the given length (one voice for each pitch).
-type family ChordToPartiture (c :: ChordType n) (l :: Nat) :: Partiture n l where
-    ChordToPartiture c l = VectorToColMatrix (ChordToPitchList c) l
+type family FromChord (c :: ChordType n) (l :: Nat) :: Partiture n l where
+    FromChord c l = VectorToColMatrix (ChordToPitchList c) l
 
 type family ChordsToPartiture (v :: Vector (ChordType n) l) (d :: Nat) :: Partiture n (l * d) where
     ChordsToPartiture None l = None
-    ChordsToPartiture (c :-- cs) d = ChordToPartiture c d +|+ ChordsToPartiture cs d
+    ChordsToPartiture (c :-- cs) d = FromChord c d +|+ ChordsToPartiture cs d

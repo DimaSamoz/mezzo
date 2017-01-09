@@ -24,7 +24,6 @@ module Mezzo.Model.Music
       Music (..)
     , Score (..)
     -- * Harmonic constructs
-    , Chord
     , Progression
     ) where
 
@@ -64,6 +63,8 @@ data Music :: forall n l. Partiture n l -> Type where
     (:|:) :: ValidMelComp m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.
     (:-:) :: ValidHarmComp m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
+    -- | A triad specified by a root, a triad type, an inversion and a duration.
+    Chord :: Cho c -> Dur d -> Music (FromChord c d)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
@@ -72,9 +73,6 @@ data Score = forall m. Score (Music m)
 -- Harmonic constructs
 -- Types and type synonyms constructing 'Music' instances from harmonic types.
 -------------------------------------------------------------------------------
-
--- | A musical chord with the given reprsentation and length.
-type Chord (c :: ChordType n) (d :: Nat) = Music (ChordToPartiture c d)
 
 -- | A chord progression with the given scheme and chord length.
 type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceToChords p) d)
