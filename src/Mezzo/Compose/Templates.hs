@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TemplateHaskell, ExplicitForAll #-}
+{-# LANGUAGE TypeInType, TemplateHaskell, ExplicitForAll, ViewPatterns #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -37,18 +37,19 @@ import Control.Monad (join)
 
 -- | Generate pitch class literal declarations.
 pitchClassLits :: DecsQ
-pitchClassLits = mapToDataCons (mkSingLit pcFormatter "PC") ''PitchClass
+pitchClassLits = genLitDecs pcFormatter "PC" ''PitchClass
 
 -- | Generate accidental literal declarations.
 accidentalLits :: DecsQ
-accidentalLits = mapToDataCons (mkSingLit accFormatter "Acc") ''Accidental
+accidentalLits = genLitDecs accFormatter "Acc" ''Accidental
 
 -- | Generate octave literal declarations.
 octaveLits :: DecsQ
-octaveLits = mapToDataCons (mkSingLit octFormatter "Oct") ''OctaveNum
+octaveLits = genLitDecs octFormatter "Oct" ''OctaveNum
 
+-- | Generate scale degree literal declarations.
 scaleDegreeLits :: DecsQ
-scaleDegreeLits = mapToDataCons (mkSingLit scaDegFormatter "ScaDeg") ''ScaleDegree
+scaleDegreeLits = genLitDecs scaDegFormatter "ScaDeg" ''ScaleDegree
 
 -------------------------------------------------------------------------------
 -- Templates and generators
@@ -128,11 +129,13 @@ octFormatter oct = 'o' : drop 3 (nameBase oct)
 
 -- | One letter accidental with explicit 'Naturals'.
 shortAccFormatter :: Formatter
-shortAccFormatter name = if accFormatter name == "fl" then "b" else [head $ accFormatter name]
+shortAccFormatter (accFormatter -> "fl") = "b"
+shortAccFormatter (accFormatter -> name) = [head name]
 
 -- | One letter accidental with implicit 'Naturals'.
 shorterAccFormatter :: Formatter
-shorterAccFormatter name = if shortAccFormatter name == "n" then "" else shortAccFormatter name
+shorterAccFormatter (shortAccFormatter -> "n") = ""
+shorterAccFormatter (shortAccFormatter -> name) = name
 
 -- | Symbolic suffix format for octaves.
 shortOctFormatter :: Formatter
@@ -152,8 +155,13 @@ shortOctFormatter name = case nameBase name of
 pitchLitFormatter :: Name -> Name -> Name -> String
 pitchLitFormatter pc acc oct = pcFormatter pc ++ shortAccFormatter acc ++ shortOctFormatter oct
 
+-- | Formatter for scale degrees.
 scaDegFormatter :: Formatter
 scaDegFormatter = map toLower . nameBase
+
+-- | Formatter for key modes.
+modeFormatter :: Formatter
+modeFormatter (nameBase -> name) = map toLower (take 3 name) ++ dropWhile isLower (tail name)
 
 -------------------------------------------------------------------------------
 -- Auxiliary functions
@@ -171,3 +179,6 @@ mapToDataCons :: (Name -> DecsQ) -> Name -> DecsQ
 mapToDataCons f tyName = do
     dcNames <- getDataCons tyName
     join <$> traverse f dcNames
+
+genLitDecs :: Formatter -> String -> Name -> DecsQ
+genLitDecs format singName name = mapToDataCons (mkSingLit format singName) name
