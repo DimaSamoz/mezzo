@@ -157,7 +157,7 @@ pitchLitFormatter pc acc oct = pcFormatter pc ++ shortAccFormatter acc ++ shortO
 getDataCons :: Name -> Q [Name]
 getDataCons tyName = do
     TyConI (DataD _ _ _ _ dcs _) <- reify tyName
-    return $ map (\(NormalC pc _) -> pc) dcs
+    return $ reverse $ map (\(NormalC pc _) -> pc) dcs
 
 -- | Map a function generating declarations from a data constructor to all
 -- data constructors of a type.
