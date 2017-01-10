@@ -21,6 +21,7 @@ module Mezzo.Compose.Templates
     , octaveLits
     , mkPitchLits
     , mkPitchCombs
+    , scaleDegreeLits
     ) where
 
 import Mezzo.Model
@@ -46,6 +47,8 @@ accidentalLits = mapToDataCons (mkSingLit accFormatter "Acc") ''Accidental
 octaveLits :: DecsQ
 octaveLits = mapToDataCons (mkSingLit octFormatter "Oct") ''OctaveNum
 
+scaleDegreeLits :: DecsQ
+scaleDegreeLits = mapToDataCons (mkSingLit scaDegFormatter "ScaDeg") ''ScaleDegree
 
 -------------------------------------------------------------------------------
 -- Templates and generators
@@ -148,6 +151,9 @@ shortOctFormatter name = case nameBase name of
 -- | Formatter for pitch literals.
 pitchLitFormatter :: Name -> Name -> Name -> String
 pitchLitFormatter pc acc oct = pcFormatter pc ++ shortAccFormatter acc ++ shortOctFormatter oct
+
+scaDegFormatter :: Formatter
+scaDegFormatter = map toLower . nameBase
 
 -------------------------------------------------------------------------------
 -- Auxiliary functions

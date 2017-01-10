@@ -25,8 +25,10 @@ library
                      , Mezzo.Model.Harmony.Motion
                      , Mezzo.Model.Harmony.Chords
                      , Mezzo.Model.Harmony.Functional
+
                      , Mezzo.Compose.Templates
                      , Mezzo.Compose.Basic
+                     , Mezzo.Compose.Harmonic
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
                      , template-haskell
