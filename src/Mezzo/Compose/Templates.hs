@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TemplateHaskell #-}
+{-# LANGUAGE TypeInType, TemplateHaskell, ExplicitForAll #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -20,6 +20,7 @@ module Mezzo.Compose.Templates
     , accidentalLits
     , octaveLits
     , mkPitchLits
+    , mkPitchCombs
     ) where
 
 import Mezzo.Model
@@ -64,7 +65,7 @@ mkSingLit format sing dataName = do
         ty = promotedT dataName
         pcDataCon = conE $ mkName sing
 
--- | Generate pitch literals for each pitch class, accidental and octave.
+-- | Generate concrete pitch literals for each pitch class, accidental and octave.
 mkPitchLits :: DecsQ
 mkPitchLits = do
     pcNames <- getDataCons ''PitchClass
@@ -80,22 +81,24 @@ mkPitchLits = do
             return $ tySig : dec
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)    -- Every combination of PCs, Accs and Octs
 
-
--- mkNoteLits :: DecsQ
--- mkNoteLits = do
---     pcNames <- getDataCons ''PitchClass
---     accNames <- getDataCons ''Accidental
---     octNames <- getDataCons ''OctaveNum
---     let declareVal pc acc oct = do
---             let pcStr = tail $ pcFormatter pc
---                 accStr = if accFormatter acc == "fl" then "b" else [head $ accFormatter acc]
---                 octStr = octSuffix (nameBase oct)
---                 valName = mkName $ pcStr ++ accStr ++ octStr
---             tySig <- sigD valName $
---                 [t| (Pit (Pitch $(conT pc) $(conT acc) $(conT oct)) -> Music m) -> Music m |]
---             dec <- [d| $(varP valName) = pitch $(varE $ mkName pcStr) $(varE $ mkName (accFormatter acc)) $(varE $ mkName (octFormatter oct)) |]
---             return $ tySig : dec
---     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)
+-- | Generate pitch combinators for earch pitch class, accidental and octave.
+-- These allow for combinatorial input with CPS-style durations and modifiers.
+mkPitchCombs :: DecsQ
+mkPitchCombs = do
+    pcNames <- getDataCons ''PitchClass
+    accNames <- getDataCons ''Accidental
+    octNames <- getDataCons ''OctaveNum
+    let declareVal pc acc oct = do
+            let pcStr = tail $ pcFormatter pc
+                accStr = shorterAccFormatter acc
+                octStr = shortOctFormatter oct
+                valName = mkName $ pcStr ++ accStr ++ octStr
+                pitchLitName = mkName $ pitchLitFormatter pc acc oct
+            tySig <- sigD valName $
+                [t| forall m. (Pit (Pitch $(conT pc) $(conT acc) $(conT oct)) -> m) -> m |]
+            dec <- [d| $(varP valName) = \ dur -> dur $(varE pitchLitName) |]
+            return $ tySig : dec
+    join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)
 
 
 

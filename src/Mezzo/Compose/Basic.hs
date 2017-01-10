@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell #-}
+{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -58,6 +58,38 @@ _th = Dur @1
 pitch :: PC pc -> Acc acc -> Oct oct -> Pit (Pitch pc acc oct)
 pitch pc acc oct = Pit
 
--- *** Literals
+-- *** Concrete literals
 mkPitchLits
+
+-- *** Combinatorial literals (admitting continuations)
+mkPitchCombs
+
+-- ** Notes
+
+-- *** Constructor
+note :: Pit p -> Dur d -> Music (FromPitch p d)
+note p d = Note p d
+
+-- *** Duration continuations
+
+type DurC d = forall p. Pit p -> Music (FromPitch p d)
+
+wh :: DurC 32
+wh = \p -> Note p _wh
+
+ha :: DurC 16
+ha = \p -> Note p _ha
+
+qu :: DurC 8
+qu = \p -> Note p _qu
+
+ei :: DurC 4
+ei = \p -> Note p _ei
+
+si :: DurC 2
+si = \p -> Note p _si
+
+th :: DurC 1
+th = \p -> Note p _th
+
 
