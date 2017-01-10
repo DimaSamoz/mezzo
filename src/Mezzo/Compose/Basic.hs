@@ -11,7 +11,7 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Literals for pitches, notes, durations, chords, etc.
+-- Literals for pitches, notes, durations, etc.
 --
 -----------------------------------------------------------------------------
 
@@ -50,27 +50,27 @@ _si = Dur @2
 _th :: Dur 1
 _th = Dur @1
 
--- ** Pitches
+-- * Pitches
 
--- *** Constructor
+-- ** Constructor
 
 -- | Create a new pitch with the given class, accidental and octave.
 pitch :: PC pc -> Acc acc -> Oct oct -> Pit (Pitch pc acc oct)
 pitch pc acc oct = Pit
 
--- *** Concrete literals
+-- ** Concrete literals
 mkPitchLits
 
--- *** Combinatorial literals (admitting continuations)
+-- ** Combinatorial literals (admitting continuations)
 mkPitchCombs
 
--- ** Notes
+-- * Notes
 
--- *** Constructor
+-- ** Constructor
 note :: Pit p -> Dur d -> Music (FromPitch p d)
 note p d = Note p d
 
--- *** Duration continuations
+-- ** Duration continuations
 
 type DurC d = forall p. Pit p -> Music (FromPitch p d)
 
@@ -91,5 +91,3 @@ si = \p -> Note p _si
 
 th :: DurC 1
 th = \p -> Note p _th
-
-
