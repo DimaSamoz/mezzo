@@ -35,8 +35,13 @@ modeLits
 key :: PC p -> Acc a -> Mod m -> KeyS (Key p a m)
 key p a m = KeyS
 
-root :: Pit p -> Root (PitchRoot p)
-root p = Root
+-- | Create a new root from a pitch.
+rootP :: Pit p -> Root (PitchRoot p)
+rootP p = Root
+
+-- | Create a new root from a key and a scale degree.
+rootS :: KeyS k -> ScaDeg d -> Root (DegreeRoot k d)
+rootS k d = Root
 
 
 -- maj :: Pit p -> DurT p d -> Music (FromChord (Triad (PitchRoot p) MajTriad Inv0) d)
