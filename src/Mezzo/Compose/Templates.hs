@@ -73,7 +73,7 @@ mkPitchLits = do
     let declareVal pc acc oct = do  -- Generates a type signature and value declaration for the specified pitch
             let pcStr = pcFormatter pc
                 accStr = if accFormatter acc == "fl" then "b" else [head $ accFormatter acc]
-                octStr = octSuffix (nameBase oct)
+                octStr = shortOctFormatter oct
                 valName = mkName $ pcStr ++ accStr ++ octStr
             tySig <- sigD valName $ [t| Pit (Pitch $(conT pc) $(conT acc) $(conT oct)) |]
             dec <- [d| $(varP valName) = pitch $(varE $ mkName pcStr) $(varE $ mkName (accFormatter acc)) $(varE $ mkName (octFormatter oct)) |]
@@ -120,6 +120,31 @@ accFormatter = map toLower . take 2 . nameBase
 octFormatter :: Formatter
 octFormatter oct = 'o' : drop 3 (nameBase oct)
 
+-- | One letter accidental with explicit 'Naturals'.
+shortAccFormatter :: Formatter
+shortAccFormatter name = if accFormatter name == "fl" then "b" else [head $ accFormatter name]
+
+-- | One letter accidental with implicit 'Naturals'.
+shorterAccFormatter :: Formatter
+shorterAccFormatter name = if shortAccFormatter name == "n" then "" else shortAccFormatter name
+
+-- | Symbolic suffix format for octaves.
+shortOctFormatter :: Formatter
+shortOctFormatter name = case nameBase name of
+    "Oct_1" -> "____"
+    "Oct0"  -> "___"
+    "Oct1"  -> "__"
+    "Oct2"  -> "_"
+    "Oct3"  -> ""
+    "Oct4"  -> "'"
+    "Oct5"  -> "''"
+    "Oct6"  -> "'''"
+    "Oct7"  -> "''''"
+    "Oct8"  -> "'''''"
+
+-- | Formatter for pitch literals.
+pitchLitFormatter :: Name -> Name -> Name -> String
+pitchLitFormatter pc acc oct = pcFormatter pc ++ shortAccFormatter acc ++ shortOctFormatter oct
 
 -------------------------------------------------------------------------------
 -- Auxiliary functions
@@ -137,16 +162,3 @@ mapToDataCons :: (Name -> DecsQ) -> Name -> DecsQ
 mapToDataCons f tyName = do
     dcNames <- getDataCons tyName
     join <$> traverse f dcNames
-
--- | Get the textual suffix representation of an octave.
-octSuffix :: String -> String
-octSuffix "Oct_1" = "____"
-octSuffix "Oct0"  = "___"
-octSuffix "Oct1"  = "__"
-octSuffix "Oct2"  = "_"
-octSuffix "Oct3"  = ""
-octSuffix "Oct4"  = "'"
-octSuffix "Oct5"  = "''"
-octSuffix "Oct6"  = "'''"
-octSuffix "Oct7"  = "''''"
-octSuffix "Oct8"  = "'''''"
