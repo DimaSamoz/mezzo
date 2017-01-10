@@ -32,25 +32,25 @@ accidentalLits
 octaveLits
 
 -- ** Duration literals
-wh :: Dur 32
-wh = Dur @32
+_wh :: Dur 32
+_wh = Dur @32
 
-ha :: Dur 16
-ha = Dur @16
+_ha :: Dur 16
+_ha = Dur @16
 
-qu :: Dur 8
-qu = Dur @8
+_qu :: Dur 8
+_qu = Dur @8
 
-ei :: Dur 4
-ei = Dur @4
+_ei :: Dur 4
+_ei = Dur @4
 
-si :: Dur 2
-si = Dur @2
+_si :: Dur 2
+_si = Dur @2
 
-th :: Dur 1
-th = Dur @1
+_th :: Dur 1
+_th = Dur @1
 
--- ** Pitch literals
+-- ** Pitches
 
 -- *** Constructor
 
