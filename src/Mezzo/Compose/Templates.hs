@@ -22,6 +22,7 @@ module Mezzo.Compose.Templates
     , mkPitchLits
     , mkPitchCombs
     , scaleDegreeLits
+    , modeLits
     ) where
 
 import Mezzo.Model
@@ -50,6 +51,10 @@ octaveLits = genLitDecs octFormatter "Oct" ''OctaveNum
 -- | Generate scale degree literal declarations.
 scaleDegreeLits :: DecsQ
 scaleDegreeLits = genLitDecs scaDegFormatter "ScaDeg" ''ScaleDegree
+
+-- | Generate mode literal declarations.
+modeLits :: DecsQ
+modeLits = genLitDecs modeFormatter "Mod" ''Mode -- Might want to extend modes later
 
 -------------------------------------------------------------------------------
 -- Templates and generators
