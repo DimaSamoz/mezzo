@@ -29,6 +29,15 @@ scaleDegreeLits
 -- ** Mode literals
 modeLits
 
+-- ** Triad type literals
+triTyLits
+
+-- ** Seventh type literals
+sevTyLits
+
+dbl :: TriType t -> SevType (Doubled t)
+dbl t = SevType
+
 -- ** Constructors
 
 -- | Create a new key from a pitch class, accidental and mode.

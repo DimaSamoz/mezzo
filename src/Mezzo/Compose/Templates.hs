@@ -23,6 +23,8 @@ module Mezzo.Compose.Templates
     , mkPitchCombs
     , scaleDegreeLits
     , modeLits
+    , triTyLits
+    , sevTyLits
     ) where
 
 import Mezzo.Model
@@ -55,6 +57,16 @@ scaleDegreeLits = genLitDecs scaDegFormatter "ScaDeg" ''ScaleDegree
 -- | Generate mode literal declarations.
 modeLits :: DecsQ
 modeLits = genLitDecs modeFormatter "Mod" ''Mode -- Might want to extend modes later
+
+-- | Generate triad type literal declarations.
+triTyLits :: DecsQ
+triTyLits = genLitDecs choTyFormatter "TriType" ''TriadType
+
+-- | Generate seventh type literal declarations.
+sevTyLits :: DecsQ
+sevTyLits = do
+    dcs <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''SeventhType
+    join <$> traverse (mkSingLit choTyFormatter "SevType") dcs
 
 -------------------------------------------------------------------------------
 -- Templates and generators
@@ -167,6 +179,19 @@ scaDegFormatter = map toLower . nameBase
 -- | Formatter for key modes.
 modeFormatter :: Formatter
 modeFormatter (nameBase -> name) = map toLower (take 3 name) ++ dropWhile isLower (tail name)
+
+-- | Formatter for chords types.
+choTyFormatter :: Formatter
+choTyFormatter n = case nameBase n of
+    "MajTriad"       -> "_maj"
+    "MinTriad"       -> "_min"
+    "AugTriad"       -> "_aug"
+    "DimTriad"       -> "_dim"
+    "MajSeventh"     -> "_maj7"
+    "MajMinSeventh"  -> "_sev"
+    "MinSeventh"     -> "_min7"
+    "HalfDimSeventh" -> "_hdim7"
+    "DimSeventh"     -> "_dim7"
 
 -------------------------------------------------------------------------------
 -- Auxiliary functions
