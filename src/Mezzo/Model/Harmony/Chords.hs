@@ -19,10 +19,13 @@
 module Mezzo.Model.Harmony.Chords
     (
     -- * Harmonic types
-      KeyType (..)
-    , Mode (..)
+      Mode (..)
     , ScaleDegree (..)
+    , KeyType (..)
     , RootType (..)
+    , Mod (..)
+    , ScaDeg (..)
+    , KeyS (..)
     , Root (..)
     -- * Chords
     , TriadType (..)
@@ -47,14 +50,14 @@ import Mezzo.Model.Prim
 -- Harmonic types
 -------------------------------------------------------------------------------
 
--- | The of a scale, chord or piece.
-data KeyType = Key PitchClass Accidental Mode
-
 -- | The mode of a key: major or minor.
 data Mode = MajorMode | MinorMode
 
 -- | The seven scale degrees.
 data ScaleDegree = I | II | III | IV | V | VI | VII
+
+-- | The of a scale, chord or piece.
+data KeyType = Key PitchClass Accidental Mode
 
 -- | The root of a chord.
 data RootType where
@@ -62,6 +65,15 @@ data RootType where
     PitchRoot :: PitchType -> RootType
     -- | A key and a scale degree constructs a scalar root.
     DegreeRoot :: KeyType -> ScaleDegree -> RootType
+
+-- | The singleton type for 'Mode'.
+data Mod (m :: Mode) = Mod
+
+-- | The singleton type for 'ScaleDegree'
+data ScaDeg (sd :: ScaleDegree) = ScaDeg
+
+-- | The singleton type for 'KeyType'.
+data KeyS (k :: KeyType) = KeyS
 
 -- | The singleton type for 'Root'.
 data Root (r :: RootType) = Root
