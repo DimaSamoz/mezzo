@@ -25,6 +25,7 @@ module Mezzo.Compose.Templates
     , modeLits
     , triTyLits
     , sevTyLits
+    , invLits
     ) where
 
 import Mezzo.Model
@@ -67,6 +68,9 @@ sevTyLits :: DecsQ
 sevTyLits = do
     dcs <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''SeventhType
     join <$> traverse (mkSingLit choTyFormatter "SevType") dcs
+
+invLits :: DecsQ
+invLits = genLitDecs invFormatter "Inv" ''Inversion
 
 -------------------------------------------------------------------------------
 -- Templates and generators
@@ -192,6 +196,10 @@ choTyFormatter n = case nameBase n of
     "MinSeventh"     -> "_min7"
     "HalfDimSeventh" -> "_hdim7"
     "DimSeventh"     -> "_dim7"
+
+-- | Formatter for inversions.
+invFormatter :: Formatter
+invFormatter (nameBase -> name) = "_i" ++ [last name]
 
 -------------------------------------------------------------------------------
 -- Auxiliary functions

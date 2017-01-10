@@ -38,6 +38,9 @@ sevTyLits
 dbl :: TriType t -> SevType (Doubled t)
 dbl t = SevType
 
+-- ** Inversion literals
+invLits
+
 -- ** Constructors
 
 -- | Create a new key from a pitch class, accidental and mode.
