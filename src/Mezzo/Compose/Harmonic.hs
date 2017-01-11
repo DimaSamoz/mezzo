@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes #-}
+{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes, ViewPatterns, GADTs #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -55,6 +55,13 @@ rootP p = Root
 rootS :: KeyS k -> ScaDeg d -> Root (DegreeRoot k d)
 rootS k d = Root
 
+-- | Create a triad from a root, a triad type and an inversion.
+triad :: Root r -> TriType t -> Inv i -> Cho (Triad r t i)
+triad r t i = Cho
+
+-- | Create a seventh chord from a root, a triad type and an inversion.
+seventh :: Root r -> SevType t -> Inv i -> Cho (SeventhChord r t i)
+seventh r t i = Cho
 
 -- maj :: Pit p -> DurT p d -> Music (FromChord (Triad (PitchRoot p) MajTriad Inv0) d)
 -- maj p d = undefined
