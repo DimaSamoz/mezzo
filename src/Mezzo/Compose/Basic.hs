@@ -72,22 +72,22 @@ note p d = Note p d
 
 -- ** Duration continuations
 
-type DurC d = forall p. Pit p -> Music (FromPitch p d)
+type DurC p d = Pit p -> Music (FromPitch p d)
 
-wh :: DurC 32
+wh :: DurC p 32
 wh = \p -> Note p _wh
 
-ha :: DurC 16
+ha :: DurC p 16
 ha = \p -> Note p _ha
 
-qu :: DurC 8
+qu :: DurC p 8
 qu = \p -> Note p _qu
 
-ei :: DurC 4
+ei :: DurC p 4
 ei = \p -> Note p _ei
 
-si :: DurC 2
+si :: DurC p 2
 si = \p -> Note p _si
 
-th :: DurC 1
+th :: DurC p 1
 th = \p -> Note p _th
