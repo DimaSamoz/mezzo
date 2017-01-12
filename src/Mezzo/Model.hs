@@ -30,7 +30,17 @@ import Mezzo.Model.Types as X
     , Dur (..)
     , PitchType (..)
     , Pit (..)
-    , FromPitch
+    , Mode (..)
+    , ScaleDegree (..)
+    , KeyType (..)
+    , RootType (..)
+    , Mod (..)
+    , ScaDeg (..)
+    , KeyS (..)
+    , Root (..)
+    , RootToPitch
+    , FromRoot
+    , FromSilence
     )
 import Mezzo.Model.Harmony.Chords as X
 import Mezzo.Model.Harmony.Functional as X

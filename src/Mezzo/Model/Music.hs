@@ -56,9 +56,9 @@ infixl 4 :-:
 --
 data Music :: forall n l. Partiture n l -> Type where
     -- | A note specified by a pitch and a duration.
-    Note :: Pit p -> Dur d -> Music (FromPitch p d)
+    Note :: Root r -> Dur d -> Music (FromRoot r d)
     -- | A rest specified by a duration.
-    Rest :: Dur d -> Music (FromPitch Silence d)
+    Rest :: Dur d -> Music (FromSilence d)
     -- | Sequential or melodic composition of music.
     (:|:) :: ValidMelComp m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.

@@ -67,7 +67,7 @@ seventh r t i = Cho
 -- * Continuation literals
 
 -- | Get the actual duration of a duration continuation
-getDur :: Pit p -> DurC p d -> Dur d
+getDur :: Root r -> DurC r d -> Dur d
 getDur p (($ p) -> Note _ dur) = dur
 getDur p (($ p) -> Rest dur) = dur
 

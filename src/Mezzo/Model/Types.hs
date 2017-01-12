@@ -30,10 +30,21 @@ module Mezzo.Model.Types
     -- * Pitches
     , PitchType (..)
     , Pit (..)
-    , FromPitch
     , type (=?=)
     , type (<<=?)
     , type (<<?)
+    -- * Harmonic types
+    , Mode (..)
+    , ScaleDegree (..)
+    , KeyType (..)
+    , RootType (..)
+    , Mod (..)
+    , ScaDeg (..)
+    , KeyS (..)
+    , Root (..)
+    , RootToPitch
+    , FromRoot
+    , FromSilence
     -- * Specialised musical vector types
     , Voice
     , Partiture
@@ -110,9 +121,69 @@ data PitchType where
 -- | The singleton type for pitches.
 data Pit (p :: PitchType) = Pit
 
+-------------------------------------------------------------------------------
+-- Harmonic types
+-------------------------------------------------------------------------------
+
+-- | The mode of a key: major or minor.
+data Mode = MajorMode | MinorMode
+
+-- | The seven scale degrees.
+data ScaleDegree = I | II | III | IV | V | VI | VII
+
+-- | The of a scale, chord or piece.
+data KeyType = Key PitchClass Accidental Mode
+
+-- | The root of a chord.
+data RootType where
+    -- | A pitch constructs a diatonic root.
+    PitchRoot :: PitchType -> RootType
+    -- | A key and a scale degree constructs a scalar root.
+    DegreeRoot :: KeyType -> ScaleDegree -> RootType
+
+-- | The singleton type for 'Mode'.
+data Mod (m :: Mode) = Mod
+
+-- | The singleton type for 'ScaleDegree'
+data ScaDeg (sd :: ScaleDegree) = ScaDeg
+
+-- | The singleton type for 'KeyType'.
+data KeyS (k :: KeyType) = KeyS
+
+-- | The singleton type for 'Root'.
+data Root (r :: RootType) = Root
+
+-- | Convert a root to a pitch.
+--
+-- Note: the default octave for scalar roots is 'Oct2'.
+type family RootToPitch (dr :: RootType) :: PitchType where
+    RootToPitch (PitchRoot p) = p
+    RootToPitch (DegreeRoot (Key pc acc m) d) =
+                    HalfStepsUpBy (Pitch pc acc Oct2) (DegreeOffset m d)
+
+-- | Calculate the semitone offset of a scale degree in a given mode.
+type family DegreeOffset (m :: Mode) (d :: ScaleDegree) where
+    DegreeOffset MajorMode I   = 0
+    DegreeOffset MajorMode II  = 2
+    DegreeOffset MajorMode III = 4
+    DegreeOffset MajorMode IV  = 5
+    DegreeOffset MajorMode V   = 7
+    DegreeOffset MajorMode VI  = 9
+    DegreeOffset MajorMode VII = 11
+    DegreeOffset MinorMode I   = 0
+    DegreeOffset MinorMode II  = 2
+    DegreeOffset MinorMode III = 3
+    DegreeOffset MinorMode IV  = 5
+    DegreeOffset MinorMode V   = 7
+    DegreeOffset MinorMode VI  = 8
+    DegreeOffset MinorMode VII = 10
+
 -- | Create a new partiture with one voice of the given pitch.
-type family FromPitch (v :: PitchType) (d :: Nat) :: Matrix t 1 d where
-    FromPitch v d = (v +*+ d) :-- None
+type family FromRoot (r :: RootType) (d :: Nat) :: Partiture 1 d where
+    FromRoot r d = ((RootToPitch r) +*+ d) :-- None
+
+type family FromSilence (d :: Nat) :: Partiture 1 d where
+    FromSilence d = (Silence +*+ d) :-- None
 
 -------------------------------------------------------------------------------
 -- Type specialisations

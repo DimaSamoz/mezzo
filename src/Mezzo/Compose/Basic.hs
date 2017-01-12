@@ -75,10 +75,10 @@ r = \dur -> dur silence
 -- * Notes
 
 -- ** Constructors
-note :: Pit p -> Dur d -> Music (FromPitch p d)
+note :: Root r -> Dur d -> Music (FromRoot r d)
 note p d = Note p d
 
-rest :: Dur d -> Music (FromPitch Silence d)
+rest :: Dur d -> Music (FromSilence d)
 rest d = Rest d
 
 -- ** Duration continuations
