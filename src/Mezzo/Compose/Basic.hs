@@ -18,6 +18,7 @@
 module Mezzo.Compose.Basic where
 
 import Mezzo.Model
+import Mezzo.Compose.Types
 import Mezzo.Compose.Templates
 
 -- * Atomic literals
@@ -32,16 +33,16 @@ accidentalLits
 octaveLits
 
 -- ** Duration literals
-_wh :: Dur 32
+_wh :: Whole
 _wh = Dur @32
 
-_ha :: Dur 16
+_ha :: Half
 _ha = Dur @16
 
-_qu :: Dur 8
+_qu :: Quarter
 _qu = Dur @8
 
-_ei :: Dur 4
+_ei :: Eighth
 _ei = Dur @4
 
 _si :: Dur 2
@@ -71,8 +72,6 @@ note :: Pit p -> Dur d -> Music (FromPitch p d)
 note p d = Note p d
 
 -- ** Duration continuations
-
-type DurC p d = Pit p -> Music (FromPitch p d)
 
 wh :: DurC p 32
 wh = \p -> Note p _wh
