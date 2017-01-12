@@ -124,8 +124,9 @@ mkPitchCombs = do
                 valName = mkName $ pcStr ++ accStr ++ octStr
                 pitchLitName = mkName $ pitchLitFormatter pc acc oct
             tySig <- sigD valName $
-                [t| forall m. (Pit (Pitch $(conT pc) $(conT acc) $(conT oct)) -> m) -> m |]
-            dec <- [d| $(varP valName) = \ dur -> dur $(varE pitchLitName) |]
+                [t| forall m. (Root (PitchRoot (Pitch $(conT pc) $(conT acc) $(conT oct))) -> m) -> m |]
+            -- dec <- [d| $(varP valName) = \ dur -> dur (rootP $(varE pitchLitName)) |]
+            dec <- [d| $(varP valName) = \ dur -> dur (Root :: (Root (PitchRoot (Pitch $(conT pc) $(conT acc) $(conT oct))))) |]
             return $ tySig : dec
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)
 
@@ -138,11 +139,13 @@ mkTriTyCombs = do
                 valName2 = mkName $ choStr
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
-                [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) i) d) |]
-            dec1 <- [d| $(varP valName1) = \ p i d -> Chord (triad (rootP p) $(varE litName) i) (getDur p d) |]
+                -- [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) i) d) |]
+                [t| forall r i d. ChordC' Triad r $(conT choTy) i d |]
+            dec1 <- [d| $(varP valName1) = \ r i d -> Chord (triad r $(varE litName) i) (getDur r d) |]
             tySig2 <- sigD valName2 $
-                [t| forall p d. Pit p -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) Inv0) d) |]
-            dec2 <- [d| $(varP valName2) = \ p d -> Chord (triad (rootP p) $(varE litName) i0) (getDur p d) |]
+                -- [t| forall p d. Pit p -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) Inv0) d) |]
+                [t| forall p d. ChordC Triad p $(conT choTy) d |]
+            dec2 <- [d| $(varP valName2) = \ r d -> Chord (triad r $(varE litName) i0) (getDur r d) |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun triTyNames
 
@@ -155,11 +158,11 @@ mkSevTyCombs = do
                 valName2 = mkName $ choStr
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
-                [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) $(conT choTy) i) d) |]
-            dec1 <- [d| $(varP valName1) = \ p i d -> Chord (seventh (rootP p) $(varE litName) i) (getDur p d) |]
+                [t| forall p i d. ChordC' SeventhChord p $(conT choTy) i d |]
+            dec1 <- [d| $(varP valName1) = \ r i d -> Chord (seventh r $(varE litName) i) (getDur r d) |]
             tySig2 <- sigD valName2 $
-                [t| forall p d. Pit p -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) $(conT choTy) Inv0) d) |]
-            dec2 <- [d| $(varP valName2) = \ p d -> Chord (seventh (rootP p) $(varE litName) i0) (getDur p d) |]
+                [t| forall p d. ChordC SeventhChord p $(conT choTy) d |]
+            dec2 <- [d| $(varP valName2) = \ r d -> Chord (seventh r $(varE litName) i0) (getDur r d) |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun sevTyNames
 
@@ -172,11 +175,11 @@ mkDoubledTyCombs = do
                 valName2 = mkName $ choStr ++ "D"
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
-                [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) (Doubled $(conT choTy)) i) d) |]
-            dec1 <- [d| $(varP valName1) = \ p i d -> Chord (seventh (rootP p) (_dbl $(varE litName)) i) (getDur p d) |]
+                [t| forall p i d. ChordC' SeventhChord p (Doubled $(conT choTy)) i d |]
+            dec1 <- [d| $(varP valName1) = \ r i d -> Chord (seventh r (_dbl $(varE litName)) i) (getDur r d) |]
             tySig2 <- sigD valName2 $
-                [t| forall p d. Pit p -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) (Doubled $(conT choTy)) Inv0) d) |]
-            dec2 <- [d| $(varP valName2) = \ p d -> Chord (seventh (rootP p) (_dbl $(varE litName)) i0) (getDur p d) |]
+                [t| forall p d. ChordC SeventhChord p (Doubled $(conT choTy)) d |]
+            dec2 <- [d| $(varP valName2) = \ r d -> Chord (seventh r (_dbl $(varE litName)) i0) (getDur r d) |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun triTyNames
 

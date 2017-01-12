@@ -25,6 +25,8 @@ module Mezzo.Compose.Types
     , Sixteenth
     , ThirtySecond
     , DurC
+    , ChordC
+    , ChordC'
     )
     where
 
@@ -48,5 +50,11 @@ type Sixteenth = Dur 2
 -- | Thirty-second note duration.
 type ThirtySecond = Dur 1
 
--- | The type of duration continuations
-type DurC p d = Pit p -> Music (FromPitch p d)
+-- | The type of duration continuations.
+type DurC r d = Root r -> Music (FromRoot r d)
+
+-- | The type of combinatorial chord type literals with default inversion.
+type ChordC c r t d = Root r -> DurC r d -> Music (FromChord (c r t Inv0) d)
+
+-- | The type of combinatorial chord type literals with custom inversion.
+type ChordC' c r t i d = Root r -> Inv i -> DurC r d -> Music (FromChord (c r t i) d)
