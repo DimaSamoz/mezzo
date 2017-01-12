@@ -64,9 +64,6 @@ triad r t i = Cho
 seventh :: Root r -> SevType t -> Inv i -> Cho (SeventhChord r t i)
 seventh r t i = Cho
 
--- maj :: Pit p -> DurT p d -> Music (FromChord (Triad (PitchRoot p) MajTriad Inv0) d)
--- maj p d = undefined
-
 -- * Continuation literals
 
 -- | Get the actual duration of a duration continuation

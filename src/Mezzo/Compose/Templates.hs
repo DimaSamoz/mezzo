@@ -134,7 +134,7 @@ mkTriTyCombs = do
     triTyNames <- getDataCons ''TriadType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
-                valName1 = mkName $ choStr ++ "_"
+                valName1 = mkName $ choStr ++ "'"
                 valName2 = mkName $ choStr
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
@@ -151,7 +151,7 @@ mkSevTyCombs = do
     sevTyNames <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''SeventhType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
-                valName1 = mkName $ choStr ++ "_"
+                valName1 = mkName $ choStr ++ "'"
                 valName2 = mkName $ choStr
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
@@ -168,7 +168,7 @@ mkDoubledTyCombs = do
     triTyNames <- getDataCons ''TriadType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
-                valName1 = mkName $ choStr ++ "D_"
+                valName1 = mkName $ choStr ++ "D'"
                 valName2 = mkName $ choStr ++ "D"
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
@@ -216,16 +216,16 @@ shorterAccFormatter (shortAccFormatter -> name) = name
 -- | Symbolic suffix format for octaves.
 shortOctFormatter :: Formatter
 shortOctFormatter name = case nameBase name of
-    "Oct_1" -> "____"
-    "Oct0"  -> "___"
+    "Oct_1" -> "_4"
+    "Oct0"  -> "_3"
     "Oct1"  -> "__"
     "Oct2"  -> "_"
     "Oct3"  -> ""
     "Oct4"  -> "'"
     "Oct5"  -> "''"
-    "Oct6"  -> "'''"
-    "Oct7"  -> "''''"
-    "Oct8"  -> "'''''"
+    "Oct6"  -> "'3"
+    "Oct7"  -> "'4"
+    "Oct8"  -> "'5"
 
 -- | Formatter for pitch literals.
 pitchLitFormatter :: Name -> Name -> Name -> String
