@@ -59,17 +59,27 @@ _th = Dur @1
 pitch :: PC pc -> Acc acc -> Oct oct -> Pit (Pitch pc acc oct)
 pitch pc acc oct = Pit
 
+-- | Value representing silence, the "pitch" of rests.
+silence :: Pit Silence
+silence = Pit
+
 -- ** Concrete literals
 mkPitchLits
 
 -- ** Combinatorial literals (admitting continuations)
 mkPitchCombs
 
+r :: (Pit Silence -> m) -> m
+r = \dur -> dur silence
+
 -- * Notes
 
--- ** Constructor
+-- ** Constructors
 note :: Pit p -> Dur d -> Music (FromPitch p d)
 note p d = Note p d
+
+rest :: Dur d -> Music (FromPitch Silence d)
+rest d = Rest d
 
 -- ** Duration continuations
 
