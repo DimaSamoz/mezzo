@@ -75,9 +75,22 @@ r = \dur -> dur silence
 -- * Notes
 
 -- ** Constructors
-note :: Root r -> Dur d -> Music (FromRoot r d)
-note p d = Note p d
+-- | Create a new root from a pitch.
+rootP :: Pit p -> Root (PitchRoot p)
+rootP p = Root
 
+-- | Create a new root from a key and a scale degree.
+rootS :: KeyS k -> ScaDeg d -> Root (DegreeRoot k d)
+rootS k d = Root
+
+-- | Create a new note from a root and duration.
+noteP :: Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
+noteP p d = Note (rootP p) d
+
+noteS :: KeyS k -> ScaDeg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
+noteS k sd d = Note (rootS k sd) d
+
+-- | Create a rest from a duration.
 rest :: Dur d -> Music (FromSilence d)
 rest d = Rest d
 

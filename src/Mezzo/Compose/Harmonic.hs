@@ -48,14 +48,6 @@ invLits
 key :: PC p -> Acc a -> Mod m -> KeyS (Key p a m)
 key p a m = KeyS
 
--- | Create a new root from a pitch.
-rootP :: Pit p -> Root (PitchRoot p)
-rootP p = Root
-
--- | Create a new root from a key and a scale degree.
-rootS :: KeyS k -> ScaDeg d -> Root (DegreeRoot k d)
-rootS k d = Root
-
 -- | Create a triad from a root, a triad type and an inversion.
 triad :: Root r -> TriType t -> Inv i -> Cho (Triad r t i)
 triad r t i = Cho
