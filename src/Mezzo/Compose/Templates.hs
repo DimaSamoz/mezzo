@@ -26,9 +26,13 @@ module Mezzo.Compose.Templates
     , triTyLits
     , sevTyLits
     , invLits
+    , mkTriTyCombs
+    , mkSevTyCombs
+    , mkDoubledTyCombs
     ) where
 
 import Mezzo.Model
+import Mezzo.Compose.Types
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax (sequenceQ)
 import Data.Char
@@ -125,6 +129,57 @@ mkPitchCombs = do
             return $ tySig : dec
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)
 
+mkTriTyCombs :: DecsQ
+mkTriTyCombs = do
+    triTyNames <- getDataCons ''TriadType
+    let declareFun choTy = do
+            let choStr = tail (choTyFormatter choTy)
+                valName1 = mkName $ choStr ++ "_"
+                valName2 = mkName $ choStr
+                litName = mkName $ choTyFormatter choTy
+            tySig1 <- sigD valName1 $
+                [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) i) d) |]
+            dec1 <- [d| $(varP valName1) = \ p i d -> Chord (triad (rootP p) $(varE litName) i) (getDur p d) |]
+            tySig2 <- sigD valName2 $
+                [t| forall p d. Pit p -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) Inv0) d) |]
+            dec2 <- [d| $(varP valName2) = \ p d -> Chord (triad (rootP p) $(varE litName) i0) (getDur p d) |]
+            return $ (tySig1 : dec1) ++ (tySig2 : dec2)
+    join <$> traverse declareFun triTyNames
+
+mkSevTyCombs :: DecsQ
+mkSevTyCombs = do
+    sevTyNames <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''SeventhType
+    let declareFun choTy = do
+            let choStr = tail (choTyFormatter choTy)
+                valName1 = mkName $ choStr ++ "_"
+                valName2 = mkName $ choStr
+                litName = mkName $ choTyFormatter choTy
+            tySig1 <- sigD valName1 $
+                [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) $(conT choTy) i) d) |]
+            dec1 <- [d| $(varP valName1) = \ p i d -> Chord (seventh (rootP p) $(varE litName) i) (getDur p d) |]
+            tySig2 <- sigD valName2 $
+                [t| forall p d. Pit p -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) $(conT choTy) Inv0) d) |]
+            dec2 <- [d| $(varP valName2) = \ p d -> Chord (seventh (rootP p) $(varE litName) i0) (getDur p d) |]
+            return $ (tySig1 : dec1) ++ (tySig2 : dec2)
+    join <$> traverse declareFun sevTyNames
+
+mkDoubledTyCombs :: DecsQ
+mkDoubledTyCombs = do
+    triTyNames <- getDataCons ''TriadType
+    let declareFun choTy = do
+            let choStr = tail (choTyFormatter choTy)
+                valName1 = mkName $ choStr ++ "D_"
+                valName2 = mkName $ choStr ++ "D"
+                litName = mkName $ choTyFormatter choTy
+            tySig1 <- sigD valName1 $
+                [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) (Doubled $(conT choTy)) i) d) |]
+            dec1 <- [d| $(varP valName1) = \ p i d -> Chord (seventh (rootP p) (_dbl $(varE litName)) i) (getDur p d) |]
+            tySig2 <- sigD valName2 $
+                [t| forall p d. Pit p -> DurC p d -> Music (FromChord (SeventhChord (PitchRoot p) (Doubled $(conT choTy)) Inv0) d) |]
+            dec2 <- [d| $(varP valName2) = \ p d -> Chord (seventh (rootP p) (_dbl $(varE litName)) i0) (getDur p d) |]
+            return $ (tySig1 : dec1) ++ (tySig2 : dec2)
+    join <$> traverse declareFun triTyNames
+
 
 
 
@@ -199,7 +254,7 @@ choTyFormatter n = case nameBase n of
 
 -- | Formatter for inversions.
 invFormatter :: Formatter
-invFormatter (nameBase -> name) = "_i" ++ [last name]
+invFormatter (nameBase -> name) = "i" ++ [last name]
 
 -------------------------------------------------------------------------------
 -- Auxiliary functions

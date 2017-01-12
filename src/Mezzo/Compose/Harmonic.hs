@@ -18,6 +18,7 @@
 module Mezzo.Compose.Harmonic where
 
 import Mezzo.Model
+import Mezzo.Compose.Types
 import Mezzo.Compose.Templates
 import Mezzo.Compose.Basic
 
@@ -35,8 +36,8 @@ triTyLits
 -- ** Seventh type literals
 sevTyLits
 
-dbl :: TriType t -> SevType (Doubled t)
-dbl t = SevType
+_dbl :: TriType t -> SevType (Doubled t)
+_dbl t = SevType
 
 -- ** Inversion literals
 invLits
@@ -65,3 +66,19 @@ seventh r t i = Cho
 
 -- maj :: Pit p -> DurT p d -> Music (FromChord (Triad (PitchRoot p) MajTriad Inv0) d)
 -- maj p d = undefined
+
+-- * Continuation literals
+
+-- | Get the actual duration of a duration continuation
+getDur :: Pit p -> DurC p d -> Dur d
+getDur p (($ p) -> Note _ dur) = dur
+getDur p (($ p) -> Rest dur) = dur
+
+-- ** Triads
+mkTriTyCombs
+
+-- ** Seventh chords
+mkSevTyCombs
+
+-- ** Doubled triads
+mkDoubledTyCombs
