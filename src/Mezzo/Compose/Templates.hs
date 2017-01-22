@@ -236,7 +236,7 @@ pitchLitFormatter pc acc oct = pcFormatter pc ++ shortAccFormatter acc ++ shortO
 
 -- | Formatter for scale degrees.
 scaDegFormatter :: Formatter
-scaDegFormatter = map toLower . nameBase
+scaDegFormatter name = "_" ++ map toLower (nameBase name)
 
 -- | Formatter for key modes.
 modeFormatter :: Formatter
