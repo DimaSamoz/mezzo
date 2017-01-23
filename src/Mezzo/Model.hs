@@ -39,6 +39,8 @@ import Mezzo.Model.Types as X
     , KeyS (..)
     , Root (..)
     , RootToPitch
+    , Sharpen
+    , Flatten
     , FromRoot
     , FromSilence
     )
