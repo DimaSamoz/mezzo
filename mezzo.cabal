@@ -27,6 +27,7 @@ library
                      , Mezzo.Model.Harmony.Functional
 
                      , Mezzo.Compose.Types
+                     , Mezzo.Compose.Builder
                      , Mezzo.Compose.Templates
                      , Mezzo.Compose.Basic
                      , Mezzo.Compose.Harmonic
