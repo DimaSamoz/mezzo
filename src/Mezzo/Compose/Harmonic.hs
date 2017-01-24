@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes, ViewPatterns, GADTs #-}
+{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes, ViewPatterns, GADTs, ImplicitParams #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -19,6 +19,7 @@ module Mezzo.Compose.Harmonic where
 
 import Mezzo.Model
 import Mezzo.Compose.Types
+import Mezzo.Compose.Builder
 import Mezzo.Compose.Templates
 import Mezzo.Compose.Basic
 
@@ -56,18 +57,14 @@ triad r t i = Cho
 seventh :: Root r -> SevType t -> Inv i -> Cho (SeventhChord r t i)
 seventh r t i = Cho
 
--- * Continuation literals
+-- * Chord builders
 
--- | Get the actual duration of a duration continuation
-getDur :: Root r -> DurC r d -> Dur d
-getDur p (($ p) -> Note _ dur) = dur
-getDur p (($ p) -> Rest dur) = dur
+-- ** Triad converters
+mkTriConvs
 
--- ** Triads
-mkTriTyCombs
+-- ** Seventh chord converters
+mkSevConvs
 
--- ** Seventh chords
-mkSevTyCombs
+-- ** Doubled triad converters
+mkDoubledConvs
 
--- ** Doubled triads
-mkDoubledTyCombs
