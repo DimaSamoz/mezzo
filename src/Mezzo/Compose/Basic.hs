@@ -73,6 +73,14 @@ mkPitchSpecs
 r :: RootS (PitchRoot Silence)
 r = \dur -> dur (rootP silence)
 
+-- | Raise a pitch by a semitone.
+sharp :: RootM r (Sharpen r)
+sharp = constConv Root
+
+-- | Lower a pitch by a semitone.
+flat :: RootM r (Flatten r)
+flat = constConv Root
+
 -- * Notes
 
 -- ** Constructors

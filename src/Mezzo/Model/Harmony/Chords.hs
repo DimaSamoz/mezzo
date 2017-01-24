@@ -25,6 +25,7 @@ module Mezzo.Model.Harmony.Chords
     , TriType (..)
     , SevType (..)
     , Inv (..)
+    , InvertChord
     , ChordType (..)
     , Cho (..)
     , FromChord
@@ -98,6 +99,17 @@ type family Invert (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchTy
 type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
     InvertDoubled Inv3 ps = RaiseAllBy ps (Interval Perf Octave)
     InvertDoubled i ps = Invert i (Init' ps) :-| (RaiseByOct (Head' (Invert i (Init' ps))))
+
+type family InvSucc (i :: Inversion) :: Inversion where
+    InvSucc Inv0 = Inv1
+    InvSucc Inv1 = Inv2
+    InvSucc Inv2 = Inv3
+    InvSucc Inv3 = Inv0
+
+type family InvertChord (c :: ChordType n) :: ChordType n where
+    InvertChord (Triad r t Inv2) = Triad r t Inv0
+    InvertChord (Triad r t i) = Triad r t (InvSucc i)
+    InvertChord (SeventhChord r t i) = SeventhChord r t (InvSucc i)
 
 -- | Build a list of pitches with the given intervals starting from a root.
 type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector PitchType n where

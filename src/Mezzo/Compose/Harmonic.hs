@@ -68,3 +68,6 @@ mkSevConvs
 -- ** Doubled triad converters
 mkDoubledConvs
 
+-- ** Inversion mutators
+inv :: ChorM c (InvertChord c)
+inv = constConv Cho
