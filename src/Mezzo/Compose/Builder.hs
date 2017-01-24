@@ -21,8 +21,10 @@ module Mezzo.Compose.Builder
       Spec
     , Conv
     , Mut
-    , Mut'
     , Term
+    , AConv
+    , AMut
+    , Mut'
     , spec
     , constConv
     -- * Music-specific builder types
@@ -49,14 +51,17 @@ type Spec t = forall m. (t -> m) -> m
 -- | Converter: converts a value of type s to a value of type t.
 type Conv s t = s -> Spec t
 
--- | Converter with argument: converts a value of type s to a value of type t, consuming an argument of type a.
-type Conv' a s t = s -> a -> Spec t
-
 -- | Mutator: mutates a value of type t.
 type Mut t = Conv t t
 
 -- | Terminator: finishes building a value of type t and returns a result of type r.
 type Term t r = t -> r
+
+-- | Converter with argument: converts a value of type s to a value of type t, consuming an argument of type a.
+type AConv a s t = s -> a -> Spec t
+
+-- | Mutator with argument: mutates a value of type t, consuming an argument of type a.
+type AMut a t = AConv a t t
 
 -- | Flexible mutator: mutator that allows slight changes in the type (otherwise use 'Conv').
 type Mut' t t' = Conv t t'
@@ -90,7 +95,7 @@ type RootM r r' = Mut' (Root r) (Root r')
 type ChorM c c' = Mut' (Cho c) (Cho c')
 
 -- | Converter from roots to chords.
-type ChorC' c r t i = Conv' (Inv i) (Root r) (Cho (c r t i))
+type ChorC' c r t i = AConv (Inv i) (Root r) (Cho (c r t i))
 
 -- | Converter from roots to chords, using the default inversion.
 type ChorC c r t = Conv (Root r) (Cho (c r t Inv0))
@@ -163,7 +168,7 @@ result = ("result: " ++)
 compute :: Double -> Spec Double
 compute = spec
 
-plus :: ArgMut Double Double
+plus :: AMut Double Double
 plus i p = spec (i + p)
 
 please :: Term Double Double
@@ -175,12 +180,10 @@ percent = nop
 of' :: Double -> Mut Double
 of' d p = spec (d * (p / 100))
 
-type ArgMut a t = t -> Conv a t
-
 stack :: Spec [Int]
 stack = spec []
 
-push :: ArgMut Int [Int]
+push :: AMut Int [Int]
 push s v = spec (v : s)
 
 pop :: Mut [Int]
