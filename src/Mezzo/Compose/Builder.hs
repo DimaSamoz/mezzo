@@ -23,12 +23,15 @@ module Mezzo.Compose.Builder
     , Mut
     , Mut'
     , Term
-    -- * General builder types
+    , spec
+    , constConv
+    -- * Music-specific builder types
     , RootS
     , ChorS
     , RootM
     , ChorM
     , ChorC
+    , ChorC'
     , NoteT
     , ChorT
     )
@@ -46,6 +49,9 @@ type Spec t = forall m. (t -> m) -> m
 -- | Converter: converts a value of type s to a value of type t.
 type Conv s t = s -> Spec t
 
+-- | Converter with argument: converts a value of type s to a value of type t, consuming an argument of type a.
+type Conv' a s t = s -> a -> Spec t
+
 -- | Mutator: mutates a value of type t.
 type Mut t = Conv t t
 
@@ -58,6 +64,10 @@ type Mut' t t' = Conv t t'
 -- | Returns a new specifier for the given value.
 spec :: t -> Spec t
 spec i c = c i
+
+-- | A converter that ignores its argument and returns the given constant value.
+constConv :: t -> Conv s t
+constConv = const . spec
 
 -- | A mutator that does nothing.
 nop :: Mut t
@@ -80,7 +90,10 @@ type RootM r r' = Mut' (Root r) (Root r')
 type ChorM c c' = Mut' (Cho c) (Cho c')
 
 -- | Converter from roots to chords.
-type ChorC c r t i = Conv (Root r) (Cho (c r t i))
+type ChorC' c r t i = Conv' (Inv i) (Root r) (Cho (c r t i))
+
+-- | Converter from roots to chords, using the default inversion.
+type ChorC c r t = Conv (Root r) (Cho (c r t Inv0))
 
 -- | Note terminator.
 type NoteT r d = Term (Root r) (Music (FromRoot r d))
@@ -99,10 +112,10 @@ c :: RootS (PitchRoot (Pitch C Natural Oct3))
 c = spec Root
 
 sharp :: RootM r (Sharpen r)
-sharp r = spec Root
+sharp = constConv Root
 
-maj :: ChorC Triad r MajTriad Inv0
-maj r = spec Cho
+maj :: ChorC Triad r MajTriad
+maj = constConv Cho
 
 qn :: NoteT r 8
 qn p = Note p Dur
