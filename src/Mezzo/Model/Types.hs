@@ -43,6 +43,8 @@ module Mezzo.Model.Types
     , KeyS (..)
     , Root (..)
     , RootToPitch
+    , Sharpen
+    , Flatten
     , FromRoot
     , FromSilence
     -- * Specialised musical vector types
@@ -178,10 +180,19 @@ type family DegreeOffset (m :: Mode) (d :: ScaleDegree) where
     DegreeOffset MinorMode VI  = 8
     DegreeOffset MinorMode VII = 10
 
+-- | Sharpen a root.
+type family Sharpen (r :: RootType) :: RootType where
+    Sharpen r = PitchRoot (HalfStepUp (RootToPitch r))
+
+-- | Flatten a root.
+type family Flatten (r :: RootType) :: RootType where
+    Flatten r = PitchRoot (HalfStepDown (RootToPitch r))
+
 -- | Create a new partiture with one voice of the given pitch.
 type family FromRoot (r :: RootType) (d :: Nat) :: Partiture 1 d where
     FromRoot r d = ((RootToPitch r) +*+ d) :-- None
 
+-- | Create a new partiture with one voice of silence.
 type family FromSilence (d :: Nat) :: Partiture 1 d where
     FromSilence d = (Silence +*+ d) :-- None
 

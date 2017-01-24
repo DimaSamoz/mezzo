@@ -19,6 +19,7 @@ module Mezzo.Compose.Basic where
 
 import Mezzo.Model
 import Mezzo.Compose.Types
+import Mezzo.Compose.Builder
 import Mezzo.Compose.Templates
 
 -- * Atomic literals
@@ -66,11 +67,11 @@ silence = Pit
 -- ** Concrete literals
 mkPitchLits
 
--- ** Combinatorial literals (admitting continuations)
-mkPitchCombs
+-- ** Pitch specifiers (admitting continuations)
+mkPitchSpecs
 
-r :: (Pit Silence -> m) -> m
-r = \dur -> dur silence
+r :: RootS (PitchRoot Silence)
+r = \dur -> dur (rootP silence)
 
 -- * Notes
 
@@ -94,22 +95,42 @@ noteS k sd d = Note (rootS k sd) d
 rest :: Dur d -> Music (FromSilence d)
 rest d = Rest d
 
--- ** Duration continuations
+-- ** Note terminators (which express the note duration)
 
-wh :: DurC p 32
-wh = \p -> Note p _wh
+wn :: NoteT r 32
+wn = \p -> Note p _wh
 
-ha :: DurC p 16
-ha = \p -> Note p _ha
+hn :: NoteT r 16
+hn = \p -> Note p _ha
 
-qu :: DurC p 8
-qu = \p -> Note p _qu
+qn :: NoteT r 8
+qn = \p -> Note p _qu
 
-ei :: DurC p 4
-ei = \p -> Note p _ei
+en :: NoteT r 4
+en = \p -> Note p _ei
 
-si :: DurC p 2
-si = \p -> Note p _si
+sn :: NoteT r 2
+sn = \p -> Note p _si
 
-th :: DurC p 1
-th = \p -> Note p _th
+tn :: NoteT r 1
+tn = \p -> Note p _th
+
+-- ** Chord terminators (which express the note duration)
+
+wc :: ChorT r 32
+wc = \p -> Chord p _wh
+
+hc :: ChorT r 16
+hc = \p -> Chord p _ha
+
+qc :: ChorT r 8
+qc = \p -> Chord p _qu
+
+ec :: ChorT r 4
+ec = \p -> Chord p _ei
+
+sc :: ChorT r 2
+sc = \p -> Chord p _si
+
+tc :: ChorT r 1
+tc = \p -> Chord p _th

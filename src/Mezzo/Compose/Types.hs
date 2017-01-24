@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE TypeInType, RankNTypes #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -24,13 +24,19 @@ module Mezzo.Compose.Types
     , Eighth
     , Sixteenth
     , ThirtySecond
-    , DurC
-    , ChordC
-    , ChordC'
+    -- * Combinatorial types
+    -- , RootS
+    -- , DurC
+    -- , ChordM
+    -- , ChordM'
     )
     where
 
 import Mezzo.Model
+
+-------------------------------------------------------------------------------
+-- Duration type synonyms
+-------------------------------------------------------------------------------
 
 -- | Whole note duration.
 type Whole = Dur 32
@@ -49,12 +55,3 @@ type Sixteenth = Dur 2
 
 -- | Thirty-second note duration.
 type ThirtySecond = Dur 1
-
--- | The type of duration continuations.
-type DurC r d = Root r -> Music (FromRoot r d)
-
--- | The type of combinatorial chord type literals with default inversion.
-type ChordC c r t d = Root r -> DurC r d -> Music (FromChord (c r t Inv0) d)
-
--- | The type of combinatorial chord type literals with custom inversion.
-type ChordC' c r t i d = Root r -> Inv i -> DurC r d -> Music (FromChord (c r t i) d)

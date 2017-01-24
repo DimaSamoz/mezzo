@@ -21,6 +21,7 @@ module Mezzo.Model.Prim
     (
     -- * Vectors and matrices
       Vector (..)
+    , Times (..)
     , Elem (..)
     , type (**)
     , OptVector (..)
