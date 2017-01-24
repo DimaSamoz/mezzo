@@ -20,19 +20,21 @@ module Mezzo.Compose.Templates
     , accidentalLits
     , octaveLits
     , mkPitchLits
-    , mkPitchCombs
+    , mkPitchSpecs
     , scaleDegreeLits
     , modeLits
     , triTyLits
     , sevTyLits
     , invLits
-    , mkTriTyCombs
-    , mkSevTyCombs
-    , mkDoubledTyCombs
+    , mkTriConvs
+    , mkSevConvs
+    , mkDoubledConvs
     ) where
 
 import Mezzo.Model
 import Mezzo.Compose.Types
+import Mezzo.Compose.Builder
+
 import Language.Haskell.TH
 import Language.Haskell.TH.Syntax (sequenceQ)
 import Data.Char
@@ -110,10 +112,10 @@ mkPitchLits = do
             return $ tySig : dec
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)    -- Every combination of PCs, Accs and Octs
 
--- | Generate pitch combinators for earch pitch class, accidental and octave.
+-- | Generate pitch root specifiers for earch pitch class, accidental and octave.
 -- These allow for combinatorial input with CPS-style durations and modifiers.
-mkPitchCombs :: DecsQ
-mkPitchCombs = do
+mkPitchSpecs :: DecsQ
+mkPitchSpecs = do
     pcNames <- getDataCons ''PitchClass
     accNames <- getDataCons ''Accidental
     octNames <- getDataCons ''OctaveNum
@@ -124,14 +126,14 @@ mkPitchCombs = do
                 valName = mkName $ pcStr ++ accStr ++ octStr
                 pitchLitName = mkName $ pitchLitFormatter pc acc oct
             tySig <- sigD valName $
-                [t| forall m. (Root (PitchRoot (Pitch $(conT pc) $(conT acc) $(conT oct))) -> m) -> m |]
-            -- dec <- [d| $(varP valName) = \ dur -> dur (rootP $(varE pitchLitName)) |]
-            dec <- [d| $(varP valName) = \ dur -> dur (Root :: (Root (PitchRoot (Pitch $(conT pc) $(conT acc) $(conT oct))))) |]
+                [t| RootS (PitchRoot (Pitch $(conT pc) $(conT acc) $(conT oct) )) |]
+            dec <- [d| $(varP valName) = spec Root |]
             return $ tySig : dec
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)
 
-mkTriTyCombs :: DecsQ
-mkTriTyCombs = do
+-- | Generate converters from roots to triads, for each triad type.
+mkTriConvs :: DecsQ
+mkTriConvs = do
     triTyNames <- getDataCons ''TriadType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
@@ -139,18 +141,17 @@ mkTriTyCombs = do
                 valName2 = mkName $ choStr
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
-                -- [t| forall p i d. Pit p -> Inv i -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) i) d) |]
-                [t| forall r i d. ChordC' Triad r $(conT choTy) i d |]
-            dec1 <- [d| $(varP valName1) = \ r i d -> Chord (triad r $(varE litName) i) (getDur r d) |]
+                [t| forall r i. ChorC' Triad r $(conT choTy) i |]
+            dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
             tySig2 <- sigD valName2 $
-                -- [t| forall p d. Pit p -> DurC p d -> Music (FromChord (Triad (PitchRoot p) $(conT choTy) Inv0) d) |]
-                [t| forall p d. ChordC Triad p $(conT choTy) d |]
-            dec2 <- [d| $(varP valName2) = \ r d -> Chord (triad r $(varE litName) i0) (getDur r d) |]
+                [t| forall r. ChorC Triad r $(conT choTy) |]
+            dec2 <- [d| $(varP valName2) = constConv Cho |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun triTyNames
 
-mkSevTyCombs :: DecsQ
-mkSevTyCombs = do
+-- | Generate converters from roots to seventh chords, for each seventh type.
+mkSevConvs :: DecsQ
+mkSevConvs = do
     sevTyNames <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''SeventhType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
@@ -158,16 +159,17 @@ mkSevTyCombs = do
                 valName2 = mkName $ choStr
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
-                [t| forall p i d. ChordC' SeventhChord p $(conT choTy) i d |]
-            dec1 <- [d| $(varP valName1) = \ r i d -> Chord (seventh r $(varE litName) i) (getDur r d) |]
+                [t| forall r i. ChorC' SeventhChord r $(conT choTy) i |]
+            dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
             tySig2 <- sigD valName2 $
-                [t| forall p d. ChordC SeventhChord p $(conT choTy) d |]
-            dec2 <- [d| $(varP valName2) = \ r d -> Chord (seventh r $(varE litName) i0) (getDur r d) |]
+                [t| forall r. ChorC SeventhChord r $(conT choTy) |]
+            dec2 <- [d| $(varP valName2) = constConv Cho |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun sevTyNames
 
-mkDoubledTyCombs :: DecsQ
-mkDoubledTyCombs = do
+-- | Generate converters from roots to doubled seventh chords, for each triad type.
+mkDoubledConvs :: DecsQ
+mkDoubledConvs = do
     triTyNames <- getDataCons ''TriadType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
@@ -175,11 +177,11 @@ mkDoubledTyCombs = do
                 valName2 = mkName $ choStr ++ "D"
                 litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
-                [t| forall p i d. ChordC' SeventhChord p (Doubled $(conT choTy)) i d |]
-            dec1 <- [d| $(varP valName1) = \ r i d -> Chord (seventh r (_dbl $(varE litName)) i) (getDur r d) |]
+                [t| forall r i. ChorC' SeventhChord r (Doubled $(conT choTy)) i |]
+            dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
             tySig2 <- sigD valName2 $
-                [t| forall p d. ChordC SeventhChord p (Doubled $(conT choTy)) d |]
-            dec2 <- [d| $(varP valName2) = \ r d -> Chord (seventh r (_dbl $(varE litName)) i0) (getDur r d) |]
+                [t| forall r. ChorC SeventhChord r (Doubled $(conT choTy)) |]
+            dec2 <- [d| $(varP valName2) = constConv Cho |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun triTyNames
 
