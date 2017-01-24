@@ -124,7 +124,6 @@ mkPitchSpecs = do
                 accStr = shorterAccFormatter acc
                 octStr = shortOctFormatter oct
                 valName = mkName $ pcStr ++ accStr ++ octStr
-                pitchLitName = mkName $ pitchLitFormatter pc acc oct
             tySig <- sigD valName $
                 [t| RootS (PitchRoot (Pitch $(conT pc) $(conT acc) $(conT oct) )) |]
             dec <- [d| $(varP valName) = spec Root |]
@@ -139,7 +138,6 @@ mkTriConvs = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "'"
                 valName2 = mkName $ choStr
-                litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
                 [t| forall r i. ChorC' Triad r $(conT choTy) i |]
             dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
@@ -157,7 +155,6 @@ mkSevConvs = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "'"
                 valName2 = mkName $ choStr
-                litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
                 [t| forall r i. ChorC' SeventhChord r $(conT choTy) i |]
             dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
@@ -175,7 +172,6 @@ mkDoubledConvs = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "D'"
                 valName2 = mkName $ choStr ++ "D"
-                litName = mkName $ choTyFormatter choTy
             tySig1 <- sigD valName1 $
                 [t| forall r i. ChorC' SeventhChord r (Doubled $(conT choTy)) i |]
             dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
