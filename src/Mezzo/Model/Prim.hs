@@ -30,6 +30,8 @@ module Mezzo.Model.Prim
     , Last
     , Tail'
     , Init'
+    , Length
+    , Length'
     , Matrix
     , type (++)
     , type (++.)
@@ -39,12 +41,14 @@ module Mezzo.Model.Prim
     , type (+-+)
     , Align
     , VectorToColMatrix
-    -- * Booleans
+    -- * Logic and arithmetic
     , If
     , Not
     , type (.&&.)
     , type (.||.)
     , type (.~.)
+    , MaxN
+    , MinN
     -- * Constraints
     , Valid
     , Invalid
@@ -124,6 +128,14 @@ type family Init' (v :: Vector t n) :: Vector t (n - 1) where
     Init' (p :-- None) = None
     Init' (p :-- ps) = p :-- Init' ps
 
+-- | Get the length of an optimised vector.
+type family Length (v :: OptVector t n) :: Nat where
+    Length (v :: OptVector t n) = n
+
+-- | Get the length of a vector.
+type family Length' (v :: Vector t n) :: Nat where
+    Length' (v :: Vector t n) = n
+
 -- | A dimension-indexed matrix.
 type Matrix t p q = Vector (OptVector t q) p
 
@@ -138,7 +150,7 @@ type family (x :: Vector t n) ++. (y :: Vector t m) :: Vector t (n + m) where
     (x :-- xs) ++. ys = x :-- (xs ++. ys)
 
 -- | Add an element to the end of a simple vector.
-type family (v :: Vector t (n - 1)) :-| (e :: t) :: Vector t n where
+type family (v :: Vector t n) :-| (e :: t) :: Vector t (n + 1) where
     v :-| e = v ++. (e :-- None)
 
 -- | Repeat the value the specified number of times to create a new 'OptVector'.
@@ -195,7 +207,7 @@ type family VectorToColMatrix (v :: Vector t n) (l :: Nat) :: Matrix t n l where
     VectorToColMatrix (v :-- vs) l = ((v ** l) :- End) :-- (VectorToColMatrix vs l)
 
 -------------------------------------------------------------------------------
--- Type-level booleans
+-- Type-level logic and arithmetic
 -------------------------------------------------------------------------------
 
 -- | Conditional expression at the type level.
@@ -220,6 +232,20 @@ type family (b1 :: Bool) .||. (b2 :: Bool) :: Bool where
 type family (a :: k) .~. (b :: k) :: Bool where
     a .~. a = True
     a .~. b = False
+
+-- | Returns the maximum of two natural numbers.
+type family MaxN (n1 :: Nat) (n2 :: Nat) :: Nat where
+    MaxN 0 n2 = n2
+    MaxN n1 0 = n1
+    MaxN n n = n
+    MaxN n1 n2 = If (n1 <=? n2) (n2) (n1)
+
+-- | Returns the minimum of two natural numbers.
+type family MinN (n1 :: Nat) (n2 :: Nat) :: Nat where
+    MinN 0 n2 = 0
+    MinN n1 0 = 0
+    MinN n n = n
+    MinN n1 n2 = If (n1 <=? n2) (n1) (n2)
 
 -------------------------------------------------------------------------------
 -- Constraints
