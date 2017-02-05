@@ -136,9 +136,6 @@ type family Length (v :: OptVector t n) :: Nat where
 type family Length' (v :: Vector t n) :: Nat where
     Length' (v :: Vector t n) = n
 
--- | A dimension-indexed matrix.
-type Matrix t p q = Vector (OptVector t q) p
-
 -- | Append two optimised vectors.
 type family (x :: OptVector t n) ++ (y :: OptVector t m) :: OptVector t (n + m) where
     End       ++ ys = ys
@@ -157,6 +154,9 @@ type family (v :: Vector t n) :-| (e :: t) :: Vector t (n + 1) where
 type family (a :: t) +*+ (n :: Nat) :: OptVector t n where
     x +*+ 0 = End
     x +*+ n = x ** n :- End
+
+-- | A dimension-indexed matrix.
+type Matrix t p q = Vector (OptVector t q) p
 
 -- | Horizontal concatenation of type-level matrices.
 -- Places the first matrix to the left of the second.
