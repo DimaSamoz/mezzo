@@ -14,60 +14,64 @@ import Mezzo.Model.Prim
 primSpec :: Spec
 primSpec =
     describe "Mezzo.Model.Prim" $ do
-        it "should replicate elements" $
-            timesReplicate `shouldBe` True
-        it "should get the head of an optimised vector" $
-            optVectorHead `shouldBe` True
-        it "should get the head of a vector" $
-            vectorHead `shouldBe` True
-        it "should get the last element of an optimised vector" $
-            optVectorLast `shouldBe` True
-        it "should get the tail of a vector" $
-            vectorTail `shouldBe` True
-        it "should get the initial elements of a vector" $
-            vectorInit `shouldBe` True
-        it "should get the length of an optimised vector" $
-            optVectorLength `shouldBe` True
-        it "should get the length of a vector" $
-            vectorLength `shouldBe` True
+        describe "Vector operations" $ do
+            it "should replicate elements" $
+                timesReplicate `shouldBe` True
+            it "should get the head of an optimised vector" $
+                optVectorHead `shouldBe` True
+            it "should get the head of a vector" $
+                vectorHead `shouldBe` True
+            it "should get the last element of an optimised vector" $
+                optVectorLast `shouldBe` True
+            it "should get the tail of a vector" $
+                vectorTail `shouldBe` True
+            it "should get the initial elements of a vector" $
+                vectorInit `shouldBe` True
+            it "should get the length of an optimised vector" $
+                optVectorLength `shouldBe` True
+            it "should get the length of a vector" $
+                vectorLength `shouldBe` True
+            it "should append optimised vectors" $
+                optVectorAppend `shouldBe` True
+            it "should append vectors" $
+                vectorAppend `shouldBe` True
+            it "should add an element to the end of a vector" $
+                snoc `shouldBe` True
+            it "should repeat an element to an optimised vector" $
+                repeatVec `shouldBe` True
 
-        it "should append optimised vectors" $
-            optVectorAppend `shouldBe` True
-        it "should append vectors" $
-            vectorAppend `shouldBe` True
-        it "should add an element to the end of a vector" $
-            snoc `shouldBe` True
-        it "should repeat an element to an optimised vector" $
-            repeatVec `shouldBe` True
+        describe "Matrix operations" $ do
+            it "should vertically align matrices" $
+                align `shouldBe` True
+            it "should horizontally concatenate matrices" $
+                matHConcat `shouldBe` True
+            it "should vertically concatenate matrices" $
+                matVConcat `shouldBe` True
+            it "should convert vectors to column matrices" $
+                vecToColMatrix `shouldBe` True
 
-        it "should vertically align matrices" $
-            align `shouldBe` True
-        it "should horizontally concatenate matrices" $
-            matHConcat `shouldBe` True
-        it "should vertically concatenate matrices" $
-            matVConcat `shouldBe` True
-        it "should convert vectors to column matrices" $
-            vecToColMatrix `shouldBe` True
-
-        it "should calculate maximum and minimum of two numbers" $ do
-            maxNat `shouldBe` True
-            minNat `shouldBe` True
-
-        it "should apply a constraint to an optimised vector" $ do
-            allSatisfy `shouldBe` True
-            -- shouldNotTypecheck allSatisfyInv
-        it "should apply a binary constraint to two optimised vectors" $ do
-            allPairsSatisfy `shouldBe` True
-            shouldNotTypecheck allPairsSatisfyInv
-        it "should apply a binary constraint to two vectors" $ do
-            allPairsSatisfy' `shouldBe` True
-            shouldNotTypecheck allPairsSatisfyInv'
-        it "should apply all constraints to a value" $ do
-            satisfiesAll `shouldBe` True
-            -- shouldNotTypecheck satisfiesAllInv
-        it "should apply all constraints to all values" $ do
-            allSatisfyAll `shouldBe` True
-            -- shouldNotTypecheck allSatisfyAllInv
+        describe "Arithmetic operations" $ do
+            it "should calculate maximum of two numbers" $ do
+                maxNat `shouldBe` True
+            it "should calculate minimum of two numbers" $ do
+                minNat `shouldBe` True
+                
+        describe "Constraint operations" $ do
+            it "should apply a constraint to an optimised vector" $ do
+                allSatisfy `shouldBe` True
+                -- shouldNotTypecheck allSatisfyInv
+            it "should apply a binary constraint to two optimised vectors" $ do
+                allPairsSatisfy `shouldBe` True
+                shouldNotTypecheck allPairsSatisfyInv
+            it "should apply a binary constraint to two vectors" $ do
+                allPairsSatisfy' `shouldBe` True
+                shouldNotTypecheck allPairsSatisfyInv'
+            it "should apply all constraints to a value" $ do
+                satisfiesAll `shouldBe` True
+                -- shouldNotTypecheck satisfiesAllInv
+            it "should apply all constraints to all values" $ do
+                allSatisfyAll `shouldBe` True
+                -- shouldNotTypecheck allSatisfyAllInv
 
 
 timesReplicate :: (True ** 23) ~ (True :* (T :: Times 23)) => Bool
