@@ -62,9 +62,9 @@ module Mezzo.Model.Prim
 import Data.Kind
 import GHC.TypeLits
 
-infixr 6 :*
-infixr 6 **
-infixr 5 :-
+infixr 7 :*
+infixr 7 **
+infixr 6 :-
 infixr 5 :--
 infixl 4 ++
 infixl 4 +*+
