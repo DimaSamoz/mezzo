@@ -263,7 +263,8 @@ type family MakeInterval (p1 :: PitchType) (p2 :: PitchType) :: IntervalType whe
 type family MakeIntervalOrd (p1 :: PitchType) (p2 :: PitchType) :: IntervalType where
     -- Handling base cases.
     MakeIntervalOrd p p = Interval Perf Unison
-    MakeIntervalOrd (Pitch C Natural o) (Pitch C Sharp o) = Interval Min Second
+    MakeIntervalOrd (Pitch C Natural o) (Pitch C Sharp o) = Interval Aug Unison
+    MakeIntervalOrd (Pitch C Natural o) (Pitch D Flat o) = Interval Min Second
     MakeIntervalOrd (Pitch C acc o)     (Pitch D acc o)   = Interval Maj Second
     MakeIntervalOrd (Pitch C acc o)     (Pitch E acc o)   = Interval Maj Third
     MakeIntervalOrd (Pitch C acc o)     (Pitch F acc o)   = Interval Perf Fourth
@@ -292,7 +293,7 @@ type family MakeIntervalOrd (p1 :: PitchType) (p2 :: PitchType) :: IntervalType 
             If  (o1 .~. o2 .||. OctSucc o1 .~. o2)
                 (MakeIntervalOrd (HalfStepDown (Pitch pc1 acc1 o1)) (HalfStepDown (Pitch pc2 acc2 o2)))
                 Compound
-    -- Handling erroneous construction (shoudln't happen).
+    -- Handling erroneous construction (shouldn't happen).
     MakeIntervalOrd _ _ = TypeError (Text "Invalid interval.")
 
 -- | Shrink an interval.
