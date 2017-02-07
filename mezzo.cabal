@@ -50,6 +50,7 @@ test-suite mezzo-test
   main-is:             Main.hs
   other-modules:       Main
                      , PrimSpec
+                     , TypeSpec
   build-depends:       base
                      , mezzo
                      , hspec
