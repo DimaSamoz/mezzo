@@ -43,6 +43,8 @@ import Mezzo.Model.Types as X
     , Flatten
     , FromRoot
     , FromSilence
+    , Voice
+    , Partiture
     )
 import Mezzo.Model.Harmony.Chords as X
 import Mezzo.Model.Harmony.Functional as X
