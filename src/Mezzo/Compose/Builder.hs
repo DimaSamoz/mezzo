@@ -41,6 +41,8 @@ module Mezzo.Compose.Builder
 
 import Mezzo.Model
 
+import GHC.TypeLits
+
 -------------------------------------------------------------------------------
 -- General types
 -------------------------------------------------------------------------------
@@ -125,7 +127,7 @@ maj = constConv Cho
 qn :: NoteT r 8
 qn p = Note p Dur
 
-qc :: ChorT c 8
+qc :: KnownNat n => ChorT (c :: ChordType n) 8
 qc c = Chord c Dur
 
 
