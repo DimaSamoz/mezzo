@@ -1,4 +1,7 @@
-{-# LANGUAGE TypeInType, RankNTypes #-}
+{-# LANGUAGE TypeInType, TypeOperators, GADTs, TypeFamilies, MultiParamTypeClasses,
+    FlexibleInstances, UndecidableInstances, FunctionalDependencies, FlexibleContexts, RankNTypes #-}
+
+{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -24,15 +27,20 @@ module Mezzo.Compose.Types
     , Eighth
     , Sixteenth
     , ThirtySecond
-    -- * Combinatorial types
-    -- , RootS
-    -- , DurC
-    -- , ChordM
-    -- , ChordM'
+    -- * Melody
+    , Melody (..)
     )
     where
 
 import Mezzo.Model
+import Mezzo.Model.Prim
+
+import Mezzo.Compose.Builder
+
+import Data.Kind
+import GHC.TypeLits
+
+infixr 5 :+
 
 -------------------------------------------------------------------------------
 -- Duration type synonyms
@@ -55,3 +63,13 @@ type Sixteenth = Dur 2
 
 -- | Thirty-second note duration.
 type ThirtySecond = Dur 1
+
+-------------------------------------------------------------------------------
+-- Musical lists
+-------------------------------------------------------------------------------
+
+-- | List of pitches with a common duration.
+data Melody :: forall l. Partiture 1 l -> Nat -> Type where
+    WithDur :: NoteT r d -> Melody (End :-- None) d
+    (:+) :: ValidMelComp (FromRoot r d) ms =>
+                RootS r -> Melody ms d -> Melody (FromRoot r d +|+ ms) d
