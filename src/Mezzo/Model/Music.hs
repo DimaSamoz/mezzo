@@ -25,6 +25,10 @@ module Mezzo.Model.Music
     , Score (..)
     -- * Harmonic constructs
     , Progression
+    -- * Constraints
+    , ValidMelComp
+    , ValidHarmComp
+    , ValidChord
     ) where
 
 import Data.Kind
@@ -64,7 +68,7 @@ data Music :: forall n l. Partiture n l -> Type where
     -- | Parallel or harmonic composition of music.
     (:-:) :: ValidHarmComp m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
     -- | A chord specified by a chord type and a duration.
-    Chord :: Cho c -> Dur d -> Music (FromChord c d)
+    Chord :: ValidChord c => Cho c -> Dur d -> Music (FromChord c d)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
@@ -258,3 +262,6 @@ instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- End) (q :* d2 
 instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
                               , ValidHarmMotionInVectors ps qs)
                                 => ValidHarmMotionInVectors (p :* d1 :- ps) (q :* d2 :- qs)
+
+-- | Ensures that the chord is valid.
+type ValidChord (c :: ChordType n) = (KnownNat n)
