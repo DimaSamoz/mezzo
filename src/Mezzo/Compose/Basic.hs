@@ -17,6 +17,8 @@
 
 module Mezzo.Compose.Basic where
 
+import GHC.TypeLits
+
 import Mezzo.Model
 import Mezzo.Compose.Types
 import Mezzo.Compose.Builder
@@ -46,10 +48,10 @@ _qu = Dur @8
 _ei :: Eighth
 _ei = Dur @4
 
-_si :: Dur 2
+_si :: Sixteenth
 _si = Dur @2
 
-_th :: Dur 1
+_th :: ThirtySecond
 _th = Dur @1
 
 -- * Pitches
@@ -123,22 +125,22 @@ sn = \p -> Note p _si
 tn :: NoteT r 1
 tn = \p -> Note p _th
 
--- ** Chord terminators (which express the note duration)
+-- ** Chord terminators (which express the chord duration)
 
-wc :: ChorT r 32
+wc :: KnownNat n => ChorT (r :: ChordType n) 32
 wc = \p -> Chord p _wh
 
-hc :: ChorT r 16
+hc :: KnownNat n => ChorT (r :: ChordType n) 16
 hc = \p -> Chord p _ha
 
-qc :: ChorT r 8
+qc :: KnownNat n => ChorT (r :: ChordType n) 8
 qc = \p -> Chord p _qu
 
-ec :: ChorT r 4
+ec :: KnownNat n => ChorT (r :: ChordType n) 4
 ec = \p -> Chord p _ei
 
-sc :: ChorT r 2
+sc :: KnownNat n => ChorT (r :: ChordType n) 2
 sc = \p -> Chord p _si
 
-tc :: ChorT r 1
+tc :: KnownNat n => ChorT (r :: ChordType n) 1
 tc = \p -> Chord p _th
