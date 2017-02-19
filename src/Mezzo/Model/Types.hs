@@ -44,6 +44,7 @@ module Mezzo.Model.Types
     , KeyS (..)
     , Root (..)
     , RootToPitch
+    , PitchToNat
     , Sharpen
     , Flatten
     , FromRoot
@@ -85,7 +86,7 @@ data PitchClass = C | D | E | F | G | A | B
 -- | The accidental applied to a note.
 data Accidental = Natural | Flat | Sharp
 
--- | The octave where the note resides (middle C is Oct3).
+-- | The octave where the note resides (middle C is Oct4).
 data OctaveNum =
     Oct_1 | Oct0 | Oct1 | Oct2 | Oct3 | Oct4 | Oct5 | Oct6 | Oct7 | Oct8
 
@@ -343,11 +344,12 @@ type family PitchToNat (p :: PitchType) :: Nat where
     PitchToNat (Pitch C Natural Oct_1) = 0
     PitchToNat (Pitch C Sharp Oct_1)   = 1
     PitchToNat (Pitch D Flat Oct_1)    = 1
-    PitchToNat (Pitch C Natural Oct1)  = 36
-    PitchToNat (Pitch C Natural Oct2)  = 48
-    PitchToNat (Pitch C Natural Oct3)  = 60
-    PitchToNat (Pitch C Natural Oct4)  = 72
-    PitchToNat (Pitch C Natural Oct5)  = 84
+    PitchToNat (Pitch C Natural Oct1)  = 24
+    PitchToNat (Pitch C Natural Oct2)  = 36
+    PitchToNat (Pitch C Natural Oct3)  = 48
+    PitchToNat (Pitch C Natural Oct4)  = 60
+    PitchToNat (Pitch C Natural Oct5)  = 72
+    PitchToNat (Pitch C Natural Oct6)  = 84
     PitchToNat p                       = 1 + PitchToNat (HalfStepDown p)
 
 -- | Convert a natural number to a suitable pitch.
