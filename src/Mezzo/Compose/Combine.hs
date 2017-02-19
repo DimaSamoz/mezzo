@@ -5,7 +5,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Mezzo.Compose.Combine
--- Description :  Basic composition units
+-- Description :  Music combinators
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
 --
