@@ -217,16 +217,16 @@ shorterAccFormatter (shortAccFormatter -> name) = name
 -- | Symbolic suffix format for octaves.
 shortOctFormatter :: Formatter
 shortOctFormatter name = case nameBase name of
-    "Oct_1" -> "_4"
-    "Oct0"  -> "_3"
-    "Oct1"  -> "__"
-    "Oct2"  -> "_"
-    "Oct3"  -> ""
-    "Oct4"  -> "'"
-    "Oct5"  -> "''"
-    "Oct6"  -> "'3"
-    "Oct7"  -> "'4"
-    "Oct8"  -> "'5"
+    "Oct_1" -> "_5"
+    "Oct0"  -> "_4"
+    "Oct1"  -> "_3"
+    "Oct2"  -> "__"
+    "Oct3"  -> "_"
+    "Oct4"  -> ""
+    "Oct5"  -> "'"
+    "Oct6"  -> "''"
+    "Oct7"  -> "'3"
+    "Oct8"  -> "'4"
 
 -- | Formatter for pitch literals.
 pitchLitFormatter :: Name -> Name -> Name -> String
