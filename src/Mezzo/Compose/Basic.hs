@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes #-}
+{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes, FlexibleContexts #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -59,7 +59,7 @@ _th = Dur @1
 -- ** Constructor
 
 -- | Create a new pitch with the given class, accidental and octave.
-pitch :: PC pc -> Acc acc -> Oct oct -> Pit (Pitch pc acc oct)
+pitch :: Primitive (Pitch pc acc oct) => PC pc -> Acc acc -> Oct oct -> Pit (Pitch pc acc oct)
 pitch pc acc oct = Pit
 
 -- | Value representing silence, the "pitch" of rests.
@@ -87,22 +87,22 @@ flat = constConv Root
 
 -- ** Constructors
 -- | Create a new root from a pitch.
-rootP :: Pit p -> Root (PitchRoot p)
+rootP :: Primitive p => Pit p -> Root (PitchRoot p)
 rootP p = Root
 
 -- | Create a new root from a key and a scale degree.
-rootS :: KeyS k -> ScaDeg d -> Root (DegreeRoot k d)
+rootS :: Primitive (DegreeRoot k d) => KeyS k -> ScaDeg d -> Root (DegreeRoot k d)
 rootS k d = Root
 
 -- | Create a new note from a root and duration.
-noteP :: Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
+noteP :: (Primitive d, Primitive p) => Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
 noteP p d = Note (rootP p) d
 
-noteS :: KeyS k -> ScaDeg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
+noteS :: (Primitive d, Primitive (DegreeRoot k sd)) => KeyS k -> ScaDeg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
 noteS k sd d = Note (rootS k sd) d
 
 -- | Create a rest from a duration.
-rest :: Dur d -> Music (FromSilence d)
+rest :: Primitive d => Dur d -> Music (FromSilence d)
 rest d = Rest d
 
 -- ** Note terminators (which express the note duration)
@@ -127,20 +127,20 @@ tn = \p -> Note p _th
 
 -- ** Chord terminators (which express the chord duration)
 
-wc :: KnownNat n => ChorT (r :: ChordType n) 32
+wc :: Primitive n => ChorT (r :: ChordType n) 32
 wc = \p -> Chord p _wh
 
-hc :: KnownNat n => ChorT (r :: ChordType n) 16
+hc :: Primitive n => ChorT (r :: ChordType n) 16
 hc = \p -> Chord p _ha
 
-qc :: KnownNat n => ChorT (r :: ChordType n) 8
+qc :: Primitive n => ChorT (r :: ChordType n) 8
 qc = \p -> Chord p _qu
 
-ec :: KnownNat n => ChorT (r :: ChordType n) 4
+ec :: Primitive n => ChorT (r :: ChordType n) 4
 ec = \p -> Chord p _ei
 
-sc :: KnownNat n => ChorT (r :: ChordType n) 2
+sc :: Primitive n => ChorT (r :: ChordType n) 2
 sc = \p -> Chord p _si
 
-tc :: KnownNat n => ChorT (r :: ChordType n) 1
+tc :: Primitive n => ChorT (r :: ChordType n) 1
 tc = \p -> Chord p _th

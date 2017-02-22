@@ -26,9 +26,9 @@ module Mezzo.Model.Music
     -- * Harmonic constructs
     , Progression
     -- * Constraints
-    , ValidMelComp
-    , ValidHarmComp
-    , ValidChord
+    , MelConstraints
+    , HarmConstraints
+    , ChordConstraints
     ) where
 
 import Data.Kind
@@ -39,6 +39,7 @@ import Mezzo.Model.Harmony.Motion
 import Mezzo.Model.Harmony.Chords
 import Mezzo.Model.Harmony.Functional
 import Mezzo.Model.Types
+import Mezzo.Model.Reify
 
 infixl 4 :|:
 infixl 4 :-:
@@ -60,15 +61,15 @@ infixl 4 :-:
 --
 data Music :: forall n l. Partiture n l -> Type where
     -- | A note specified by a pitch and a duration.
-    Note :: Root r -> Dur d -> Music (FromRoot r d)
+    Note :: NoteConstraints r d => Root r -> Dur d -> Music (FromRoot r d)
     -- | A rest specified by a duration.
-    Rest :: Dur d -> Music (FromSilence d)
+    Rest :: RestConstraints d => Dur d -> Music (FromSilence d)
     -- | Sequential or melodic composition of music.
-    (:|:) :: ValidMelComp m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
+    (:|:) :: MelConstraints m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.
-    (:-:) :: ValidHarmComp m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
+    (:-:) :: HarmConstraints m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
     -- | A chord specified by a chord type and a duration.
-    Chord :: ValidChord c => Cho c -> Dur d -> Music (FromChord c d)
+    Chord :: ChordConstraints c => Cho c -> Dur d -> Music (FromChord c d)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
@@ -86,11 +87,25 @@ type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceTo
 -- Specifications of the rules that valid musical terms have to follow.
 -------------------------------------------------------------------------------
 
----- Melodic constraints
+type NoteConstraints r d = (Primitive r, Primitive d)
+
+type RestConstraints d = (Primitive d)
 
 -- | Ensures that two pieces of music can be composed sequentially.
-type ValidMelComp m1 m2 = ( ValidMelConcat m1 m2)
-                        --   , ValidMelMatrixMotion m1 m2)
+type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
+        ( Primitive l1
+        , Primitive l2
+        , Primitive n
+        , ValidMelConcat m1 m2)
+
+-- | Ensures that two pieces of music can be composed in parallel.
+type HarmConstraints m1 m2 = (ValidHarmConcat (Align m1 m2))
+
+-- | Ensures that the chord is valid.
+type ChordConstraints (c :: ChordType n) = (Primitive n)
+
+
+---- Melodic constraints
 
 -- | Ensures that melodic intervals are valid.
 --
@@ -146,9 +161,6 @@ instance {-# OVERLAPPABLE #-} (ValidMelAppend v1 v2, ValidMelConcat vs1 vs2)
 
 
 ---- Harmonic constraints
-
--- | Ensures that two pieces of music can be composed in parallel.
-type ValidHarmComp m1 m2 = (ValidHarmConcat (Align m1 m2))
 
 -- | Ensures that harmonic intervals are valid.
 --
@@ -262,6 +274,3 @@ instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- End) (q :* d2 
 instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
                               , ValidHarmMotionInVectors ps qs)
                                 => ValidHarmMotionInVectors (p :* d1 :- ps) (q :* d2 :- qs)
-
--- | Ensures that the chord is valid.
-type ValidChord (c :: ChordType n) = (KnownNat n)

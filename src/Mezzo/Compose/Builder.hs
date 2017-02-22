@@ -85,50 +85,50 @@ nop = spec
 -------------------------------------------------------------------------------
 
 -- | Root specifier.
-type RootS r = Spec (Root r)
+type RootS r = Primitive r => Spec (Root r)
 
 -- | Chord specifier.
 type ChorS c = Spec (Cho c)
 
 -- | Root mutator.
-type RootM r r' = Mut' (Root r) (Root r')
+type RootM r r' = (Primitive r, Primitive r') => Mut' (Root r) (Root r')
 
 -- | Chord mutator.
 type ChorM c c' = Mut' (Cho c) (Cho c')
 
 -- | Converter from roots to chords.
-type ChorC' c r t i = AConv (Inv i) (Root r) (Cho (c r t i))
+type ChorC' c r t i = Primitive r => AConv (Inv i) (Root r) (Cho (c r t i))
 
 -- | Converter from roots to chords, using the default inversion.
-type ChorC c r t = Conv (Root r) (Cho (c r t Inv0))
+type ChorC c r t = Primitive r => Conv (Root r) (Cho (c r t Inv0))
 
 -- | Note terminator.
-type NoteT r d = Term (Root r) (Music (FromRoot r d))
+type NoteT r d = Primitive r => Term (Root r) (Music (FromRoot r d))
 
 -- | Chord terminator.
 type ChorT c d = Term (Cho c) (Music (FromChord c d))
 
-inKey :: KeyS key -> a -> a
-inKey key cont = let ?k = key in cont
-
-
-i :: (?k :: KeyS key) => RootS (DegreeRoot key I)
-i = spec Root
-
-c :: RootS (PitchRoot (Pitch C Natural Oct3))
-c = spec Root
-
-sharp :: RootM r (Sharpen r)
-sharp = constConv Root
-
-maj :: ChorC Triad r MajTriad
-maj = constConv Cho
-
-qn :: NoteT r 8
-qn p = Note p Dur
-
-qc :: KnownNat n => ChorT (c :: ChordType n) 8
-qc c = Chord c Dur
+-- inKey :: KeyS key -> a -> a
+-- inKey key cont = let ?k = key in cont
+--
+--
+-- i :: (?k :: KeyS key) => RootS (DegreeRoot key I)
+-- i = spec Root
+--
+-- c :: RootS (PitchRoot (Pitch C Natural Oct3))
+-- c = spec Root
+--
+-- sharp :: RootM r (Sharpen r)
+-- sharp = constConv Root
+--
+-- maj :: ChorC Triad r MajTriad
+-- maj = constConv Cho
+--
+-- qn :: NoteT r 8
+-- qn p = Note p Dur
+--
+-- qc :: KnownNat n => ChorT (c :: ChordType n) 8
+-- qc c = Chord c Dur
 
 
 -------------------------------------------------------------------------------

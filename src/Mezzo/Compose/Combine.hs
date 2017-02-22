@@ -45,19 +45,19 @@ import GHC.TypeLits
 -------------------------------------------------------------------------------
 
 -- | Get the duration of a piece of music.
-musicDur :: Music (m :: Partiture n l) -> Dur l
+musicDur :: Primitive l => Music (m :: Partiture n l) -> Dur l
 musicDur _ = Dur
 
 -- | Convert a duration to an integer.
-durToInt :: KnownNat d => Dur d -> Integer
-durToInt = natVal
+durToInt :: Primitive d => Dur d -> Int
+durToInt = prim
 
 -- | Get the numeric duration of a piece of music.
-duration :: KnownNat l => Music (m :: Partiture n l) -> Integer
+duration :: Primitive l => Music (m :: Partiture n l) -> Int
 duration = durToInt . musicDur
 
 -- | Get the number of voices in a piece of music.
-voices :: Music m -> Integer
+voices :: Music m -> Int
 voices (Note r d) = 1
 voices (Rest d) = 1
 voices (m1 :|: m2) = voices m1
@@ -66,11 +66,11 @@ voices (Chord c d) = chordVoices c
 
 -- | Get the number of voices in a chord.
 -- Thanks to Michael B. Gale
-chordVoices :: forall (n :: Nat) (c :: ChordType n) . KnownNat n => Cho c -> Integer
-chordVoices _ = natVal (undefined :: ChordType n) -- Need to get a kind-level variable to the term level
+chordVoices :: forall (n :: Nat) (c :: ChordType n) . Primitive n => Cho c -> Int
+chordVoices _ = prim (undefined :: ChordType n) -- Need to get a kind-level variable to the term level
 
 -- | Add an empty voice to the end of a piece of music.
-pad :: (ValidHarmComp m (FromSilence b)) => Music (m :: Partiture a b) -> Music (m +-+ FromSilence b)
+pad :: (HarmConstraints m (FromSilence b), KnownNat b) => Music (m :: Partiture a b) -> Music (m +-+ FromSilence b)
 pad m = m :-: rest (musicDur m)
 
 -------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ pad m = m :-: rest (musicDur m)
 -------------------------------------------------------------------------------
 
 -- | Create a melody (a sequence of pitches of the same duration).
-melody :: Melody m n -> Music m
+melody :: Primitive n => Melody m n -> Music m
 melody (WithDur d) = rest (Dur :: Dur 0)
 melody (p :+ ps) = p (`Note` notesDur) :|: melody ps
     where notesDur = getMelodyDur ps
@@ -88,5 +88,5 @@ withDur :: NoteT r d -> Melody (End :-- None) d
 withDur = WithDur
 
 -- | Get the duration of the notes in a melody.
-getMelodyDur :: Melody m d -> Dur d
+getMelodyDur :: Primitive d => Melody m d -> Dur d
 getMelodyDur _ = Dur

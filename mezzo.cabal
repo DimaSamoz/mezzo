@@ -25,6 +25,7 @@ library
                      , Mezzo.Model.Harmony.Motion
                      , Mezzo.Model.Harmony.Chords
                      , Mezzo.Model.Harmony.Functional
+                     , Mezzo.Model.Reify
 
                      , Mezzo.Compose.Types
                      , Mezzo.Compose.Builder

@@ -39,6 +39,7 @@ import Mezzo.Model.Types as X
     , KeyS (..)
     , Root (..)
     , RootToPitch
+    , PitchToNat
     , Sharpen
     , Flatten
     , FromRoot
@@ -49,3 +50,4 @@ import Mezzo.Model.Types as X
 import Mezzo.Model.Harmony.Chords as X
 import Mezzo.Model.Harmony.Functional as X
 import Mezzo.Model.Music as X
+import Mezzo.Model.Reify as X

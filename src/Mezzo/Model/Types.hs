@@ -1,4 +1,5 @@
-{-# LANGUAGE TypeInType, GADTs, TypeOperators, TypeFamilies, UndecidableInstances #-}
+{-# LANGUAGE TypeInType, GADTs, TypeOperators, TypeFamilies, UndecidableInstances,
+    TypeApplications, ScopedTypeVariables, FlexibleInstances #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
@@ -71,6 +72,7 @@ import GHC.TypeLits
 import Data.Proxy
 
 import Mezzo.Model.Prim
+import Mezzo.Model.Reify
 
 infixl 3 <<=?
 infixl 3 <<?
@@ -97,19 +99,19 @@ type Duration = Nat
 
 -- | The singleton type for 'PitchClass'.
 data PC (pc :: PitchClass) where
-    PC :: PC pc
+    PC :: Primitive pc => PC pc
 
 -- | The singleton type for 'Accidental'.
 data Acc (acc :: Accidental) where
-    Acc :: Acc acc
+    Acc :: Primitive acc => Acc acc
 
 -- | The singleton type for 'Octave'.
 data Oct (oct :: OctaveNum) where
-    Oct :: Oct oct
+    Oct :: Primitive oct => Oct oct
 
 -- | The singleton type for 'Duration'.
 data Dur (dur :: Duration) where
-    Dur :: Dur dur
+    Dur :: Primitive dur => Dur dur
 
 -------------------------------------------------------------------------------
 -- Pitches
@@ -124,7 +126,8 @@ data PitchType where
     Silence :: PitchType
 
 -- | The singleton type for pitches.
-data Pit (p :: PitchType) = Pit
+data Pit (p :: PitchType) where
+    Pit :: Primitive p => Pit p
 
 -------------------------------------------------------------------------------
 -- Harmonic types
@@ -156,7 +159,8 @@ data ScaDeg (sd :: ScaleDegree) = ScaDeg
 data KeyS (k :: KeyType) = KeyS
 
 -- | The singleton type for 'Root'.
-data Root (r :: RootType) = Root
+data Root (r :: RootType) where
+    Root :: Primitive r => Root r
 
 -- | Convert a root to a pitch.
 --
@@ -592,3 +596,42 @@ type family RaiseByOct (p :: PitchType) :: PitchType where
 -- | Lower a pitch by an octave.
 type family LowerByOct (p :: PitchType) :: PitchType where
     LowerByOct p = LowerBy p (Interval Perf Octave)
+
+-------------------------------------------------------------------------------
+-- Instances
+-------------------------------------------------------------------------------
+
+instance Primitive Oct_1 where prim o = 0
+instance Primitive Oct0 where prim o = 12
+instance Primitive Oct1 where prim o = 24
+instance Primitive Oct2 where prim o = 36
+instance Primitive Oct3 where prim o = 48
+instance Primitive Oct4 where prim o = 60
+instance Primitive Oct5 where prim o = 72
+instance Primitive Oct6 where prim o = 84
+instance Primitive Oct7 where prim o = 96
+instance Primitive Oct8 where prim o = 108
+
+instance Primitive C where prim p = 0
+instance Primitive D where prim p = 2
+instance Primitive E where prim p = 4
+instance Primitive F where prim p = 5
+instance Primitive G where prim p = 7
+instance Primitive A where prim p = 9
+instance Primitive B where prim p = 11
+
+instance Primitive Natural where prim a = 0
+instance Primitive Flat where prim a = -1
+instance Primitive Sharp where prim a = 1
+
+instance (Primitive pc, Primitive acc, Primitive oct) => Primitive (Pitch pc acc oct) where
+    prim p = prim (PC @pc) + prim (Acc @acc) + prim (Oct @oct)
+instance Primitive Silence where prim p = -1
+
+instance (RootToPitch r ~ p, Primitive p) => Primitive (Root r) where
+    prim r = prim (Pit @p)
+
+instance Primitive p => Primitive (PitchRoot p) where
+    prim p = prim (Pit @p)
+
+instance KnownNat n => Primitive n where prim = fromInteger . natVal
