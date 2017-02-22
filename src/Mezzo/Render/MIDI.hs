@@ -103,5 +103,6 @@ musicToMidi (m1 :-: m2) = musicToMidi m1 >+< musicToMidi m2
 createMidi :: FilePath -> MidiTrack -> IO ()
 createMidi f notes = exportFile f $ midiSkeleton notes
 
+-- | Create a MIDI file with the specified path and composition.
 renderMusic :: FilePath -> Music m -> IO ()
 renderMusic f m = createMidi f (musicToMidi m)
