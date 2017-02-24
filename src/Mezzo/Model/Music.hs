@@ -81,7 +81,7 @@ data Score = forall m. Score (Music m)
 -------------------------------------------------------------------------------
 
 -- | A chord progression with the given scheme and chord length.
-type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceToChords p) d)
+type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceToChords l p) d)
 
 -------------------------------------------------------------------------------
 -- Musical constraints

@@ -92,7 +92,7 @@ data Piece (k :: KeyType) (l :: Nat) where
 -- | A phrase matching a specific functional progression.
 data Phrase (k :: KeyType) (l :: Nat) where
     -- | A tonic-dominant-tonic progression.
-    PhraseIVI :: Tonic k l1 -> Dominant k (l2 - l1) -> Tonic k (l - l2) -> Phrase k l
+    PhraseIVI :: Tonic k (l2 - l1) -> Dominant k l1 -> Tonic k (l - l2) -> Phrase k l
     -- | A dominant-tonic progression.
     PhraseVI  :: Dominant k l1 -> Tonic k (l - l1) -> Phrase k l
 
@@ -174,12 +174,13 @@ type family TonToChords (t :: Tonic k l) :: Vector (ChordType 4) l where
     TonToChords (TonMin d) = DegToChord d :-- None
 
 -- | Convert a dominant to chords.
-type family DomToChords (t :: Dominant k l) :: Vector (ChordType 4) l where
-    DomToChords (DomVM d) = DegToChord d :-- None
-    DomToChords (DomV7 d) = DegToChord d :-- None
-    DomToChords (DomVii0 d) = DegToChord d :-- None
-    DomToChords (DomSD s d) = SubdomToChords s ++. DomToChords d
-    DomToChords (DomSecD d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+type family DomToChords (l :: Nat) (t :: Dominant k l) :: Vector (ChordType 4) l where
+    DomToChords 1 (DomVM d) = DegToChord d :-- None
+    DomToChords 1 (DomV7 d) = DegToChord d :-- None
+    DomToChords 1 (DomVii0 d) = DegToChord d :-- None
+    DomToChords l (DomSD (s :: Subdominant k l1) d) =
+                    SubdomToChords s ++. DomToChords (l - l1) d
+    DomToChords 2 (DomSecD d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
 
 -- | Convert a subdominant to chords.
 type family SubdomToChords (t :: Subdominant k l) :: Vector (ChordType 4) l where
@@ -189,14 +190,14 @@ type family SubdomToChords (t :: Subdominant k l) :: Vector (ChordType 4) l wher
     SubdomToChords (SubIVm d) = DegToChord d :-- None
 
 -- | Convert a phrase to chords.
-type family PhraseToChords (p :: Phrase k l) :: Vector (ChordType 4) l where
-    PhraseToChords (PhraseIVI t1 d t2) = TonToChords t1 ++. DomToChords d ++. TonToChords t2
-    PhraseToChords (PhraseVI d t) = DomToChords d ++. TonToChords t
+type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) l where
+    PhraseToChords l (PhraseIVI t1 (d :: Dominant k dl) t2) = TonToChords t1 ++. DomToChords dl d ++. TonToChords t2
+    PhraseToChords l (PhraseVI (d :: Dominant k dl) t) = DomToChords dl d ++. TonToChords t
 
 -- | Convert a piece to chords.
-type family PieceToChords (p :: Piece k l) :: Vector (ChordType 4) l where
-    PieceToChords (Cad c) = CadToChords c
-    PieceToChords (p := ps) = PhraseToChords p ++. PieceToChords ps
+type family PieceToChords (l :: Nat) (p :: Piece k l) :: Vector (ChordType 4) l where
+    PieceToChords l (Cad (c :: Cadence k l)) = CadToChords c
+    PieceToChords l ((p :: Phrase k l1) :~ ps) = PhraseToChords l1 p ++. PieceToChords (l - l1) ps
 
 -- | Convert a quality to text.
 type family ShowQual (q :: Quality) :: ErrorMessage where

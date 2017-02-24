@@ -90,19 +90,17 @@ type family SeventhTypeToIntervals (s :: SeventhType) :: Vector IntervalType 4 w
     SeventhTypeToIntervals (Doubled tt)   = TriadTypeToIntervals tt       :-| Interval Perf Octave
 
 -- | Apply an inversion to a list of pitches.
-type family Invert (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
-    Invert Inv0     ps         = ps
+type family Invert (i :: Inversion) (n :: Nat) (ps :: Vector PitchType n) :: Vector PitchType n where
+    Invert Inv0 n ps         = ps
     -- Need awkward workarounds because of #12564.
-    Invert Inv1  (p :-- ps) = ps :-| RaiseByOct p
-    Invert Inv2 (p :-- ps) = Invert Inv1 (p :-- Tail' ps) :-| RaiseByOct (Head' ps)
-    Invert Inv3  (p :-- ps) = Invert Inv2 (p :-- (Head' (Tail' ps)) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' ps)
+    Invert Inv1 n (p :-- ps) = ps :-| RaiseByOct p
+    Invert Inv2 n (p :-- ps) = Invert Inv1 (n - 1) (p :-- Tail' ps) :-| RaiseByOct (Head' ps)
+    Invert Inv3 n (p :-- ps) = Invert Inv2 (n - 1) (p :-- (Head' (Tail' ps)) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' ps)
 
 -- | Invert a doubled triad chord.
-type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
-    InvertDoubled Inv0 ps = ps
-    InvertDoubled Inv1 ps = Invert Inv1 (Init' ps) :-| (RaiseByOct (Head' (Tail' ps)))
-    InvertDoubled Inv2 ps = Invert Inv2 (Init' ps) :-| (RaiseByOct (Head' (Tail' (Tail' ps))))
+type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType 4) :: Vector PitchType 4 where
     InvertDoubled Inv3 ps = RaiseAllBy ps (Interval Perf Octave)
+    InvertDoubled i ps = Invert i 3 (Init' ps) :-| (RaiseByOct (Head' (Invert i 3 (Init' ps))))
 
 type family InvSucc (i :: Inversion) :: Inversion where
     InvSucc Inv0 = Inv1
@@ -123,10 +121,10 @@ type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector 
 
 -- | Convert a chord to a list of constituent pitches.
 type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
-    ChordToPitchList (Triad        r t i) = Invert i (BuildOnRoot r (TriadTypeToIntervals t))
+    ChordToPitchList (Triad        r t i) = Invert i 3 (BuildOnRoot r (TriadTypeToIntervals t))
     ChordToPitchList (SeventhChord r (Doubled tt) i)
                                           = InvertDoubled i (BuildOnRoot r (SeventhTypeToIntervals (Doubled tt)))
-    ChordToPitchList (SeventhChord r t i) = Invert i (BuildOnRoot r (SeventhTypeToIntervals t))
+    ChordToPitchList (SeventhChord r t i) = Invert i 4 (BuildOnRoot r (SeventhTypeToIntervals t))
 
 -- | Convert a chord to a partiture with the given length (one voice for each pitch).
 type family FromChord (c :: ChordType n) (l :: Nat) :: Partiture n l where
