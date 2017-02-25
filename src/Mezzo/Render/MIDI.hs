@@ -17,7 +17,7 @@
 -----------------------------------------------------------------------------
 
 module Mezzo.Render.MIDI
-    ( renderMusic )
+    ( renderMusic, musicToMidi )
     where
 
 import Mezzo.Model

@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeInType, GADTs, TypeOperators, TypeFamilies, UndecidableInstances,
-    TypeApplications, ScopedTypeVariables, FlexibleInstances #-}
+    TypeApplications, ScopedTypeVariables, FlexibleInstances, StandaloneDeriving, ViewPatterns #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
@@ -601,37 +601,72 @@ type family LowerByOct (p :: PitchType) :: PitchType where
 -- Instances
 -------------------------------------------------------------------------------
 
-instance Primitive Oct_1 where prim o = 0
-instance Primitive Oct0 where prim o = 12
-instance Primitive Oct1 where prim o = 24
-instance Primitive Oct2 where prim o = 36
-instance Primitive Oct3 where prim o = 48
-instance Primitive Oct4 where prim o = 60
-instance Primitive Oct5 where prim o = 72
-instance Primitive Oct6 where prim o = 84
-instance Primitive Oct7 where prim o = 96
-instance Primitive Oct8 where prim o = 108
+instance Primitive Oct_1 where prim o = 0 ; pretty o = "_5"
+instance Primitive Oct0 where prim o = 12 ; pretty o = "_4"
+instance Primitive Oct1 where prim o = 24 ; pretty o = "_3"
+instance Primitive Oct2 where prim o = 36 ; pretty o = "__"
+instance Primitive Oct3 where prim o = 48 ; pretty o = "_ "
+instance Primitive Oct4 where prim o = 60 ; pretty o = "  "
+instance Primitive Oct5 where prim o = 72 ; pretty o = "' "
+instance Primitive Oct6 where prim o = 84 ; pretty o = "''"
+instance Primitive Oct7 where prim o = 96 ; pretty o = "'3"
+instance Primitive Oct8 where prim o = 108; pretty o = "'4"
 
-instance Primitive C where prim p = 0
-instance Primitive D where prim p = 2
-instance Primitive E where prim p = 4
-instance Primitive F where prim p = 5
-instance Primitive G where prim p = 7
-instance Primitive A where prim p = 9
-instance Primitive B where prim p = 11
+instance Primitive C where prim p = 0 ; pretty p = "C"
+instance Primitive D where prim p = 2 ; pretty p = "D"
+instance Primitive E where prim p = 4 ; pretty p = "E"
+instance Primitive F where prim p = 5 ; pretty p = "F"
+instance Primitive G where prim p = 7 ; pretty p = "G"
+instance Primitive A where prim p = 9 ; pretty p = "A"
+instance Primitive B where prim p = 11; pretty p = "B"
 
-instance Primitive Natural where prim a = 0
-instance Primitive Flat where prim a = -1
-instance Primitive Sharp where prim a = 1
+instance Primitive Natural where prim a = 0 ; pretty a = " "
+instance Primitive Flat where prim a = -1 ; pretty a = "b"
+instance Primitive Sharp where prim a = 1 ; pretty a = "#"
 
 instance (Primitive pc, Primitive acc, Primitive oct) => Primitive (Pitch pc acc oct) where
     prim p = prim (PC @pc) + prim (Acc @acc) + prim (Oct @oct)
-instance Primitive Silence where prim p = -1
+    pretty p = pretty (PC @pc) ++ pretty (Acc @acc) ++ pretty (Oct @oct)
 
-instance (RootToPitch r ~ p, Primitive p) => Primitive (Root r) where
+instance Primitive Silence where prim s = 60 ; pretty s = "~dsdfs~~~"
+
+instance Primitive p => Primitive (Root (PitchRoot p)) where
     prim r = prim (Pit @p)
+    pretty r = pretty (Pit @p)
+
+-- Modes
+instance Primitive MajorMode where prim m = 0 ; pretty m = "Major"
+instance Primitive MinorMode where prim m = 1 ; pretty m = "minor"
+
+-- Scale degrees
+instance Primitive I where prim d = 0 ; pretty d = "I"
+instance Primitive II where prim d = 1 ; pretty d = "II"
+instance Primitive III where prim d = 2 ; pretty d = "III"
+instance Primitive IV where prim d = 3 ; pretty d = "IV"
+instance Primitive V where prim d = 4 ; pretty d = "V"
+instance Primitive VI where prim d = 5 ; pretty d = "VI"
+instance Primitive VII where prim d = 6 ; pretty d = "VII"
+
+
+instance (Primitive pc, Primitive acc, Primitive mo) => Primitive (Key pc acc mo) where
+    prim k = 0 -- to be changed
+    pretty k = pretty (PC @pc) ++ pretty (Acc @acc) ++ " " ++ pretty (Mod @mo)
+
+
+instance (RootToPitch (DegreeRoot k sd) ~ p, Primitive p, Primitive sd) => Primitive (Root (DegreeRoot k sd)) where
+    prim r = prim (Pit @p)
+    pretty r = pretty (ScaDeg @sd)
 
 instance Primitive p => Primitive (PitchRoot p) where
     prim p = prim (Pit @p)
+    pretty p = pretty (Pit @p)
 
-instance KnownNat n => Primitive n where prim = fromInteger . natVal
+instance KnownNat n => Primitive n where
+    prim = fromInteger . natVal
+    pretty (natVal -> 1) = "Th"
+    pretty (natVal -> 2) = "Si"
+    pretty (natVal -> 4) = "Ei"
+    pretty (natVal -> 8) = "Qu"
+    pretty (natVal -> 16) = "Ha"
+    pretty (natVal -> 32) = "Wh"
+    pretty (natVal -> n) = ":" ++ show n

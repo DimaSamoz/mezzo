@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType #-}
+{-# LANGUAGE TypeInType, ScopedTypeVariables, FlexibleInstances, UndecidableInstances #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -20,3 +20,7 @@ module Mezzo.Model.Reify where
 -- | Class of types which can have a primitive representation at runtime.
 class Primitive (a :: k) where
     prim :: proxy a -> Int
+    pretty :: proxy a -> String
+
+instance {-# OVERLAPPABLE #-} Primitive t => Show (proxy t) where
+    show = pretty
