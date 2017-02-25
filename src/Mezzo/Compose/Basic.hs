@@ -107,22 +107,22 @@ rest d = Rest d
 
 -- ** Note terminators (which express the note duration)
 
-wn :: NoteT r 32
+wn :: RootT r 32
 wn = \p -> Note p _wh
 
-hn :: NoteT r 16
+hn :: RootT r 16
 hn = \p -> Note p _ha
 
-qn :: NoteT r 8
+qn :: RootT r 8
 qn = \p -> Note p _qu
 
-en :: NoteT r 4
+en :: RootT r 4
 en = \p -> Note p _ei
 
-sn :: NoteT r 2
+sn :: RootT r 2
 sn = \p -> Note p _si
 
-tn :: NoteT r 1
+tn :: RootT r 1
 tn = \p -> Note p _th
 
 -- ** Chord terminators (which express the chord duration)

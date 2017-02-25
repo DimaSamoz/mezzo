@@ -34,7 +34,7 @@ module Mezzo.Compose.Builder
     , ChorM
     , ChorC
     , ChorC'
-    , NoteT
+    , RootT
     , ChorT
     )
     where
@@ -103,7 +103,7 @@ type ChorC' c r t i = Primitive r => AConv (Inv i) (Root r) (Cho (c r t i))
 type ChorC c r t = Primitive r => Conv (Root r) (Cho (c r t Inv0))
 
 -- | Note terminator.
-type NoteT r d = Primitive r => Term (Root r) (Music (FromRoot r d))
+type RootT r d = Primitive r => Term (Root r) (Music (FromRoot r d))
 
 -- | Chord terminator.
 type ChorT c d = Term (Cho c) (Music (FromChord c d))
@@ -124,7 +124,7 @@ type ChorT c d = Term (Cho c) (Music (FromChord c d))
 -- maj :: ChorC Triad r MajTriad
 -- maj = constConv Cho
 --
--- qn :: NoteT r 8
+-- qn :: RootT r 8
 -- qn p = Note p Dur
 --
 -- qc :: KnownNat n => ChorT (c :: ChordType n) 8

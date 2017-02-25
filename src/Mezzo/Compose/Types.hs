@@ -70,6 +70,6 @@ type ThirtySecond = Dur 1
 
 -- | List of pitches with a common duration.
 data Melody :: forall l. Partiture 1 l -> Nat -> Type where
-    WithDur :: NoteT r d -> Melody (End :-- None) d
+    WithDur :: RootT r d -> Melody (End :-- None) d
     (:+) :: (Primitive r, MelConstraints (FromRoot r d) ms) =>
                 RootS r -> Melody ms d -> Melody (FromRoot r d +|+ ms) d
