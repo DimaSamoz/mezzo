@@ -138,6 +138,7 @@ type family Length' (v :: Vector t n) :: Nat where
 
 -- | Append two optimised vectors.
 type family (x :: OptVector t n) ++ (y :: OptVector t m) :: OptVector t (n + m) where
+    ys        ++ End = ys
     End       ++ ys = ys
     (x :- xs) ++ ys = x :- (xs ++ ys)
 

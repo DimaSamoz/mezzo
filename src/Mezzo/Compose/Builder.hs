@@ -29,12 +29,14 @@ module Mezzo.Compose.Builder
     , constConv
     -- * Music-specific builder types
     , RootS
+    , RestS
     , ChorS
     , RootM
     , ChorM
     , ChorC
     , ChorC'
-    , NoteT
+    , RootT
+    , RestT
     , ChorT
     )
     where
@@ -87,6 +89,9 @@ nop = spec
 -- | Root specifier.
 type RootS r = Primitive r => Spec (Root r)
 
+-- | Rest specifier.
+type RestS = Spec (Pit Silence)
+
 -- | Chord specifier.
 type ChorS c = Spec (Cho c)
 
@@ -103,7 +108,10 @@ type ChorC' c r t i = Primitive r => AConv (Inv i) (Root r) (Cho (c r t i))
 type ChorC c r t = Primitive r => Conv (Root r) (Cho (c r t Inv0))
 
 -- | Note terminator.
-type NoteT r d = Primitive r => Term (Root r) (Music (FromRoot r d))
+type RootT r d = Primitive r => Term (Root r) (Music (FromRoot r d))
+
+--  | Rest terminator.
+type RestT d = Term (Pit Silence) (Music (FromSilence d))
 
 -- | Chord terminator.
 type ChorT c d = Term (Cho c) (Music (FromChord c d))
@@ -124,7 +132,7 @@ type ChorT c d = Term (Cho c) (Music (FromChord c d))
 -- maj :: ChorC Triad r MajTriad
 -- maj = constConv Cho
 --
--- qn :: NoteT r 8
+-- qn :: RootT r 8
 -- qn p = Note p Dur
 --
 -- qc :: KnownNat n => ChorT (c :: ChordType n) 8

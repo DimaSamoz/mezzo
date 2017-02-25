@@ -33,6 +33,7 @@ module Mezzo.Model.Music
 
 import Data.Kind
 import GHC.TypeLits
+import Text.PrettyPrint.Boxes
 
 import Mezzo.Model.Prim
 import Mezzo.Model.Harmony.Motion
@@ -93,10 +94,7 @@ type RestConstraints d = (Primitive d)
 
 -- | Ensures that two pieces of music can be composed sequentially.
 type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
-        ( Primitive l1
-        , Primitive l2
-        , Primitive n
-        , ValidMelConcat m1 m2)
+        ( ValidMelConcat m1 m2)
 
 -- | Ensures that two pieces of music can be composed in parallel.
 type HarmConstraints m1 m2 = (ValidHarmConcat (Align m1 m2))
@@ -274,3 +272,18 @@ instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- End) (q :* d2 
 instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
                               , ValidHarmMotionInVectors ps qs)
                                 => ValidHarmMotionInVectors (p :* d1 :- ps) (q :* d2 :- qs)
+
+-------------------------------------------------------------------------------
+-- Pretty-printing
+-------------------------------------------------------------------------------
+
+instance Show (Music m) where show = render . ppMusic
+
+ppMusic :: Music m -> Box
+ppMusic (Note r d) = char '|' <+> doc r <+> doc d
+ppMusic (Rest d) = char '|' <+> text "~~~~" <+> doc d
+ppMusic (m1 :|: m2) = ppMusic m1 <> emptyBox 1 1 <> ppMusic m2
+ppMusic (m1 :-: m2) = ppMusic m1 // ppMusic m2
+
+doc :: Show a => a -> Box
+doc = text . show

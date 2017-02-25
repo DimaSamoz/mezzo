@@ -72,8 +72,8 @@ mkPitchLits
 -- ** Pitch specifiers (admitting continuations)
 mkPitchSpecs
 
-r :: RootS (PitchRoot Silence)
-r = \dur -> dur (rootP silence)
+r :: RestS
+r = \dur -> dur Pit
 
 -- | Raise a pitch by a semitone.
 sharp :: RootM r (Sharpen r)
@@ -107,23 +107,43 @@ rest d = Rest d
 
 -- ** Note terminators (which express the note duration)
 
-wn :: NoteT r 32
+wn :: RootT r 32
 wn = \p -> Note p _wh
 
-hn :: NoteT r 16
+hn :: RootT r 16
 hn = \p -> Note p _ha
 
-qn :: NoteT r 8
+qn :: RootT r 8
 qn = \p -> Note p _qu
 
-en :: NoteT r 4
+en :: RootT r 4
 en = \p -> Note p _ei
 
-sn :: NoteT r 2
+sn :: RootT r 2
 sn = \p -> Note p _si
 
-tn :: NoteT r 1
+tn :: RootT r 1
 tn = \p -> Note p _th
+
+-- ** Rest terminators (which express the note duration)
+
+wr :: RestT 32
+wr = \p -> Rest _wh
+
+hr :: RestT 16
+hr = \p -> Rest _ha
+
+qr :: RestT 8
+qr = \p -> Rest _qu
+
+er :: RestT 4
+er = \p -> Rest _ei
+
+sr :: RestT 2
+sr = \p -> Rest _si
+
+tr :: RestT 1
+tr = \p -> Rest _th
 
 -- ** Chord terminators (which express the chord duration)
 
