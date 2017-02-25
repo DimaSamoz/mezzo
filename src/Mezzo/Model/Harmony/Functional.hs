@@ -87,7 +87,7 @@ instance {-# OVERLAPPABLE #-} TypeError (Text "Can't have a "
 -- | A functionally described piece of music, built from multiple phrases.
 data Piece (k :: KeyType) (l :: Nat) where
     Cad :: Cadence k l -> Piece k l
-    (:~) :: Phrase k l -> Piece k (n - l) -> Piece k n
+    (:=) :: Phrase k l -> Piece k (n - l) -> Piece k n
 
 -- | A phrase matching a specific functional progression.
 data Phrase (k :: KeyType) (l :: Nat) where
@@ -196,7 +196,7 @@ type family PhraseToChords (p :: Phrase k l) :: Vector (ChordType 4) l where
 -- | Convert a piece to chords.
 type family PieceToChords (p :: Piece k l) :: Vector (ChordType 4) l where
     PieceToChords (Cad c) = CadToChords c
-    PieceToChords (p :~ ps) = PhraseToChords p ++. PieceToChords ps
+    PieceToChords (p := ps) = PhraseToChords p ++. PieceToChords ps
 
 -- | Convert a quality to text.
 type family ShowQual (q :: Quality) :: ErrorMessage where

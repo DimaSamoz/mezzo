@@ -78,10 +78,11 @@ pad m = m :-: rest (musicDur m)
 -------------------------------------------------------------------------------
 
 -- | Create a melody (a sequence of pitches of the same duration).
-melody :: Primitive n => Melody m n -> Music m
-melody (WithDur d) = rest (Dur :: Dur 0)
-melody (p :+ ps) = p (`Note` notesDur) :|: melody ps
-    where notesDur = getMelodyDur ps
+melody :: (Primitive d) => Melody m d -> Music m
+melody (p :+ WithDur d) = p (`Note` getMelodyDur (WithDur d))
+melody (r :~ WithDur d) = Rest (getMelodyDur (WithDur d))
+melody (p :+ ps) = p (`Note` getMelodyDur ps) :|: melody ps
+melody (r :~ ps) = Rest (getMelodyDur ps) :|: melody ps
 
 -- | Specify the duration of a melody.
 withDur :: RootT r d -> Melody (End :-- None) d
