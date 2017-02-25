@@ -83,7 +83,7 @@ midiSkeleton mel = Midi
         [ [ (0, ChannelPrefix 0)
           , (0, TrackName " Grand Piano  ")
           , (0, InstrumentName "GM Device  1")
-          , (0, TimeSignature 2 4 24 8)
+          , (0, TimeSignature 4 2 24 8)
           , (0, KeySignature 0 0)
           ]
         ++ mel
