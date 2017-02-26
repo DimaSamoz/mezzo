@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes, FlexibleContexts #-}
+{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes, FlexibleContexts, GADTs #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -36,23 +36,23 @@ accidentalLits
 octaveLits
 
 -- ** Duration literals
-_wh :: Whole
-_wh = Dur @32
+wh :: Whole
+wh = Dur @32
 
-_ha :: Half
-_ha = Dur @16
+ha :: Half
+ha = Dur @16
 
-_qu :: Quarter
-_qu = Dur @8
+qu :: Quarter
+qu = Dur @8
 
-_ei :: Eighth
-_ei = Dur @4
+ei :: Eighth
+ei = Dur @4
 
-_si :: Sixteenth
-_si = Dur @2
+si :: Sixteenth
+si = Dur @2
 
-_th :: ThirtySecond
-_th = Dur @1
+th :: ThirtySecond
+th = Dur @1
 
 -- * Pitches
 
@@ -87,7 +87,7 @@ flat = constConv Root
 
 -- ** Constructors
 -- | Create a new root from a pitch.
-rootP :: Primitive p => Pit p -> Root (PitchRoot p)
+rootP :: (Primitive p, Rep p ~ Int) => Pit p -> Root (PitchRoot p)
 rootP p = Root
 
 -- | Create a new root from a key and a scale degree.
@@ -95,10 +95,11 @@ rootS :: Primitive (DegreeRoot k d) => KeyS k -> ScaDeg d -> Root (DegreeRoot k 
 rootS k d = Root
 
 -- | Create a new note from a root and duration.
-noteP :: (Primitive d, Primitive p) => Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
+noteP :: (Primitive d, Primitive p, Rep p ~ Int) => Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
 noteP p d = Note (rootP p) d
 
-noteS :: (Primitive d, Primitive (DegreeRoot k sd)) => KeyS k -> ScaDeg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
+noteS :: (Primitive d, Primitive (DegreeRoot k sd), Rep (DegreeRoot k sd) ~ Int)
+      => KeyS k -> ScaDeg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
 noteS k sd d = Note (rootS k sd) d
 
 -- | Create a rest from a duration.
@@ -107,60 +108,60 @@ rest d = Rest d
 
 -- ** Note terminators (which express the note duration)
 
-wn :: RootT r 32
-wn = \p -> Note p _wh
+wn :: Rep r ~ Int => RootT r 32
+wn = \p -> Note p wh
 
-hn :: RootT r 16
-hn = \p -> Note p _ha
+hn :: Rep r ~ Int => RootT r 16
+hn = \p -> Note p ha
 
-qn :: RootT r 8
-qn = \p -> Note p _qu
+qn :: Rep r ~ Int => RootT r 8
+qn = \p -> Note p qu
 
-en :: RootT r 4
-en = \p -> Note p _ei
+en :: Rep r ~ Int => RootT r 4
+en = \p -> Note p ei
 
-sn :: RootT r 2
-sn = \p -> Note p _si
+sn :: Rep r ~ Int => RootT r 2
+sn = \p -> Note p si
 
-tn :: RootT r 1
-tn = \p -> Note p _th
+tn :: Rep r ~ Int => RootT r 1
+tn = \p -> Note p th
 
 -- ** Rest terminators (which express the note duration)
 
 wr :: RestT 32
-wr = \p -> Rest _wh
+wr = \p -> Rest wh
 
 hr :: RestT 16
-hr = \p -> Rest _ha
+hr = \p -> Rest ha
 
 qr :: RestT 8
-qr = \p -> Rest _qu
+qr = \p -> Rest qu
 
 er :: RestT 4
-er = \p -> Rest _ei
+er = \p -> Rest ei
 
 sr :: RestT 2
-sr = \p -> Rest _si
+sr = \p -> Rest si
 
 tr :: RestT 1
-tr = \p -> Rest _th
+tr = \p -> Rest th
 
 -- ** Chord terminators (which express the chord duration)
 
 wc :: Primitive n => ChorT (r :: ChordType n) 32
-wc = \p -> Chord p _wh
+wc = \p -> Chord p wh
 
 hc :: Primitive n => ChorT (r :: ChordType n) 16
-hc = \p -> Chord p _ha
+hc = \p -> Chord p ha
 
 qc :: Primitive n => ChorT (r :: ChordType n) 8
-qc = \p -> Chord p _qu
+qc = \p -> Chord p qu
 
 ec :: Primitive n => ChorT (r :: ChordType n) 4
-ec = \p -> Chord p _ei
+ec = \p -> Chord p ei
 
 sc :: Primitive n => ChorT (r :: ChordType n) 2
-sc = \p -> Chord p _si
+sc = \p -> Chord p si
 
 tc :: Primitive n => ChorT (r :: ChordType n) 1
-tc = \p -> Chord p _th
+tc = \p -> Chord p th
