@@ -85,7 +85,7 @@ melody (p :+ ps) = p (`Note` getMelodyDur ps) :|: melody ps
 melody (r :~ ps) = Rest (getMelodyDur ps) :|: melody ps
 
 -- | Specify the duration of a melody.
-withDur :: RootT r d -> Melody (End :-- None) d
+withDur :: Dur d -> Melody (End :-- None) d
 withDur = WithDur
 
 -- | Get the duration of the notes in a melody.
