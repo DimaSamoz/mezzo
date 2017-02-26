@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, RankNTypes, ExistentialQuantification, ImplicitParams #-}
+{-# LANGUAGE TypeInType, RankNTypes, ExistentialQuantification, GADTs #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -93,19 +93,19 @@ type RootS r = Primitive r => Spec (Root r)
 type RestS = Spec (Pit Silence)
 
 -- | Chord specifier.
-type ChorS c = Spec (Cho c)
+type ChorS c = Primitive c => Spec (Cho c)
 
 -- | Root mutator.
 type RootM r r' = (Primitive r, Primitive r') => Mut' (Root r) (Root r')
 
 -- | Chord mutator.
-type ChorM c c' = Mut' (Cho c) (Cho c')
+type ChorM c c' = (Primitive c, Primitive c') => Mut' (Cho c) (Cho c')
 
 -- | Converter from roots to chords.
-type ChorC' c r t i = Primitive r => AConv (Inv i) (Root r) (Cho (c r t i))
+type ChorC' c r t i = (Primitive r, Primitive t, Primitive i) => AConv (Inv i) (Root r) (Cho (c r t i))
 
 -- | Converter from roots to chords, using the default inversion.
-type ChorC c r t = Primitive r => Conv (Root r) (Cho (c r t Inv0))
+type ChorC c r t = (Primitive r, Primitive t) => Conv (Root r) (Cho (c r t Inv0))
 
 -- | Note terminator.
 type RootT r d = Primitive r => Term (Root r) (Music (FromRoot r d))
@@ -114,7 +114,7 @@ type RootT r d = Primitive r => Term (Root r) (Music (FromRoot r d))
 type RestT d = Term (Pit Silence) (Music (FromSilence d))
 
 -- | Chord terminator.
-type ChorT c d = Term (Cho c) (Music (FromChord c d))
+type ChorT c d = Primitive c => Term (Cho c) (Music (FromChord c d))
 
 -- inKey :: KeyS key -> a -> a
 -- inKey key cont = let ?k = key in cont
