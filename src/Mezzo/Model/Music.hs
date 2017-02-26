@@ -70,7 +70,7 @@ data Music :: forall n l. Partiture n l -> Type where
     -- | Parallel or harmonic composition of music.
     (:-:) :: HarmConstraints m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
     -- | A chord specified by a chord type and a duration.
-    Chord :: ChordConstraints c => Cho c -> Dur d -> Music (FromChord c d)
+    Chord :: ChordConstraints c d => Cho c -> Dur d -> Music (FromChord c d)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
@@ -88,7 +88,7 @@ type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceTo
 -- Specifications of the rules that valid musical terms have to follow.
 -------------------------------------------------------------------------------
 
-type NoteConstraints r d = (Primitive r, Primitive d)
+type NoteConstraints r d = (Primitive r, Primitive d, Rep r ~ Int)
 
 type RestConstraints d = (Primitive d)
 
@@ -100,7 +100,7 @@ type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
 type HarmConstraints m1 m2 = (ValidHarmConcat (Align m1 m2))
 
 -- | Ensures that the chord is valid.
-type ChordConstraints (c :: ChordType n) = (Primitive n)
+type ChordConstraints (c :: ChordType n) d = (Primitive c, Primitive n, Primitive d)
 
 
 ---- Melodic constraints
@@ -279,11 +279,14 @@ instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
 
 instance Show (Music m) where show = render . ppMusic
 
+-- | Pretty-print a 'Music' value.
 ppMusic :: Music m -> Box
 ppMusic (Note r d) = char '|' <+> doc r <+> doc d
 ppMusic (Rest d) = char '|' <+> text "~~~~" <+> doc d
 ppMusic (m1 :|: m2) = ppMusic m1 <> emptyBox 1 1 <> ppMusic m2
 ppMusic (m1 :-: m2) = ppMusic m1 // ppMusic m2
+ppMusic (Chord c d) = char '|' <+> doc c <+> doc d
 
+-- | Convert a showable value into a pretty-printed box.
 doc :: Show a => a -> Box
 doc = text . show
