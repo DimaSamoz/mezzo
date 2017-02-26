@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, ScopedTypeVariables, FlexibleInstances, UndecidableInstances #-}
+{-# LANGUAGE TypeInType, ScopedTypeVariables, TypeFamilies, FlexibleInstances, UndecidableInstances #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -17,9 +17,15 @@
 
 module Mezzo.Model.Reify where
 
+import Data.Kind
+
 -- | Class of types which can have a primitive representation at runtime.
 class Primitive (a :: k) where
-    prim :: proxy a -> Int
+    -- | The type of the primitive representation.
+    type Rep a
+    -- | Convert a singleton of the type into its primitive representation.
+    prim :: proxy a -> Rep a
+    -- | Pretty print a singleton of the type.
     pretty :: proxy a -> String
 
 instance {-# OVERLAPPABLE #-} Primitive t => Show (proxy t) where
