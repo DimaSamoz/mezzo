@@ -152,12 +152,12 @@ instance Primitive MinTriad where
 instance Primitive AugTriad where
     type Rep AugTriad = Int -> [Int]
     prim t = \r -> [r, r + 4, r + 8]
-    pretty t = "Aug"
+    pretty t = "aug"
 
 instance Primitive DimTriad where
     type Rep DimTriad = Int -> [Int]
     prim t = \r -> [r, r + 3, r + 6]
-    pretty t = "Dim"
+    pretty t = "dim"
 
 instance Primitive MajSeventh where
     type Rep MajSeventh = Int -> [Int]
@@ -177,12 +177,17 @@ instance Primitive MinSeventh where
 instance Primitive HalfDimSeventh where
     type Rep HalfDimSeventh = Int -> [Int]
     prim t = \r -> [r, r + 3, r + 6, r + 10]
-    pretty t = "HDim7"
+    pretty t = "hdim7"
 
 instance Primitive DimSeventh where
     type Rep DimSeventh = Int -> [Int]
     prim t = \r -> [r, r + 3, r + 6, r + 9]
-    pretty t = "Dim7"
+    pretty t = "dim7"
+
+instance (Primitive c, Rep c ~ (Int -> [Int])) => Primitive (Doubled c) where
+    type Rep (Doubled c) = Int -> [Int]
+    prim t = \r -> prim (TriType @c) r ++ [r + 12]
+    pretty t = pretty (TriType @c) ++ "D"
 
 -- Inversions
 -- No real need for applying inversions since harmonic composition is commutative,

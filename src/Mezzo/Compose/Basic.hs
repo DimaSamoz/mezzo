@@ -148,20 +148,20 @@ tr = \p -> Rest th
 
 -- ** Chord terminators (which express the chord duration)
 
-wc :: Primitive n => ChorT (r :: ChordType n) 32
+wc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 32
 wc = \p -> Chord p wh
 
-hc :: Primitive n => ChorT (r :: ChordType n) 16
+hc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 16
 hc = \p -> Chord p ha
 
-qc :: Primitive n => ChorT (r :: ChordType n) 8
+qc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 8
 qc = \p -> Chord p qu
 
-ec :: Primitive n => ChorT (r :: ChordType n) 4
+ec :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 4
 ec = \p -> Chord p ei
 
-sc :: Primitive n => ChorT (r :: ChordType n) 2
+sc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 2
 sc = \p -> Chord p si
 
-tc :: Primitive n => ChorT (r :: ChordType n) 1
+tc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 1
 tc = \p -> Chord p th

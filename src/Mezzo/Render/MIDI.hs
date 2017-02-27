@@ -91,13 +91,18 @@ midiSkeleton mel = Midi
         ]
     }
 
+-- | Play a MIDI note with the specified duration and default velocity.
+midiNote :: Int -> Int -> MidiNote
+midiNote root dur = MidiNote {noteNum = root, vel = 100, start = 0, noteDur = dur}
+
 -- | Convert a 'Music' piece into a 'MidiTrack'.
 musicToMidi :: Music m -> MidiTrack
-musicToMidi (Note root dur) =
-    playNote MidiNote {noteNum = prim root, vel = 100, start = 0, noteDur = durToTicks dur}
+musicToMidi (Note root dur) = playNote $ midiNote (prim root) (durToTicks dur)
 musicToMidi (Rest dur) = playRest (durToTicks dur)
 musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
 musicToMidi (m1 :-: m2) = musicToMidi m1 >+< musicToMidi m2
+musicToMidi (Chord c d) = foldr1 (>+<) notes
+    where notes = map (playNote . flip midiNote (durToTicks d)) $ prim c
 
 -- | Create a MIDI file with the specified name and track.
 createMidi :: FilePath -> MidiTrack -> IO ()

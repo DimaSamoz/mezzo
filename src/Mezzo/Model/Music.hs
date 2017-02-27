@@ -100,7 +100,7 @@ type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
 type HarmConstraints m1 m2 = (ValidHarmConcat (Align m1 m2))
 
 -- | Ensures that the chord is valid.
-type ChordConstraints (c :: ChordType n) d = (Primitive c, Primitive n, Primitive d)
+type ChordConstraints (c :: ChordType n) d = (Primitive c, Primitive n, Primitive d, Rep c ~ [Int])
 
 
 ---- Melodic constraints
