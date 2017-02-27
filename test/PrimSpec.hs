@@ -55,7 +55,7 @@ primSpec =
                 maxNat `shouldBe` True
             it "should calculate minimum of two numbers" $ do
                 minNat `shouldBe` True
-                
+
         describe "Constraint operations" $ do
             it "should apply a constraint to an optimised vector" $ do
                 allSatisfy `shouldBe` True
@@ -178,7 +178,7 @@ matVConcat = True
 
 vecToColMatrix ::
         ( (VectorToColMatrix (True :-- False :-- None) 24)
-          ~ (True ** 24 :- End :-- False ** 24 :- End :-- None)
+          ~ (False ** 24 :- End :-- True ** 24 :- End :-- None)
         , (VectorToColMatrix None 11) ~ None
         ) => Bool
 vecToColMatrix = True
