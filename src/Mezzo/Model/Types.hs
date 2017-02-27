@@ -536,7 +536,7 @@ type family HalfStepUp (p :: PitchType) :: PitchType where
     HalfStepUp Silence              = Silence
     HalfStepUp (Pitch B  Flat    o) = Pitch B Natural o
     HalfStepUp (Pitch B  acc     o) = Pitch C acc (OctSucc o)
-    HalfStepUp (Pitch E  Flat    o) = Pitch E Sharp o
+    HalfStepUp (Pitch E  Flat    o) = Pitch E Natural o
     HalfStepUp (Pitch E  acc     o) = Pitch F acc o
     HalfStepUp (Pitch pc Flat    o) = Pitch pc Natural o
     HalfStepUp (Pitch pc Natural o) = Pitch pc Sharp o
