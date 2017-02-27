@@ -99,8 +99,10 @@ type family Invert (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchTy
 
 -- | Invert a doubled triad chord.
 type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType n) :: Vector PitchType n where
+    InvertDoubled Inv0 ps = ps
+    InvertDoubled Inv1 ps = Invert Inv1 (Init' ps) :-| (RaiseByOct (Head' (Tail' ps)))
+    InvertDoubled Inv2 ps = Invert Inv2 (Init' ps) :-| (RaiseByOct (Head' (Tail' (Tail' ps))))
     InvertDoubled Inv3 ps = RaiseAllBy ps (Interval Perf Octave)
-    InvertDoubled i ps = Invert i (Init' ps) :-| (RaiseByOct (Head' (Invert i (Init' ps))))
 
 type family InvSucc (i :: Inversion) :: Inversion where
     InvSucc Inv0 = Inv1
