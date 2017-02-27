@@ -126,7 +126,7 @@ sn = \p -> Note p si
 tn :: Rep r ~ Int => RootT r 1
 tn = \p -> Note p th
 
--- ** Rest terminators (which express the note duration)
+-- ** Rest terminators (which express the rest duration)
 
 wr :: RestT 32
 wr = \p -> Rest wh
