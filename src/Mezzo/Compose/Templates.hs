@@ -104,7 +104,7 @@ mkPitchLits = do
     octNames <- getDataCons ''OctaveNum
     let declareVal pc acc oct = do  -- Generates a type signature and value declaration for the specified pitch
             let pcStr = pcFormatter pc
-                accStr = if accFormatter acc == "fl" then "b" else [head $ accFormatter acc]
+                accStr = shortAccFormatter acc
                 octStr = shortOctFormatter oct
                 valName = mkName $ pcStr ++ accStr ++ octStr
             tySig <- sigD valName $ [t| Pit (Pitch $(conT pc) $(conT acc) $(conT oct)) |]
@@ -206,7 +206,7 @@ octFormatter oct = 'o' : drop 3 (nameBase oct)
 
 -- | One letter accidental with explicit 'Naturals'.
 shortAccFormatter :: Formatter
-shortAccFormatter (accFormatter -> "fl") = "b"
+shortAccFormatter (accFormatter -> "fl") = "f"
 shortAccFormatter (accFormatter -> name) = [head name]
 
 -- | One letter accidental with implicit 'Naturals'.
