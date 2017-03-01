@@ -19,6 +19,8 @@ module Mezzo.Compose.Templates
     ( pitchClassLits
     , accidentalLits
     , octaveLits
+    , mkDurLits
+    , mk32ndLits
     , mkPitchLits
     , mkPitchSpecs
     , scaleDegreeLits
@@ -111,6 +113,66 @@ mkPitchLits = do
             dec <- [d| $(varP valName) = pitch $(varE $ mkName pcStr) $(varE $ mkName (accFormatter acc)) $(varE $ mkName (octFormatter oct)) |]
             return $ tySig : dec
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)    -- Every combination of PCs, Accs and Octs
+
+mkDurLits :: Name -> DecsQ
+mkDurLits name = do
+    let litName = mkName $ durLitFormatter name
+        litName' = mkName $ (durLitFormatter name ++ "\'")
+    literal <- do
+            tySig1 <- sigD litName $ [t| Dur $(conT name) |]
+            dec1 <- [d| $(varP litName) = Dur |]
+            tySig1' <- sigD litName' $ [t| Dur (Dot $(conT name)) |]
+            dec1' <- [d| $(varP litName') = Dur |]
+            return $ tySig1 : dec1 ++ tySig1' : dec1'
+    noteTerm <- do
+            let valName = mkName $ head (durLitFormatter name) : "n"
+            tySig2 <- sigD valName $ [t| forall r. Rep r ~ Int => RootT r $(conT name) |]
+            dec2 <- [d| $(varP valName) = \p -> Note p $(varE litName) |]
+            let valName' = mkName $ head (durLitFormatter name) : "n\'"
+            tySig2' <- sigD valName' $ [t| forall r. Rep r ~ Int => RootT r (Dot $(conT name)) |]
+            dec2' <- [d| $(varP valName') = \p -> Note p $(varE litName') |]
+            return $ tySig2 : dec2 ++ tySig2' : dec2'
+    restTerm <- do
+            let valName = mkName $ head (durLitFormatter name) : "r"
+            tySig2 <- sigD valName $ [t| RestT $(conT name) |]
+            dec2 <- [d| $(varP valName) = const (Rest $(varE litName)) |]
+            let valName' = mkName $ head (durLitFormatter name) : "r\'"
+            tySig2' <- sigD valName' $ [t| RestT (Dot $(conT name)) |]
+            dec2' <- [d| $(varP valName') = const (Rest $(varE litName')) |]
+            return $ tySig2 : dec2 ++ tySig2' : dec2'
+    chordTerm <- do
+            let valName = mkName $ head (durLitFormatter name) : "c"
+            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) $(conT name) |]
+            dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName) |]
+            let valName' = mkName $ head (durLitFormatter name) : "c\'"
+            tySig2' <- sigD valName' $ [t| forall n r. (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) (Dot $(conT name)) |]
+            dec2' <- [d| $(varP valName') = \c -> Chord c $(varE litName') |]
+            return $ tySig2 : dec2 ++ tySig2' : dec2'
+    return $ literal ++ noteTerm ++ restTerm ++ chordTerm
+
+mk32ndLits :: DecsQ -- Don't want to make dotted literals for thirty second notes.
+mk32ndLits = do
+    let litName = mkName $ "th"
+    literal <- do
+            tySig1 <- sigD litName $ [t| Dur $(conT ''ThirtySecond) |]
+            dec1 <- [d| $(varP litName) = Dur |]
+            return $ tySig1 : dec1
+    noteTerm <- do
+            let valName = mkName $ "tn"
+            tySig2 <- sigD valName $ [t| forall r. Rep r ~ Int => RootT r $(conT ''ThirtySecond) |]
+            dec2 <- [d| $(varP valName) = \p -> Note p $(varE litName) |]
+            return $ tySig2 : dec2
+    restTerm <- do
+            let valName = mkName $ "tr"
+            tySig2 <- sigD valName $ [t| RestT $(conT ''ThirtySecond) |]
+            dec2 <- [d| $(varP valName) = const (Rest $(varE litName)) |]
+            return $ tySig2 : dec2
+    restTerm <- do
+            let valName = mkName $ "tc"
+            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) $(conT ''ThirtySecond) |]
+            dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName)  |]
+            return $ tySig2 : dec2
+    return $ literal ++ noteTerm
 
 -- | Generate pitch root specifiers for earch pitch class, accidental and octave.
 -- These allow for combinatorial input with CPS-style durations and modifiers.
@@ -227,6 +289,10 @@ shortOctFormatter name = case nameBase name of
     "Oct6"  -> "''"
     "Oct7"  -> "'3"
     "Oct8"  -> "'4"
+
+-- | Formatter for duration literals.
+durLitFormatter :: Formatter
+durLitFormatter = map toLower . take 2 . nameBase
 
 -- | Formatter for pitch literals.
 pitchLitFormatter :: Name -> Name -> Name -> String

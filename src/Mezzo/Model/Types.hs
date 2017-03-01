@@ -48,6 +48,7 @@ module Mezzo.Model.Types
     , PitchToNat
     , Sharpen
     , Flatten
+    , Dot
     , FromRoot
     , FromSilence
     -- * Specialised musical vector types
@@ -194,6 +195,19 @@ type family Sharpen (r :: RootType) :: RootType where
 -- | Flatten a root.
 type family Flatten (r :: RootType) :: RootType where
     Flatten r = PitchRoot (HalfStepDown (RootToPitch r))
+
+-- | Halve a type-level natural.
+type family HalfOf (n :: Nat) :: Nat where
+    HalfOf 0 = 0
+    HalfOf 1 = 0
+    HalfOf 8 = 4
+    HalfOf 32 = 16
+    HalfOf n = 1 + (HalfOf (n - 2))
+
+-- | Form a dotted duration.
+type family Dot (d :: Duration) :: Duration where
+    Dot 1 = TypeError (Text "Can't have dotted thirty-seconds.")
+    Dot n = n + HalfOf n
 
 -- | Create a new partiture with one voice of the given pitch.
 type family FromRoot (r :: RootType) (d :: Nat) :: Partiture 1 d where
@@ -676,8 +690,13 @@ instance KnownNat n => Primitive n where
     prim = fromInteger . natVal
     pretty (natVal -> 1) = "Th"
     pretty (natVal -> 2) = "Si"
+    pretty (natVal -> 3) = "Si."
     pretty (natVal -> 4) = "Ei"
+    pretty (natVal -> 6) = "Ei."
     pretty (natVal -> 8) = "Qu"
+    pretty (natVal -> 12) = "Qu."
     pretty (natVal -> 16) = "Ha"
+    pretty (natVal -> 24) = "Ha."
     pretty (natVal -> 32) = "Wh"
+    pretty (natVal -> 48) = "Wh."
     pretty (natVal -> n) = ":" ++ show n

@@ -48,22 +48,22 @@ infixr 5 :~
 -------------------------------------------------------------------------------
 
 -- | Whole note duration.
-type Whole = Dur 32
+type Whole = 32
 
 -- | Half note duration.
-type Half = Dur 16
+type Half = 16
 
 -- | Quarter note duration.
-type Quarter = Dur 8
+type Quarter = 8
 
 -- | Eighth note duration.
-type Eighth = Dur 4
+type Eighth = 4
 
 -- | Sixteenth note duration.
-type Sixteenth = Dur 2
+type Sixteenth = 2
 
 -- | Thirty-second note duration.
-type ThirtySecond = Dur 1
+type ThirtySecond = 1
 
 -------------------------------------------------------------------------------
 -- Musical lists

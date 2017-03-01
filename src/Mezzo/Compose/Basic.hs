@@ -18,6 +18,8 @@
 module Mezzo.Compose.Basic where
 
 import GHC.TypeLits
+import Data.Kind
+import Control.Monad
 
 import Mezzo.Model
 import Mezzo.Compose.Types
@@ -35,24 +37,10 @@ accidentalLits
 -- ** Octave literals
 octaveLits
 
--- ** Duration literals
-wh :: Whole
-wh = Dur @32
+-- ** Duration literals and terminators
+join <$> traverse mkDurLits [''Whole, ''Half, ''Quarter, ''Eighth, ''Sixteenth]
 
-ha :: Half
-ha = Dur @16
-
-qu :: Quarter
-qu = Dur @8
-
-ei :: Eighth
-ei = Dur @4
-
-si :: Sixteenth
-si = Dur @2
-
-th :: ThirtySecond
-th = Dur @1
+mk32ndLits
 
 -- * Pitches
 
@@ -73,8 +61,7 @@ mkPitchLits
 mkPitchSpecs
 
 r :: RestS
-r = \dur -> dur Pit
-
+r dur = dur Pit
 -- | Raise a pitch by a semitone.
 sharp :: RootM r (Sharpen r)
 sharp = constConv Root
@@ -96,72 +83,12 @@ rootS k d = Root
 
 -- | Create a new note from a root and duration.
 noteP :: (Primitive d, Primitive p, Rep p ~ Int) => Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
-noteP p d = Note (rootP p) d
+noteP p = Note (rootP p)
 
 noteS :: (Primitive d, Primitive (DegreeRoot k sd), Rep (DegreeRoot k sd) ~ Int)
       => KeyS k -> ScaDeg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
-noteS k sd d = Note (rootS k sd) d
+noteS k sd = Note (rootS k sd)
 
 -- | Create a rest from a duration.
 rest :: Primitive d => Dur d -> Music (FromSilence d)
-rest d = Rest d
-
--- ** Note terminators (which express the note duration)
-
-wn :: Rep r ~ Int => RootT r 32
-wn = \p -> Note p wh
-
-hn :: Rep r ~ Int => RootT r 16
-hn = \p -> Note p ha
-
-qn :: Rep r ~ Int => RootT r 8
-qn = \p -> Note p qu
-
-en :: Rep r ~ Int => RootT r 4
-en = \p -> Note p ei
-
-sn :: Rep r ~ Int => RootT r 2
-sn = \p -> Note p si
-
-tn :: Rep r ~ Int => RootT r 1
-tn = \p -> Note p th
-
--- ** Rest terminators (which express the rest duration)
-
-wr :: RestT 32
-wr = \p -> Rest wh
-
-hr :: RestT 16
-hr = \p -> Rest ha
-
-qr :: RestT 8
-qr = \p -> Rest qu
-
-er :: RestT 4
-er = \p -> Rest ei
-
-sr :: RestT 2
-sr = \p -> Rest si
-
-tr :: RestT 1
-tr = \p -> Rest th
-
--- ** Chord terminators (which express the chord duration)
-
-wc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 32
-wc = \p -> Chord p wh
-
-hc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 16
-hc = \p -> Chord p ha
-
-qc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 8
-qc = \p -> Chord p qu
-
-ec :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 4
-ec = \p -> Chord p ei
-
-sc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 2
-sc = \p -> Chord p si
-
-tc :: (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) 1
-tc = \p -> Chord p th
+rest = Rest
