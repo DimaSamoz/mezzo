@@ -197,7 +197,7 @@ type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) 
 -- | Convert a piece to chords.
 type family PieceToChords (l :: Nat) (p :: Piece k l) :: Vector (ChordType 4) l where
     PieceToChords l (Cad (c :: Cadence k l)) = CadToChords c
-    PieceToChords l ((p :: Phrase k l1) :~ ps) = PhraseToChords l1 p ++. PieceToChords (l - l1) ps
+    PieceToChords l ((p :: Phrase k l1) := ps) = PhraseToChords l1 p ++. PieceToChords (l - l1) ps
 
 -- | Convert a quality to text.
 type family ShowQual (q :: Quality) :: ErrorMessage where

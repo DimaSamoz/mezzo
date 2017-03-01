@@ -1,5 +1,5 @@
 {-# LANGUAGE  TypeInType, UndecidableInstances, GADTs, TypeOperators,
-    TypeApplications, TypeFamilies, ScopedTypeVariables #-}
+    TypeApplications, TypeFamilies, ScopedTypeVariables, FlexibleInstances #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
@@ -99,8 +99,10 @@ type family Invert (i :: Inversion) (n :: Nat) (ps :: Vector PitchType n) :: Vec
 
 -- | Invert a doubled triad chord.
 type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType 4) :: Vector PitchType 4 where
+    InvertDoubled Inv0 ps = ps
+    InvertDoubled Inv1 ps = Invert Inv1 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' ps)))
+    InvertDoubled Inv2 ps = Invert Inv2 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' (Tail' ps))))
     InvertDoubled Inv3 ps = RaiseAllBy ps (Interval Perf Octave)
-    InvertDoubled i ps = Invert i 3 (Init' ps) :-| (RaiseByOct (Head' (Invert i 3 (Init' ps))))
 
 type family InvSucc (i :: Inversion) :: Inversion where
     InvSucc Inv0 = Inv1
@@ -226,7 +228,18 @@ instance ((Rep r) ~ Int, (Rep t) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
     pretty c = pc ++ " " ++ pretty (TriType @t) ++ " " ++ pretty (Inv @i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
 
-instance ((Rep r) ~ Int, (Rep t) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
+instance ((Rep r) ~ Int, (Rep tt) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
+         , Primitive r, Primitive tt, Primitive i)
+        => Primitive (SeventhChord r (Doubled tt) i) where
+    type Rep (SeventhChord r (Doubled tt) i) = [Int]
+    prim c = inverted ++ [head inverted + 12]
+        where rootPos = prim (TriType @tt) $ prim (Root @r)
+              inverted = prim (Inv @i) rootPos
+    pretty c = pc ++ " " ++ pretty (TriType @tt) ++ "D " ++ pretty (Inv @i)
+        where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
+
+
+instance {-# OVERLAPPABLE #-} ((Rep r) ~ Int, (Rep t) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
          , Primitive r, Primitive t, Primitive i)
         => Primitive (SeventhChord r t i) where
     type Rep (SeventhChord r t i) = [Int]
