@@ -70,7 +70,7 @@ chordVoices :: forall (n :: Nat) (c :: ChordType n) . Primitive n => Cho c -> In
 chordVoices _ = prim (undefined :: ChordType n) -- Need to get a kind-level variable to the term level
 
 -- | Add an empty voice to the end of a piece of music.
-pad :: (HarmConstraints m (FromSilence b), KnownNat b) => Music (m :: Partiture a b) -> Music (m +-+ FromSilence b)
+pad :: (HarmConstraints m (FromSilence b), Primitive b) => Music (m :: Partiture (a - 1) b) -> Music ((m +-+ FromSilence b) :: Partiture a b)
 pad m = m :-: rest (musicDur m)
 
 -------------------------------------------------------------------------------
