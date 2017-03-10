@@ -27,6 +27,7 @@ module Mezzo.Compose.Combine
     , pad
     -- * Melody composition
     , play
+    -- , withDur
     ) where
 
 import Mezzo.Model
@@ -76,34 +77,44 @@ pad m = m :-: rest (musicDur m)
 -- Melodies
 -------------------------------------------------------------------------------
 
--- | Create a melody (a sequence of pitches of the same duration).
+-- | Convert a melody (a sequence of notes and rests) to `Music`.
 play :: (Primitive d) => Melody m d -> Music m
-play m@(Melody :| p) = p (\r -> Note r (melDur m))
-play m@(Melody :<<< p) = p (\r -> Note r (melDur m))
-play m@(Melody :<< p) = p (\r -> Note r (melDur m))
-play m@(Melody :< p) = p (\r -> Note r (melDur m))
-play m@(Melody :^ p) = p (\r -> Note r (melDur m))
-play m@(Melody :> p) = p (\r -> Note r (melDur m))
-play m@(Melody :>> p) = p (\r -> Note r (melDur m))
-play m@(ps :| p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :<<< p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :<< p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :< p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :^ p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :> p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :>> p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(Melody :<<. p) = p (\r -> Note r (melDur m))
-play m@(Melody :<. p) = p (\r -> Note r (melDur m))
-play m@(Melody :^. p) = p (\r -> Note r (melDur m))
-play m@(Melody :>. p) = p (\r -> Note r (melDur m))
-play m@(Melody :>>. p) = p (\r -> Note r (melDur m))
-play m@(ps :<<. p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :<. p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :^. p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :>. p) = play ps :|: p (\r -> Note r (melDur m))
-play m@(ps :>>. p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :| p)    = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :<<< p)  = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :<< p)   = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :< p)    = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :^ p)    = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :> p)    = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :>> p)   = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :<<. p)  = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :<. p)   = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :^. p)   = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :>. p)   = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :>>. p)  = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
+play m@(ps :~| p)   = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~<<< p) = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~<< p)  = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~< p)   = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~^ p)   = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~> p)   = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~>> p)  = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~<<. p) = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~<. p)  = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~^. p)  = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~>. p)  = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
+play m@(ps :~>>. p) = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
 
--- | Specify the duration of a melody.
+-- | Make a note of suitable duration from a root specifier.
+mkMelNote :: (Primitive r, Primitive d, Rep r ~ Int) => Melody m d -> RootS r -> Music (FromRoot r d)
+mkMelNote m p = p (\r -> Note r (melDur m))
+
+-- | Make a rest of suitable duration from a rest specifier.
+mkMelRest :: Primitive d => Melody m d -> Music (FromSilence d)
+mkMelRest m = r (\_ -> Rest (melDur m))
+
+-- | Alias for the start of the melody.
+melody :: Melody (End :-- None) Quarter
+melody = Melody
 
 -- | Get the duration of the notes in a melody.
 melDur :: Primitive d => Melody m d -> Dur d
