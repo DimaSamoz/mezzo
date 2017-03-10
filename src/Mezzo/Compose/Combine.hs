@@ -26,8 +26,7 @@ module Mezzo.Compose.Combine
     , voices
     , pad
     -- * Melody composition
-    , melody
-    , withDur
+    , play
     ) where
 
 import Mezzo.Model
@@ -78,16 +77,34 @@ pad m = m :-: rest (musicDur m)
 -------------------------------------------------------------------------------
 
 -- | Create a melody (a sequence of pitches of the same duration).
-melody :: (Primitive d) => Melody m d -> Music m
-melody (p :+ WithDur d) = p (`Note` getMelodyDur (WithDur d))
-melody (r :~ WithDur d) = Rest (getMelodyDur (WithDur d))
-melody (p :+ ps) = p (`Note` getMelodyDur ps) :|: melody ps
-melody (r :~ ps) = Rest (getMelodyDur ps) :|: melody ps
+play :: (Primitive d) => Melody m d -> Music m
+play m@(Melody :| p) = p (\r -> Note r (melDur m))
+play m@(Melody :<<< p) = p (\r -> Note r (melDur m))
+play m@(Melody :<< p) = p (\r -> Note r (melDur m))
+play m@(Melody :< p) = p (\r -> Note r (melDur m))
+play m@(Melody :^ p) = p (\r -> Note r (melDur m))
+play m@(Melody :> p) = p (\r -> Note r (melDur m))
+play m@(Melody :>> p) = p (\r -> Note r (melDur m))
+play m@(ps :| p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :<<< p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :<< p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :< p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :^ p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :> p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :>> p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(Melody :<<. p) = p (\r -> Note r (melDur m))
+play m@(Melody :<. p) = p (\r -> Note r (melDur m))
+play m@(Melody :^. p) = p (\r -> Note r (melDur m))
+play m@(Melody :>. p) = p (\r -> Note r (melDur m))
+play m@(Melody :>>. p) = p (\r -> Note r (melDur m))
+play m@(ps :<<. p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :<. p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :^. p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :>. p) = play ps :|: p (\r -> Note r (melDur m))
+play m@(ps :>>. p) = play ps :|: p (\r -> Note r (melDur m))
 
 -- | Specify the duration of a melody.
-withDur :: Dur d -> Melody (End :-- None) d
-withDur = WithDur
 
 -- | Get the duration of the notes in a melody.
-getMelodyDur :: Primitive d => Melody m d -> Dur d
-getMelodyDur _ = Dur
+melDur :: Primitive d => Melody m d -> Dur d
+melDur _ = Dur
