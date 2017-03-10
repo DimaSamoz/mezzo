@@ -71,6 +71,7 @@ data Music :: forall n l. Partiture n l -> Type where
     (:-:) :: HarmConstraints m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
     -- | A chord specified by a chord type and a duration.
     Chord :: ChordConstraints c d => Cho c -> Dur d -> Music (FromChord c d)
+    -- Progression :: ProgressionConstraints p => Prog p -> Music (FromProg p)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
@@ -102,6 +103,7 @@ type HarmConstraints m1 m2 = (ValidHarmConcat (Align m1 m2))
 -- | Ensures that the chord is valid.
 type ChordConstraints (c :: ChordType n) d = (Primitive c, Primitive n, Primitive d, Rep c ~ [Int])
 
+type ProgressionConstraints p = (() :: Constraint)
 
 ---- Melodic constraints
 
@@ -144,7 +146,7 @@ instance {-# OVERLAPPABLE #-} ValidMelInterval (MakeInterval a b) => ValidMelLea
 class ValidMelAppend (a :: Voice l1) (b :: Voice l2)
 instance {-# OVERLAPPING #-}  ValidMelAppend End a
 instance {-# OVERLAPPING #-}  ValidMelAppend a End
-instance {-# OVERLAPPABLE #-} ValidMelLeap (Last vs1) v2 => ValidMelAppend vs1 (v2 :* d :- vs2)
+instance {-# OVERLAPPABLE #-} ValidMelLeap (Last vs1) (Head vs2) => ValidMelAppend vs1 vs2
 
 -- | Ensures that two partitures can be horizontally concatenated.
 --
