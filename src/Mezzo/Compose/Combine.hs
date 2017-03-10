@@ -27,7 +27,6 @@ module Mezzo.Compose.Combine
     , pad
     -- * Melody composition
     , play
-    -- , withDur
     ) where
 
 import Mezzo.Model
