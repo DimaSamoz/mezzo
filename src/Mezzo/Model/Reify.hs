@@ -38,4 +38,5 @@ type IntRep t = (Primitive t, Rep t ~ Int)
 -- | Primitive types with integer list representations.
 type IntListRep t = (Primitive t, Rep t ~ [Int])
 
+-- | Primitive types with function representations from type a to type b.
 type FunRep a b t = (Primitive t, Rep t ~ (a -> b))
