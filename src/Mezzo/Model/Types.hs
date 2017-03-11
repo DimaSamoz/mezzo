@@ -228,23 +228,6 @@ type Voice l = OptVector PitchType l
 -- | A 'Partiture' is made up of a fixed number of voices.
 type Partiture n l = Matrix PitchType n l
 
--- type family PadFst (p :: Partiture n1 l1) (q :: Partiture nAim l2) :: Partiture nAim l1 where
---     PadFst None None = None
---     PadFst None ((y :: Voice l) :-- ys) = FromSilence l ++. (PadFst None ys)
---     PadFst (x :-- xs) (y :-- ys) = x :-- PadFst xs ys
---
--- type family SeqPad (p :: Partiture n1 l1) (q :: Partiture n2 l2) :: Partiture (MaxN n1 n2) (l1 + l2) where
---     SeqPad (p :: Partiture n l1) (q :: Partiture n l2) = p +|+ q
---     SeqPad (p :: Partiture n1 l1) (q :: Partiture n2 l2) =
---                     If (n1 <=? n2)  -- If p has fewer voices
---                     (PadFst p q +|+ q)  -- Then pad p and concatenate with q
---                     (p +|+ PadFst q p)  -- Else
-
--- durT :: Dur n -> Dur m -> Dur (MaxN n m)
--- durT = undefined
-
--- t2 :: (Pad None ((Silence ** 6 :- End) :-- (Silence ** 6 :- End) :-- None)) ~ ((Silence ** 6 :- End) :-- (Silence ** 6 :- End) :-- None) => Int
--- t2 = 5
 -------------------------------------------------------------------------------
 -- Intervals
 -------------------------------------------------------------------------------
