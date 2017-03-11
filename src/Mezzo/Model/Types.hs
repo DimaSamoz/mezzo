@@ -63,10 +63,11 @@ module Mezzo.Model.Types
     , HalfStepsDownBy
     , RaiseBy
     , LowerBy
-    , RaiseAllBy
-    , LowerAllBy
+    , RaiseAllBy'
+    , LowerAllBy'
     , RaiseByOct
     , LowerByOct
+    , RaiseAllByOct
     ) where
 
 import GHC.TypeLits
@@ -593,15 +594,25 @@ type family LowerBy (p :: PitchType) (i :: IntervalType) :: PitchType where
     LowerBy p (Interval Aug is) = HalfStepUp (HalfStepsDownBy p (IntervalWidth (Interval Aug is) + 1))
     LowerBy p i                 = HalfStepsDownBy p (IntervalWidth i)
 
+-- | Raise all pitches in a voice by an interval.
+type family RaiseAllBy (ps :: Voice l) (i :: IntervalType) :: Voice l where
+    RaiseAllBy End _ = End
+    RaiseAllBy (p :* d :- ps) i = RaiseBy p i :* d :- RaiseAllBy ps i
+
 -- | Raise multiple pitches by an interval.
-type family RaiseAllBy (ps :: Vector PitchType n) (i :: IntervalType) :: Vector PitchType n where
-    RaiseAllBy None _ = None
-    RaiseAllBy (p :-- ps) i = RaiseBy p i :-- RaiseAllBy ps i
+type family RaiseAllBy' (ps :: Vector PitchType n) (i :: IntervalType) :: Vector PitchType n where
+    RaiseAllBy' None _ = None
+    RaiseAllBy' (p :-- ps) i = RaiseBy p i :-- RaiseAllBy' ps i
+
+-- | Lower all pitches in a voice by an interval.
+type family LowerAllBy (ps :: Voice l) (i :: IntervalType) :: Voice l where
+    LowerAllBy End _ = End
+    LowerAllBy (p :* d :- ps) i = LowerBy p i :* d :- LowerAllBy ps i
 
 -- | Lower multiple pitches by an interval.
-type family LowerAllBy (ps :: Vector PitchType n) (i :: IntervalType) :: Vector PitchType n where
-    LowerAllBy None _ = None
-    LowerAllBy (p :-- ps) i = LowerBy p i :-- LowerAllBy ps i
+type family LowerAllBy' (ps :: Vector PitchType n) (i :: IntervalType) :: Vector PitchType n where
+    LowerAllBy' None _ = None
+    LowerAllBy' (p :-- ps) i = LowerBy p i :-- LowerAllBy' ps i
 
 -- | Raise a pitch by an octave.
 type family RaiseByOct (p :: PitchType) :: PitchType where
@@ -610,6 +621,9 @@ type family RaiseByOct (p :: PitchType) :: PitchType where
 -- | Lower a pitch by an octave.
 type family LowerByOct (p :: PitchType) :: PitchType where
     LowerByOct p = LowerBy p (Interval Perf Octave)
+
+type family RaiseAllByOct (ps :: Voice l) :: Voice l where
+    RaiseAllByOct v = RaiseAllBy v (Interval Perf Octave)
 
 -------------------------------------------------------------------------------
 -- Primitive instances

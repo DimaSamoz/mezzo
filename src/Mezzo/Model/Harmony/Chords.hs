@@ -102,7 +102,7 @@ type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType 4) :: Vector 
     InvertDoubled Inv0 ps = ps
     InvertDoubled Inv1 ps = Invert Inv1 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' ps)))
     InvertDoubled Inv2 ps = Invert Inv2 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' (Tail' ps))))
-    InvertDoubled Inv3 ps = RaiseAllBy ps (Interval Perf Octave)
+    InvertDoubled Inv3 ps = RaiseAllBy' ps (Interval Perf Octave)
 
 type family InvSucc (i :: Inversion) :: Inversion where
     InvSucc Inv0 = Inv1

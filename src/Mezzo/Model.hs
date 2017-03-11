@@ -47,6 +47,7 @@ import Mezzo.Model.Types as X
     , FromSilence
     , Voice
     , Partiture
+    , RaiseAllByOct
     )
 import Mezzo.Model.Harmony.Chords as X
 import Mezzo.Model.Harmony.Functional as X
