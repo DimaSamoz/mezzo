@@ -167,12 +167,12 @@ mk32ndLits = do
             tySig2 <- sigD valName $ [t| RestT $(conT ''ThirtySecond) |]
             dec2 <- [d| $(varP valName) = const (Rest $(varE litName)) |]
             return $ tySig2 : dec2
-    restTerm <- do
+    chordTerm <- do
             let valName = mkName $ "tc"
             tySig2 <- sigD valName $ [t| forall n r. (Primitive n, Rep r ~ [Int]) => ChorT (r :: ChordType n) $(conT ''ThirtySecond) |]
             dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName)  |]
             return $ tySig2 : dec2
-    return $ literal ++ noteTerm
+    return $ literal ++ noteTerm ++ restTerm ++ chordTerm
 
 -- | Generate pitch root specifiers for earch pitch class, accidental and octave.
 -- These allow for combinatorial input with CPS-style durations and modifiers.
