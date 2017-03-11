@@ -64,7 +64,6 @@ infixl 5 :~<.
 infixl 5 :~^.
 infixl 5 :~>.
 infixl 5 :~>>.
--- infixr 5 :~
 
 -------------------------------------------------------------------------------
 -- Duration type synonyms
@@ -98,40 +97,40 @@ data Melody :: forall l. Partiture 1 l -> Nat -> Type where
     -- the default duration is a quarter.
     Melody  :: Melody (End :-- None) Quarter
     -- | Add a note with the same duration as the previous one.
-    (:|)    :: (MelConstraints ms (FromRoot r d), Primitive r, Primitive d, Rep r ~ Int)
+    (:|)    :: (MelConstraints ms (FromRoot r d), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r d) d
     -- | Add a thirty-second note.
-    (:<<<)  :: (MelConstraints ms (FromRoot r ThirtySecond), Primitive r, Primitive d, Rep r ~ Int)
+    (:<<<)  :: (MelConstraints ms (FromRoot r ThirtySecond), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r ThirtySecond) ThirtySecond
     -- | Add a sixteenth note.
-    (:<<)   :: (MelConstraints ms (FromRoot r Sixteenth), Primitive r, Primitive d, Rep r ~ Int)
+    (:<<)   :: (MelConstraints ms (FromRoot r Sixteenth), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r Sixteenth) Sixteenth
     -- | Add an eighth note.
-    (:<)    :: (MelConstraints ms (FromRoot r Eighth), Primitive r, Primitive d, Rep r ~ Int)
+    (:<)    :: (MelConstraints ms (FromRoot r Eighth), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r Eighth) Eighth
     -- | Add a quarter note.
-    (:^)    :: (MelConstraints ms (FromRoot r Quarter), Primitive r, Primitive d, Rep r ~ Int)
+    (:^)    :: (MelConstraints ms (FromRoot r Quarter), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r Quarter) Quarter
     -- | Add a half note.
-    (:>)    :: (MelConstraints ms (FromRoot r Half), Primitive r, Primitive d, Rep r ~ Int)
+    (:>)    :: (MelConstraints ms (FromRoot r Half), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r Half) Half
     -- | Add a whole note.
-    (:>>)   :: (MelConstraints ms (FromRoot r Whole), Primitive r, Primitive d, Rep r ~ Int)
+    (:>>)   :: (MelConstraints ms (FromRoot r Whole), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r Whole) Whole
     -- | Add a dotted sixteenth note.
-    (:<<.)  :: (MelConstraints ms (FromRoot r (Dot Sixteenth)), Primitive r, Primitive d, Rep r ~ Int)
+    (:<<.)  :: (MelConstraints ms (FromRoot r (Dot Sixteenth)), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r (Dot Sixteenth)) (Dot Sixteenth)
     -- | Add a dotted eighth note.
-    (:<.)   :: (MelConstraints ms (FromRoot r (Dot Eighth)), Primitive r, Primitive d, Rep r ~ Int)
+    (:<.)   :: (MelConstraints ms (FromRoot r (Dot Eighth)), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r (Dot Eighth)) (Dot Eighth)
     -- | Add a dotted quarter note.
-    (:^.)   :: (MelConstraints ms (FromRoot r (Dot Quarter)), Primitive r, Primitive d, Rep r ~ Int)
+    (:^.)   :: (MelConstraints ms (FromRoot r (Dot Quarter)), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r (Dot Quarter)) (Dot Quarter)
     -- | Add a dotted half note.
-    (:>.)   :: (MelConstraints ms (FromRoot r (Dot Half)), Primitive r, Primitive d, Rep r ~ Int)
+    (:>.)   :: (MelConstraints ms (FromRoot r (Dot Half)), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r (Dot Half)) (Dot Half)
     -- | Add a dotted whole note.
-    (:>>.)  :: (MelConstraints ms (FromRoot r (Dot Whole)), Primitive r, Primitive d, Rep r ~ Int)
+    (:>>.)  :: (MelConstraints ms (FromRoot r (Dot Whole)), IntRep r, Primitive d)
            => Melody ms d -> RootS r -> Melody (ms +|+ FromRoot r (Dot Whole)) (Dot Whole)
     -- | Add a rest with the same duration as the previous one.
     (:~|)   :: (MelConstraints ms (FromSilence d), Primitive d)
@@ -169,3 +168,5 @@ data Melody :: forall l. Partiture 1 l -> Nat -> Type where
     -- | Add a dotted whole rest.
     (:~>>.) :: (MelConstraints ms (FromSilence (Dot Whole)), Primitive d)
            => Melody ms d -> RestS -> Melody (ms +|+ FromSilence (Dot Whole)) (Dot Whole)
+
+-- raiseByOct :: Melody m d -> Melody (RaiseAllByOct m) d

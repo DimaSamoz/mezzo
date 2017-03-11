@@ -637,8 +637,7 @@ instance Primitive Sharp where type Rep Sharp = Int ; prim a = 1 ; pretty a = "#
 
 -- "Equality constraints are literally magic."
 --                                  - Michael Gale, 2017
-instance ( Rep pc ~ Int, Rep acc ~ Int, Rep oct ~ Int
-         , Primitive pc, Primitive acc, Primitive oct)
+instance (IntRep pc, IntRep acc, IntRep oct)
         => Primitive (Pitch pc acc oct) where
     type Rep (Pitch pc acc oct) = Int
     prim p = prim (PC @pc) + prim (Acc @acc) + prim (Oct @oct)
@@ -646,7 +645,7 @@ instance ( Rep pc ~ Int, Rep acc ~ Int, Rep oct ~ Int
 
 instance Primitive Silence where type Rep Silence = Int ; prim s = 60 ; pretty s = "~~~~"
 
-instance (Rep p ~ Int, Primitive p) => Primitive (Root (PitchRoot p)) where
+instance IntRep p => Primitive (Root (PitchRoot p)) where
     type Rep (Root (PitchRoot p)) = Int
     prim r = prim (Pit @p)
     pretty r = pretty (Pit @p)
@@ -665,19 +664,19 @@ instance Primitive VI   where type Rep VI   = Int ; prim d = 5 ; pretty d = "VI"
 instance Primitive VII  where type Rep VII  = Int ; prim d = 6 ; pretty d = "VII"
 
 
-instance (Primitive pc, Primitive acc, Primitive mo) => Primitive (Key pc acc mo) where
+instance (IntRep pc, IntRep acc, IntRep mo) => Primitive (Key pc acc mo) where
     type Rep (Key pc acc mo) = Int
     prim k = 0 -- to be changed
     pretty k = pretty (PC @pc) ++ pretty (Acc @acc) ++ " " ++ pretty (Mod @mo)
 
 
-instance (Rep p ~ Int, RootToPitch (DegreeRoot k sd) ~ p, Primitive p, Primitive sd)
+instance (IntRep p, RootToPitch (DegreeRoot k sd) ~ p, Primitive sd)
         => Primitive (Root (DegreeRoot k sd)) where
     type Rep (Root (DegreeRoot k sd)) = Int
     prim r = prim (Pit @p)
     pretty r = pretty (ScaDeg @sd)
 
-instance (Rep p ~ Int, Primitive p) => Primitive (PitchRoot p) where
+instance IntRep p => Primitive (PitchRoot p) where
     type Rep (PitchRoot p) = Int
     prim p = prim (Pit @p)
     pretty p = pretty (Pit @p)

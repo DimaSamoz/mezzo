@@ -186,15 +186,12 @@ instance Primitive DimSeventh where
     prim t = \r -> [r, r + 3, r + 6, r + 9]
     pretty t = "dim7"
 
-instance (Primitive c, Rep c ~ (Int -> [Int])) => Primitive (Doubled c) where
+instance FunRep Int [Int] c => Primitive (Doubled c) where
     type Rep (Doubled c) = Int -> [Int]
     prim t = \r -> prim (TriType @c) r ++ [r + 12]
     pretty t = pretty (TriType @c) ++ "D"
 
 -- Inversions
--- No real need for applying inversions since harmonic composition is commutative,
--- but doesn't hurt
-
 -- Places the first element of the list on its end.
 invChord :: [Int] -> [Int]
 invChord [] = []
@@ -220,16 +217,14 @@ instance Primitive Inv3 where
     prim i = invChord . invChord . invChord
     pretty i = "I3"
 
-instance ((Rep r) ~ Int, (Rep t) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
-         , Primitive r, Primitive t, Primitive i)
+instance (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
         => Primitive (Triad r t i) where
     type Rep (Triad r t i) = [Int]
     prim c = prim (Inv @i) . prim (TriType @t) $ prim (Root @r)
     pretty c = pc ++ " " ++ pretty (TriType @t) ++ " " ++ pretty (Inv @i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
 
-instance ((Rep r) ~ Int, (Rep tt) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
-         , Primitive r, Primitive tt, Primitive i)
+instance (IntRep r, FunRep Int [Int] tt, FunRep [Int] [Int] i)
         => Primitive (SeventhChord r (Doubled tt) i) where
     type Rep (SeventhChord r (Doubled tt) i) = [Int]
     prim c = inverted ++ [head inverted + 12]
@@ -239,8 +234,7 @@ instance ((Rep r) ~ Int, (Rep tt) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
 
 
-instance {-# OVERLAPPABLE #-} ((Rep r) ~ Int, (Rep t) ~ (Int -> [Int]), (Rep i) ~ ([Int] -> [Int])
-         , Primitive r, Primitive t, Primitive i)
+instance {-# OVERLAPPABLE #-} (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
         => Primitive (SeventhChord r t i) where
     type Rep (SeventhChord r t i) = [Int]
     prim c = prim (Inv @i) . prim (SevType @t) $ prim (Root @r)

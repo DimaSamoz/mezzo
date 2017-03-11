@@ -74,7 +74,7 @@ flat = constConv Root
 
 -- ** Constructors
 -- | Create a new root from a pitch.
-rootP :: (Primitive p, Rep p ~ Int) => Pit p -> Root (PitchRoot p)
+rootP :: IntRep p => Pit p -> Root (PitchRoot p)
 rootP p = Root
 
 -- | Create a new root from a key and a scale degree.
@@ -82,10 +82,10 @@ rootS :: Primitive (DegreeRoot k d) => KeyS k -> ScaDeg d -> Root (DegreeRoot k 
 rootS k d = Root
 
 -- | Create a new note from a root and duration.
-noteP :: (Primitive d, Primitive p, Rep p ~ Int) => Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
+noteP :: (Primitive d, IntRep p) => Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
 noteP p = Note (rootP p)
 
-noteS :: (Primitive d, Primitive (DegreeRoot k sd), Rep (DegreeRoot k sd) ~ Int)
+noteS :: (Primitive d, IntRep (DegreeRoot k sd))
       => KeyS k -> ScaDeg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
 noteS k sd = Note (rootS k sd)
 

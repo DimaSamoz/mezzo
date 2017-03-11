@@ -104,7 +104,7 @@ play m@(ps :~>. p)  = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: m
 play m@(ps :~>>. p) = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
 
 -- | Make a note of suitable duration from a root specifier.
-mkMelNote :: (Primitive r, Primitive d, Rep r ~ Int) => Melody m d -> RootS r -> Music (FromRoot r d)
+mkMelNote :: (IntRep r, Primitive d) => Melody m d -> RootS r -> Music (FromRoot r d)
 mkMelNote m p = p (\r -> Note r (melDur m))
 
 -- | Make a rest of suitable duration from a rest specifier.

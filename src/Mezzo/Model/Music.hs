@@ -89,19 +89,19 @@ type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceTo
 -- Specifications of the rules that valid musical terms have to follow.
 -------------------------------------------------------------------------------
 
-type NoteConstraints r d = (Primitive r, Primitive d, Rep r ~ Int)
+type NoteConstraints r d = (IntRep r, Primitive d)
 
 type RestConstraints d = (Primitive d)
 
 -- | Ensures that two pieces of music can be composed sequentially.
 type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
-        ( ValidMelConcat m1 m2)
+        (ValidMelConcat m1 m2)
 
 -- | Ensures that two pieces of music can be composed in parallel.
 type HarmConstraints m1 m2 = (ValidHarmConcat (Align m1 m2))
 
 -- | Ensures that the chord is valid.
-type ChordConstraints (c :: ChordType n) d = (Primitive c, Primitive n, Primitive d, Rep c ~ [Int])
+type ChordConstraints (c :: ChordType n) d = (IntListRep c, Primitive n, Primitive d)
 
 type ProgressionConstraints p = (() :: Constraint)
 
