@@ -12,4 +12,4 @@ v1 = d qn :|: g qn :|: fs qn :|: g en :|: a en :|: bf qn :|: a qn :|: g hn
 
 v2 = d qn :|: ef qn :|: d qn :|: b_ en :|: a_ en :|: b_ qn :|: a_ qn :|: g_ hn
 
--- comp = v1 :-: v2 :-: v3 :-: v4
+comp = v1 :-: v2

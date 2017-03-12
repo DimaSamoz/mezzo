@@ -6,10 +6,10 @@ import Mezzo.Compose.Types
 
 import Mezzo.Render.MIDI
 
-v1_1 = melody $ g :+ a :+ b :+ g :+ withDur qn
-v2_1 = melody $ b_ :+ c :+ g :+ b_ :+ withDur qn
-v3_1 = melody $ d :+ d :+ d :+ d :+ withDur qn
-v4_1 = melody $ g_ :+ fs_ :+ e_ :+ d_ :+ withDur qn
+v1_1 = play $ Melody :| g :| a :| b :| g
+v2_1 = play $ Melody :| b_ :| c :| g :| b_
+v3_1 = play $ Melody :| d :| d :| d :| d
+v4_1 = play $ Melody :| g_ :| fs_ :| e_ :| d_
 
 fj_verse1 = v1_1 :-: v2_1 :-: v3_1  :-: v4_1
 
