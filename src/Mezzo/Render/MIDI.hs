@@ -46,6 +46,13 @@ type MidiTrack = Track Ticks
 -- Operations
 -------------------------------------------------------------------------------
 
+-- | Play a MIDI note with the specified duration and default velocity.
+midiNote :: Int -> Ticks -> MidiNote
+midiNote root dur = MidiNote {noteNum = root, vel = 100, start = 0, noteDur = dur}
+
+midiRest :: Ticks -> MidiNote
+midiRest dur = MidiNote {noteNum = 60, vel = 0, start = 0, noteDur = dur}
+
 -- | Start playing the specified 'MidiNote'.
 keyDown :: MidiNote -> MidiEvent
 keyDown n = (start n, NoteOn {channel = 0, key = noteNum n, velocity = vel n})
@@ -55,16 +62,16 @@ keyUp :: MidiNote -> MidiEvent
 keyUp n = (start n + noteDur n, NoteOn {channel = 0, key = noteNum n, velocity = 0})
 
 -- | Play the specified 'MidiNote'.
-playNote :: MidiNote -> MidiTrack
-playNote k = [keyDown k, keyUp k]
+playNote :: Int -> Ticks -> MidiTrack
+playNote root dur = map ($ midiNote root dur) [keyDown, keyUp]
 
 -- | Play a rest of the specified duration.
 playRest :: Ticks -> MidiTrack
-playRest dur = playNote MidiNote {noteNum = 60, vel = 0, start = 0, noteDur = dur}
+playRest dur = map ($ midiRest dur) [keyDown, keyUp]
 
 -- | Merge two parallel MIDI tracks.
-(>+<) :: MidiTrack -> MidiTrack -> MidiTrack
-m1 >+< m2 = removeTrackEnds $ m1 `merge` m2
+(><) :: MidiTrack -> MidiTrack -> MidiTrack
+m1 >< m2 = removeTrackEnds $ m1 `merge` m2
 
 -- | Convert a 'Dur' to 'Ticks'.
 durToTicks :: Primitive d => Dur d -> Ticks
@@ -91,18 +98,14 @@ midiSkeleton mel = Midi
         ]
     }
 
--- | Play a MIDI note with the specified duration and default velocity.
-midiNote :: Int -> Int -> MidiNote
-midiNote root dur = MidiNote {noteNum = root, vel = 100, start = 0, noteDur = dur}
-
 -- | Convert a 'Music' piece into a 'MidiTrack'.
 musicToMidi :: Music m -> MidiTrack
-musicToMidi (Note root dur) = playNote $ midiNote (prim root) (durToTicks dur)
+musicToMidi (Note root dur) = playNote (prim root) (durToTicks dur)
 musicToMidi (Rest dur) = playRest (durToTicks dur)
 musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
-musicToMidi (m1 :-: m2) = musicToMidi m1 >+< musicToMidi m2
-musicToMidi (Chord c d) = foldr1 (>+<) notes
-    where notes = map (playNote . flip midiNote (durToTicks d)) $ prim c
+musicToMidi (m1 :-: m2) = musicToMidi m1 >< musicToMidi m2
+musicToMidi (Chord c d) = foldr1 (><) notes
+    where notes = map (`playNote` durToTicks d) $ prim c
 
 -- | Create a MIDI file with the specified name and track.
 createMidi :: FilePath -> MidiTrack -> IO ()
