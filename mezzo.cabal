@@ -1,5 +1,5 @@
 name:                mezzo
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            Typesafe music composition
 description:         A Haskell music composition library that enforces common
                      musical rules in the type system.
@@ -16,8 +16,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
-                     , Mezzo
+  exposed-modules:     Mezzo
                      , Mezzo.Model
                      , Mezzo.Model.Prim
                      , Mezzo.Model.Music
@@ -27,6 +26,7 @@ library
                      , Mezzo.Model.Harmony.Functional
                      , Mezzo.Model.Reify
 
+                     , Mezzo.Compose
                      , Mezzo.Compose.Types
                      , Mezzo.Compose.Builder
                      , Mezzo.Compose.Templates
@@ -34,6 +34,7 @@ library
                      , Mezzo.Compose.Harmonic
                      , Mezzo.Compose.Combine
 
+                     , Mezzo.Render
                      , Mezzo.Render.MIDI
 
   build-depends:       base >= 4.7 && < 5
@@ -41,14 +42,6 @@ library
                      , template-haskell
                      , HCodecs
                      , boxes
-  default-language:    Haskell2010
-
-executable mezzo-exe
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , mezzo
   default-language:    Haskell2010
 
 test-suite mezzo-test

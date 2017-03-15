@@ -1,8 +1,8 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Mezzo
--- Description :  Mezzo core module
+-- Module      :  Mezzo.Render
+-- Description :  Mezzo exporting module
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
 --
@@ -10,18 +10,12 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Module providing the external interface to the Mezzo library and EDSL.
+-- Module providing the external interface to the Mezzo exporting module.
 --
 -----------------------------------------------------------------------------
 
-module Mezzo (module X) where
+module Mezzo.Render (module X) where
 
 -- Uses import/export shortcut as suggested by HLint.
 
-import Mezzo.Render as X
-import Mezzo.Compose as X
-import Mezzo.Model as X
-    ( Music (..)
-    , Voice (..)
-    , Partiture (..)
-    )
+import Mezzo.Render.MIDI as X
