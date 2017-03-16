@@ -38,9 +38,9 @@ accidentalLits
 octaveLits
 
 -- ** Duration literals and terminators
+mk32ndLits
 join <$> traverse mkDurLits [''Whole, ''Half, ''Quarter, ''Eighth, ''Sixteenth]
 
-mk32ndLits
 
 -- * Pitches
 

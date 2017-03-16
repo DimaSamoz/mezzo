@@ -125,26 +125,26 @@ mkDurLits name = do
             dec1' <- [d| $(varP litName') = Dur |]
             return $ tySig1 : dec1 ++ tySig1' : dec1'
     noteTerm <- do
-            let valName = mkName $ head (durLitFormatter name) : "n"
+            let valName = mkName $ (durLitFormatter name) !! 1 : "n"
             tySig2 <- sigD valName $ [t| forall r. IntRep r => RootT r $(conT name) |]
             dec2 <- [d| $(varP valName) = \p -> Note p $(varE litName) |]
-            let valName' = mkName $ head (durLitFormatter name) : "n\'"
+            let valName' = mkName $ (durLitFormatter name) !! 1 : "n\'"
             tySig2' <- sigD valName' $ [t| forall r. IntRep r => RootT r (Dot $(conT name)) |]
             dec2' <- [d| $(varP valName') = \p -> Note p $(varE litName') |]
             return $ tySig2 : dec2 ++ tySig2' : dec2'
     restTerm <- do
-            let valName = mkName $ head (durLitFormatter name) : "r"
+            let valName = mkName $ (durLitFormatter name) !! 1 : "r"
             tySig2 <- sigD valName $ [t| RestT $(conT name) |]
             dec2 <- [d| $(varP valName) = const (Rest $(varE litName)) |]
-            let valName' = mkName $ head (durLitFormatter name) : "r\'"
+            let valName' = mkName $ (durLitFormatter name) !! 1 : "r\'"
             tySig2' <- sigD valName' $ [t| RestT (Dot $(conT name)) |]
             dec2' <- [d| $(varP valName') = const (Rest $(varE litName')) |]
             return $ tySig2 : dec2 ++ tySig2' : dec2'
     chordTerm <- do
-            let valName = mkName $ head (durLitFormatter name) : "c"
+            let valName = mkName $ (durLitFormatter name) !! 1 : "c"
             tySig2 <- sigD valName $ [t| forall n r. (Primitive n, IntListRep r) => ChorT (r :: ChordType n) $(conT name) |]
             dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName) |]
-            let valName' = mkName $ head (durLitFormatter name) : "c\'"
+            let valName' = mkName $ (durLitFormatter name) !! 1 : "c\'"
             tySig2' <- sigD valName' $ [t| forall n r. (Primitive n, IntListRep r) => ChorT (r :: ChordType n) (Dot $(conT name)) |]
             dec2' <- [d| $(varP valName') = \c -> Chord c $(varE litName') |]
             return $ tySig2 : dec2 ++ tySig2' : dec2'
@@ -152,7 +152,7 @@ mkDurLits name = do
 
 mk32ndLits :: DecsQ -- Don't want to make dotted literals for thirty second notes.
 mk32ndLits = do
-    let litName = mkName $ "th"
+    let litName = mkName $ "_th"
     literal <- do
             tySig1 <- sigD litName $ [t| Dur $(conT ''ThirtySecond) |]
             dec1 <- [d| $(varP litName) = Dur |]
@@ -260,16 +260,16 @@ pcFormatter pc = '_' : map toLower (nameBase pc)
 
 -- | 'Accidental' formatter.
 accFormatter :: Formatter
-accFormatter = map toLower . take 2 . nameBase
+accFormatter = ('_' :) . map toLower . take 2 . nameBase
 
 -- | 'OctaveNum' formatter.
 octFormatter :: Formatter
-octFormatter oct = 'o' : drop 3 (nameBase oct)
+octFormatter oct = "_o" ++ drop 3 (nameBase oct)
 
 -- | One letter accidental with explicit 'Naturals'.
 shortAccFormatter :: Formatter
-shortAccFormatter (accFormatter -> "fl") = "f"
-shortAccFormatter (accFormatter -> name) = [head name]
+shortAccFormatter (accFormatter -> "_fl") = "f"
+shortAccFormatter (accFormatter -> name) = [name !! 1]
 
 -- | One letter accidental with implicit 'Naturals'.
 shorterAccFormatter :: Formatter
@@ -292,7 +292,7 @@ shortOctFormatter name = case nameBase name of
 
 -- | Formatter for duration literals.
 durLitFormatter :: Formatter
-durLitFormatter = map toLower . take 2 . nameBase
+durLitFormatter = ('_' :) . map toLower . take 2 . nameBase
 
 -- | Formatter for pitch literals.
 pitchLitFormatter :: Name -> Name -> Name -> String
