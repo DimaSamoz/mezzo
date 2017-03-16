@@ -314,7 +314,7 @@ choTyFormatter n = case nameBase n of
     "AugTriad"       -> "_aug"
     "DimTriad"       -> "_dim"
     "MajSeventh"     -> "_maj7"
-    "MajMinSeventh"  -> "_sev"
+    "MajMinSeventh"  -> "_dom7"
     "MinSeventh"     -> "_min7"
     "HalfDimSeventh" -> "_hdim7"
     "DimSeventh"     -> "_dim7"
