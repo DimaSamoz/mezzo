@@ -27,7 +27,7 @@ cabal install mezzo
 If using Stack, you will need to add the package to your `extra-deps` in your `stack.yaml` (as Mezzo is not part of Stackage yet), and then add it normally to your `.cabal` file dependencies:
 
 ```cabal
-extra-deps: [ mezzo-0.2.0.0 ]
+extra-deps: [ mezzo-0.2.0.2 ]
 
 build-depends: base >= 4.7 && < 5
              , mezzo
