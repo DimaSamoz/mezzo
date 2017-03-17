@@ -1,6 +1,6 @@
 # Mezzo
 
-[![Build Status](https://travis-ci.org/DimaSamoz/mezzo.svg?branch=master)](https://travis-ci.org/DimaSamoz/mezzo )
+[![Build Status](https://travis-ci.org/DimaSamoz/mezzo.svg?branch=master)](https://travis-ci.org/DimaSamoz/mezzo) [![Hackage](https://img.shields.io/hackage/v/mezzo.svg)](https://hackage.haskell.org/package/mezzo)
 
 *Mezzo* is a Haskell library and embedded domain-specific language for music description. Its novelty is in the fact that it can enforce various rules of music composition *statically*, that is, at compile-time. This effectively means that if you write "bad" music, your composition will not compile – think of it as a **very** strict spell-checker for music.
 
