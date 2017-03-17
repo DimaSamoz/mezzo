@@ -4,7 +4,7 @@ synopsis:            Typesafe music composition
 description:         A Haskell music composition library that enforces common
                      musical rules in the type system.
 homepage:            https://github.com/DimaSamoz/mezzo#readme
-license:             BSD3
+license:             MIT
 license-file:        LICENSE
 author:              Dima Szamozvancev
 maintainer:          ds709@cam.ac.uk
