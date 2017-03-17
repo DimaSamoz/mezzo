@@ -55,7 +55,13 @@ Save, build and execute (e.g., with `stack exec <project_name>`). You should get
 
 To test the correctness checking, change the `d` in `comp` to a `b`. You should see the following when you save the file:
 
-![First error](/docs/err1.png)
+```
+• Seventh intervals are not permitted in melody.
+• In the first argument of ‘(:|)’, namely ‘melody :| c :| b’
+  In the first argument of ‘(:|)’, namely ‘melody :| c :| b :| e’
+  In the first argument of ‘(:>>)’, namely
+    ‘melody :| c :| b :| e :| f_’
+```
 
 ## Composing in Mezzo
 
@@ -84,7 +90,7 @@ Notes are given by their pitch and duration. In builder style, every pitch has a
 * **Accidental**: a suffix of the pitch class, one of `f` (flat) or `s` (sharp). Natural accidentals are not specified, so `c` means C natural. Accidentals can also be written out as a separate attribute (`c sharp qn`), or even repeated (for example, double sharps: `c sharp sharp qn` or `cs sharp qn`).
 * **Octave**: the last component of the value. The default octave is 4, this is unmarked. Lower octaves are marked with `_`, `__`, `_3`, `_4` and `_5`. Higher octaves are marked with `'`, `''`, `'3` and `'4`. A C natural in octave 2 is therefore `c__ qn`, a B flat in octave 7 is `bf'3 qn`.
 
-Durations are written after the pitch. For notes, the value is the first letter of the duration name (eight, quarter, etc.) followed by `n` for note, e.g., `qn` for quarter note. A dotted duration is given by following the name with a `'`: `hn'` is a dotted half note, with the length of three quarters.
+Durations are written after the pitch. For notes, the value is the first letter of the duration name (eighth, quarter, etc.) followed by `n` for note, e.g., `qn` for quarter note. A dotted duration is specified by following the name with a `'`: `hn'` is a dotted half note, with the length of three quarters.
 
 #### Rests
 
@@ -115,11 +121,7 @@ Harmonic composition `(:-:)` plays two pieces of music at the same time:
 g qn :-: e qn :-: c qn
 ```
 
-For consistency, pieces should be composed from top voice to the bottom: the above example would therefore play a C major triad. The composed pieces can be any musical composition, as long as the durations of the pieces matches. If this is not the case, the shorter voice has to be padded by rests where necessary. A common use case for harmonic composition is playing the right and left hand of a piece at the same time:
-
-```haskell
-comp = right :-: left
-```
+For consistency, pieces should be composed from top voice to the bottom: the above example would therefore play a C major triad. The composed pieces can be any musical composition, as long as the durations of the pieces matches. If this is not the case, the shorter voice has to be padded by rests where necessary.
 
 #### Melodic composition
 
@@ -199,7 +201,7 @@ Mezzo enforces a number of composition rules found in classical (common practice
 
 ### Harmonic intervals
 
-Mezzo disallows very dissonant harmonic intervals like minor seconds, major sevenths and augmented octaves. That is, `c qn :-: b qn` produces a type error. Note that the rule only applies at harmonic composition and not enforced for chords: that is, a major seventh chord (which contains a major seventh) *is* allowed, but only when constructed symbolically. The composition `c maj7 qc :-: d' qn` is allowed, but `c maj qc :-: b qn :-: d' qn` triggers the error.
+Mezzo disallows very dissonant harmonic intervals like minor seconds, major sevenths and augmented octaves. For example, `c qn :-: b qn` produces a type error. Note that the rule only applies at harmonic composition and not enforced for chords: that is, a major seventh chord (which contains a major seventh) *is* allowed, but only when constructed symbolically. The composition `c maj7 qc :-: d' qn` is allowed, but `c maj qc :-: b qn :-: d' qn` triggers the error.
 
 ### Melodic intervals
 
