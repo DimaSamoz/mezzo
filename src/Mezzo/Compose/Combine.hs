@@ -24,9 +24,14 @@ module Mezzo.Compose.Combine
     , durToInt
     , duration
     , voices
+    , restWhile
     , pad
+    , pad2
+    , pad3
+    , pad4
     -- * Melody composition
     , play
+    , melody
     ) where
 
 import Mezzo.Model
@@ -68,9 +73,38 @@ voices (Chord c d) = chordVoices c
 chordVoices :: forall (n :: Nat) (c :: ChordType n) . Primitive n => Cho c -> Int
 chordVoices _ = prim (undefined :: ChordType n) -- Need to get a kind-level variable to the term level
 
--- | Add an empty voice to the end of a piece of music.
-pad :: (HarmConstraints m (FromSilence b), Primitive b) => Music (m :: Partiture (a - 1) b) -> Music ((m +-+ FromSilence b) :: Partiture a b)
-pad m = m :-: rest (musicDur m)
+-- | Add an empty voice to the piece of music.
+pad :: (HarmConstraints m (FromSilence b), Primitive b)
+    => Music (m :: Partiture (a - 1) b) -> Music ((m +-+ FromSilence b) :: Partiture a b)
+pad m = m :-: restWhile m
+
+-- | Add two empty voices to the piece of music.
+pad2 :: ( HarmConstraints m (FromSilence b)
+        , HarmConstraints (m +-+ FromSilence b) (FromSilence b)
+        , Primitive b)
+     => Music (m :: Partiture (a - 2) b) -> Music ((m +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
+pad2 m = m :-: restWhile m :-: restWhile m
+
+-- | Add three empty voices to the piece of music.
+pad3 :: ( HarmConstraints m (FromSilence b)
+        , HarmConstraints (m +-+ FromSilence b) (FromSilence b)
+        , HarmConstraints (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+        , Primitive b)
+     => Music (m :: Partiture (a - 3) b) -> Music ((m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
+pad3 m = m :-: restWhile m :-: restWhile m :-: restWhile m
+
+-- | Add four empty voices to the piece of music.
+pad4 :: ( HarmConstraints m (FromSilence b)
+        , HarmConstraints (m +-+ FromSilence b) (FromSilence b)
+        , HarmConstraints (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+        , HarmConstraints (m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+        , Primitive b)
+     => Music (m :: Partiture (a - 4) b) -> Music ((m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
+pad4 m = m :-: restWhile m :-: restWhile m :-: restWhile m :-: restWhile m
+
+-- | Rest for the duration of the given music piece.
+restWhile :: Primitive l =>  Music (m :: Partiture n l) -> Music (FromSilence l)
+restWhile m = rest (musicDur m)
 
 -------------------------------------------------------------------------------
 -- Melodies
