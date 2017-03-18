@@ -23,8 +23,6 @@ module Mezzo.Model.Music
     -- * Music
       Music (..)
     , Score (..)
-    -- * Harmonic constructs
-    , Progression
     -- * Constraints
     , MelConstraints
     , HarmConstraints
@@ -71,18 +69,10 @@ data Music :: forall n l. Partiture n l -> Type where
     (:-:) :: HarmConstraints m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
     -- | A chord specified by a chord type and a duration.
     Chord :: ChordConstraints c d => Cho c -> Dur d -> Music (FromChord c d)
-    -- Progression :: ProgressionConstraints p => Prog p -> Music (FromProg p)
+    Progression :: ProgressionConstraints p => TimeSig t -> Prog p -> Music (FromProg p t)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
-
--------------------------------------------------------------------------------
--- Harmonic constructs
--- Types and type synonyms constructing 'Music' instances from harmonic types.
--------------------------------------------------------------------------------
-
--- | A chord progression with the given scheme and chord length.
-type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceToChords l p) d)
 
 -------------------------------------------------------------------------------
 -- Musical constraints

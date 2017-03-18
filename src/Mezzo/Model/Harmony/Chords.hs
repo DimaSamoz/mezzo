@@ -30,7 +30,6 @@ module Mezzo.Model.Harmony.Chords
     , ChordType (..)
     , Cho (..)
     , FromChord
-    , ChordsToPartiture
     ) where
 
 import GHC.TypeLits
@@ -131,10 +130,6 @@ type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
 -- | Convert a chord to a partiture with the given length (one voice for each pitch).
 type family FromChord (c :: ChordType n) (l :: Nat) :: Partiture n l where
     FromChord c l = VectorToColMatrix (ChordToPitchList c) l
-
-type family ChordsToPartiture (v :: Vector (ChordType n) l) (d :: Nat) :: Partiture n (l * d) where
-    ChordsToPartiture None l = None
-    ChordsToPartiture (c :-- cs) d = FromChord c d +|+ ChordsToPartiture cs d
 
 -------------------------------------------------------------------------------
 -- Primitive instances

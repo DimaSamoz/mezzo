@@ -21,18 +21,23 @@ module Mezzo.Model.Harmony.Functional
     (
       Quality (..)
     , Degree (..)
-    , Piece (..)
+    , ProgType (..)
+    , Prog (..)
     , Phrase (..)
     , Cadence (..)
     , Tonic (..)
     , Dominant (..)
     , Subdominant (..)
-    , PieceToChords
+    , TimeSignature
+    , TimeSig (..)
+    , ChordsToPartiture
+    , ProgTypeToChords
+    , FromProg
     )
     where
 
 import GHC.TypeLits
-import Data.Kind
+import Data.Kind (Type)
 
 import Mezzo.Model.Types hiding (IntervalClass (..))
 import Mezzo.Model.Prim
@@ -85,9 +90,11 @@ instance {-# OVERLAPPABLE #-} TypeError (Text "Can't have a "
                                 => MinDegQuality d q
 
 -- | A functionally described piece of music, built from multiple phrases.
-data Piece (k :: KeyType) (l :: Nat) where
-    Cad :: Cadence k l -> Piece k l
-    (:=) :: Phrase k l -> Piece k (n - l) -> Piece k n
+data ProgType (k :: KeyType) (l :: Nat) where
+    Cad :: Cadence k l -> ProgType k l
+    (:=) :: Phrase k l -> ProgType k (n - l) -> ProgType k n
+
+data Prog (p :: ProgType k l) = Prog
 
 -- | A phrase matching a specific functional progression.
 data Phrase (k :: KeyType) (l :: Nat) where
@@ -195,9 +202,24 @@ type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) 
     PhraseToChords l (PhraseVI (d :: Dominant k dl) t) = DomToChords dl d ++. TonToChords t
 
 -- | Convert a piece to chords.
-type family PieceToChords (l :: Nat) (p :: Piece k l) :: Vector (ChordType 4) l where
-    PieceToChords l (Cad (c :: Cadence k l)) = CadToChords c
-    PieceToChords l ((p :: Phrase k l1) := ps) = PhraseToChords l1 p ++. PieceToChords (l - l1) ps
+type family ProgTypeToChords (l :: Nat) (p :: ProgType k l) :: Vector (ChordType 4) l where
+    ProgTypeToChords l (Cad (c :: Cadence k l)) = CadToChords c
+    ProgTypeToChords l ((p :: Phrase k l1) := ps) = PhraseToChords l1 p ++. ProgTypeToChords (l - l1) ps
+
+-- | The number of beats in a bar.
+type TimeSignature = Nat
+
+-- | Singleton for 'TimeSignature'.
+data TimeSig (t :: TimeSignature) = TimeSig
+
+-- | Convert a vector of chords ("chord progression") into a 'Partiture'.
+type family ChordsToPartiture (v :: Vector (ChordType n) l) (t :: TimeSignature) :: Partiture n (l * t * 8) where
+    ChordsToPartiture None l = None
+    ChordsToPartiture (c :-- cs) l = FromChord c (l * 8) +|+ ChordsToPartiture cs l
+
+-- | Convert a progression with a time signature into a partiture.
+type family FromProg (p :: ProgType k l) (t :: TimeSignature) :: Partiture 4 (l * t * 8) where
+    FromProg (p :: ProgType k l) t = ChordsToPartiture (ProgTypeToChords l p) t
 
 -- | Convert a quality to text.
 type family ShowQual (q :: Quality) :: ErrorMessage where
