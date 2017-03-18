@@ -5,7 +5,7 @@ description:         A Haskell music composition library that enforces common
                      musical rules in the type system.
 homepage:            https://github.com/DimaSamoz/mezzo
 license:             MIT
-license-file:        LICENSE
+license-file:        LICENSE.md
 author:              Dima Szamozvancev
 maintainer:          ds709@cam.ac.uk
 copyright:           2016 Dima Samozvancev
