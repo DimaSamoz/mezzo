@@ -38,11 +38,13 @@ module Mezzo.Model.Types
     -- * Harmonic types
     , Mode (..)
     , ScaleDegree (..)
+    , DegreeType (..)
     , KeyType (..)
     , RootType (..)
     , Mod (..)
     , ScaDeg (..)
     , KeyS (..)
+    , Deg (..)
     , Root (..)
     , RootToPitch
     , PitchToNat
@@ -59,6 +61,8 @@ module Mezzo.Model.Types
     , IntervalClass (..)
     , IntervalType (..)
     , MakeInterval
+    , OctPred
+    , OctSucc
     , HalfStepsUpBy
     , HalfStepsDownBy
     , RaiseBy
@@ -141,6 +145,8 @@ data Mode = MajorMode | MinorMode
 -- | The seven scale degrees.
 data ScaleDegree = I | II | III | IV | V | VI | VII
 
+data DegreeType = Degree ScaleDegree Accidental OctaveNum
+
 -- | The of a scale, chord or piece.
 data KeyType = Key PitchClass Accidental Mode
 
@@ -149,7 +155,7 @@ data RootType where
     -- | A pitch constructs a diatonic root.
     PitchRoot :: PitchType -> RootType
     -- | A key and a scale degree constructs a scalar root.
-    DegreeRoot :: KeyType -> ScaleDegree -> RootType
+    DegreeRoot :: KeyType -> DegreeType -> RootType
 
 -- | The singleton type for 'Mode'.
 data Mod (m :: Mode) = Mod
@@ -160,6 +166,8 @@ data ScaDeg (sd :: ScaleDegree) = ScaDeg
 -- | The singleton type for 'KeyType'.
 data KeyS (k :: KeyType) = KeyS
 
+data Deg (d :: DegreeType) = Deg
+
 -- | The singleton type for 'Root'.
 data Root (r :: RootType) where
     Root :: Primitive r => Root r
@@ -169,25 +177,27 @@ data Root (r :: RootType) where
 -- Note: the default octave for scalar roots is 'Oct2'.
 type family RootToPitch (dr :: RootType) :: PitchType where
     RootToPitch (PitchRoot p) = p
-    RootToPitch (DegreeRoot (Key pc acc m) d) =
-                    HalfStepsUpBy (Pitch pc acc Oct2) (DegreeOffset m d)
+    RootToPitch (DegreeRoot (Key pc acc m) (Degree sd dacc oct)) =
+                    HalfStepsUpBy (Pitch pc acc oct) (DegreeOffset m sd dacc)
 
 -- | Calculate the semitone offset of a scale degree in a given mode.
-type family DegreeOffset (m :: Mode) (d :: ScaleDegree) where
-    DegreeOffset MajorMode I   = 0
-    DegreeOffset MajorMode II  = 2
-    DegreeOffset MajorMode III = 4
-    DegreeOffset MajorMode IV  = 5
-    DegreeOffset MajorMode V   = 7
-    DegreeOffset MajorMode VI  = 9
-    DegreeOffset MajorMode VII = 11
-    DegreeOffset MinorMode I   = 0
-    DegreeOffset MinorMode II  = 2
-    DegreeOffset MinorMode III = 3
-    DegreeOffset MinorMode IV  = 5
-    DegreeOffset MinorMode V   = 7
-    DegreeOffset MinorMode VI  = 8
-    DegreeOffset MinorMode VII = 10
+type family DegreeOffset (m :: Mode) (d :: ScaleDegree) (a :: Accidental) where
+    DegreeOffset MajorMode I   Natural = 0
+    DegreeOffset MajorMode II  Natural = 2
+    DegreeOffset MajorMode III Natural = 4
+    DegreeOffset MajorMode IV  Natural = 5
+    DegreeOffset MajorMode V   Natural = 7
+    DegreeOffset MajorMode VI  Natural = 9
+    DegreeOffset MajorMode VII Natural = 11
+    DegreeOffset MinorMode I   Natural = 0
+    DegreeOffset MinorMode II  Natural = 2
+    DegreeOffset MinorMode III Natural = 3
+    DegreeOffset MinorMode IV  Natural = 5
+    DegreeOffset MinorMode V   Natural = 7
+    DegreeOffset MinorMode VI  Natural = 8
+    DegreeOffset MinorMode VII Natural = 10
+    DegreeOffset m         sd  Flat    = (DegreeOffset m sd Natural) - 1
+    DegreeOffset m         sd  Sharp   = (DegreeOffset m sd Natural) + 1
 
 -- | Sharpen a root.
 type family Sharpen (r :: RootType) :: RootType where
@@ -643,6 +653,11 @@ instance (IntRep pc, IntRep acc, IntRep oct)
     prim p = prim (PC @pc) + prim (Acc @acc) + prim (Oct @oct)
     pretty p = pretty (PC @pc) ++ pretty (Acc @acc) ++ pretty (Oct @oct)
 
+instance (IntRep sd, IntRep acc, IntRep oct) => Primitive (Degree sd acc oct) where
+    type Rep (Degree sd acc oct) = Int
+    prim _ = prim (ScaDeg @sd) + prim (Acc @acc) + prim (Oct @oct)
+    pretty _ = pretty (ScaDeg @sd) ++ pretty (Acc @acc) ++ pretty (Oct @oct)
+
 instance Primitive Silence where type Rep Silence = Int ; prim s = 60 ; pretty s = "~~~~"
 
 instance IntRep p => Primitive (Root (PitchRoot p)) where
@@ -672,12 +687,11 @@ instance (IntRep pc, IntRep acc, BoolRep mo) => Primitive (Key pc acc mo) where
                             else [0, 2, 3, 5, 7, 8, 10]
     pretty k = pretty (PC @pc) ++ pretty (Acc @acc) ++ " " ++ pretty (Mod @mo)
 
-
-instance (IntRep p, RootToPitch (DegreeRoot k sd) ~ p, Primitive sd, Primitive k)
-        => Primitive (DegreeRoot k sd) where
-    type Rep (DegreeRoot k sd) = Int
+instance (IntRep p, RootToPitch (DegreeRoot k deg) ~ p, Primitive deg, Primitive k)
+        => Primitive (DegreeRoot k deg) where
+    type Rep (DegreeRoot k deg) = Int
     prim r = prim (Pit @p)
-    pretty r = pretty (ScaDeg @sd)
+    pretty r = pretty (Deg @deg)
 
 instance IntRep p => Primitive (PitchRoot p) where
     type Rep (PitchRoot p) = Int

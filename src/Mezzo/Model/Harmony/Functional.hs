@@ -20,7 +20,7 @@
 module Mezzo.Model.Harmony.Functional
     (
       Quality (..)
-    , Degree (..)
+    , DegreeC (..)
     , ProgType (..)
     , Phrase (..)
     , Cadence (..)
@@ -52,9 +52,9 @@ import Mezzo.Model.Harmony.Chords
 -- | The quality of a scale degree chord.
 data Quality = MajQ | MinQ | DomQ | DimQ
 
--- | A scale degree chord in given key, on the given scale, with the given quality.
-data Degree (d :: ScaleDegree) (q :: Quality) (k :: KeyType) (i :: Inversion) where
-    DegChord :: Degree d q k i
+-- | A scale degree chord in given key, on the given scale, with the given quality and octave.
+data DegreeC (d :: ScaleDegree) (q :: Quality) (k :: KeyType) (i :: Inversion) (o :: OctaveNum) where
+    DegChord :: DegreeC d q k i o
 
 -- | Ensure that the degree and quality match the mode.
 class DiatonicDegree (d :: ScaleDegree) (q :: Quality) (k :: KeyType)
@@ -112,24 +112,22 @@ data Phrase (k :: KeyType) (l :: Nat) where
 -- | A cadence in a specific key with a specific length.
 data Cadence (k :: KeyType) (l :: Nat) where
     -- | Authentic cadence with major fifth chord.
-    AuthCad    :: Degree V MajQ k Inv1 -> Degree I q k Inv0 -> Cadence k 2
+    AuthCad    :: DegreeC V MajQ k Inv1 (OctPred o) -> DegreeC I q k Inv0 o -> Cadence k 2
     -- | Authentic cadence with dominant seventh fifth chord.
-    AuthCad7   :: Degree V DomQ k Inv2 -> Degree I q k Inv0 -> Cadence k 2
+    AuthCad7   :: DegreeC V DomQ k Inv2 (OctPred o) -> DegreeC I q k Inv0 o -> Cadence k 2
     -- | Authentic cadence with diminished seventh chord.
-    AuthCadVii :: Degree VII DimQ k Inv0 -> Degree I q k Inv0 -> Cadence k 2
+    AuthCadVii :: DegreeC VII DimQ k Inv1 (OctPred o) -> DegreeC I q k Inv0 o -> Cadence k 2
     -- | Authentic cadence with a cadential 6-4 chord
-    AuthCad64  :: Degree I MajQ k Inv2 -> Degree V DomQ k Inv3 -> Degree I MajQ k Inv1 -> Cadence k 3
-    -- | Half cadence ending with a major fifth chord.
-    HalfCad    :: Degree d q k i -> Degree V MajQ k Inv0 -> Cadence k 2
+    AuthCad64  :: DegreeC I MajQ k Inv2 o -> DegreeC V DomQ k Inv3 (OctPred o) -> DegreeC I MajQ k Inv1 o -> Cadence k 3
     -- | Deceptive cadence from a dominant fifth to a sixth.
-    DeceptCad  :: Degree V DomQ k Inv0 -> Degree VI q k Inv2 -> Cadence k 2
+    DeceptCad  :: DegreeC V DomQ k Inv0 (OctPred o) -> DegreeC VI q k Inv0 o -> Cadence k 2
 
 -- | A tonic chord.
 data Tonic (k :: KeyType) (l :: Nat) where
     -- | A major tonic chord.
-    TonMaj :: Degree I MajQ k Inv0 -> Tonic k 1 -- Temporarily (?) allow only no inversion
+    TonMaj :: DegreeC I MajQ k Inv0 o -> Tonic k 1 -- Temporarily (?) allow only no inversion
     -- | A minor tonic chord.
-    TonMin :: Degree I MinQ k Inv0 -> Tonic k 1
+    TonMin :: DegreeC I MinQ k Inv0 o -> Tonic k 1
 
 class NotInv2 (i :: Inversion)
 instance NotInv2 Inv0
@@ -140,30 +138,30 @@ instance NotInv2 Inv3
 -- | A dominant chord progression.
 data Dominant (k :: KeyType) (l :: Nat) where
     -- | Major fifth dominant.
-    DomVM   :: Degree V MajQ k i -> Dominant k 1
+    DomVM   :: DegreeC V MajQ k i o -> Dominant k 1
     -- | Seventh chord fifth degree dominant.
-    DomV7   :: Degree V DomQ k i -> Dominant k 1
+    DomV7   :: DegreeC V DomQ k i o -> Dominant k 1
     -- | Diminished seventh degree dominant.
-    DomVii0 :: Degree VII DimQ k i -> Dominant k 1
+    DomVii0 :: DegreeC VII DimQ k i o -> Dominant k 1
     -- | Subdominant followed by dominant.
     DomSD   :: Subdominant k l1 -> Dominant k (l - l1) -> Dominant k l
     -- | Secondary dominant followed by dominant.
-    DomSecD :: Degree II DomQ k Inv0 -> Degree V DomQ k Inv2 -> Dominant k 2
+    DomSecD :: DegreeC II DomQ k Inv0 (OctPred o) -> DegreeC V DomQ k Inv2 o -> Dominant k 2
 
 -- | A subdominant chord progression.
 data Subdominant (k :: KeyType) (l :: Nat) where
     -- | Minor second subdominant.
-    SubIIm     :: Degree II MinQ k i -> Subdominant k 1
+    SubIIm     :: DegreeC II MinQ k i o -> Subdominant k 1
     -- | Major fourth subdominant.
-    SubIVM     :: Degree IV MajQ k i -> Subdominant k 1
-    -- | Minor third followed by major fourth subdominant
-    SubIIImIVM :: Degree III MinQ k i1 -> Degree IV MajQ k i2 -> Subdominant k 2
+    SubIVM     :: DegreeC IV MajQ k i o -> Subdominant k 1
+    -- | Minor third followed by major fourth subdominant.
+    SubIIImIVM :: DegreeC III MinQ k i1 o -> DegreeC IV MajQ k i2 o -> Subdominant k 2
     -- | Minor fourth dominant.
-    SubIVm     :: Degree IV MinQ k i -> Subdominant k 1
+    SubIVm     :: DegreeC IV MinQ k i o -> Subdominant k 1
 
 -- | Convert a scale degree to a chord.
-type family DegToChord (d :: Degree d q k i) :: ChordType 4 where
-    DegToChord (DegChord :: Degree d q k i) = SeventhChord (DegreeRoot k d) (QualToType q) i
+type family DegToChord (d :: DegreeC d q k i o) :: ChordType 4 where
+    DegToChord (DegChord :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
 
 -- | Convert a quality to a seventh chord type.
 type family QualToType (q :: Quality) :: SeventhType where
@@ -178,7 +176,6 @@ type family CadToChords (c :: Cadence k l) :: Vector (ChordType 4) l where
     CadToChords (AuthCad7 d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
     CadToChords (AuthCadVii d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
     CadToChords (AuthCad64 d1 d2 d3) = DegToChord d1 :-- DegToChord d2 :-- DegToChord d3 :-- None
-    CadToChords (HalfCad d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
     CadToChords (DeceptCad d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
 
 -- | Convert a tonic to chords.
@@ -335,11 +332,6 @@ instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep c
     type Rep (AuthCad64 d1 d2 d3) = [[Int]]
     prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2), prim (Cho @4 @ch3)]
     pretty _ = "AuthCad 6-4"
-
-instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (HalfCad d1 d2) where
-    type Rep (HalfCad d1 d2) = [[Int]]
-    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
-    pretty _ = "HalfCad"
 
 instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (DeceptCad d1 d2) where
     type Rep (DeceptCad d1 d2) = [[Int]]
