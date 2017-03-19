@@ -146,7 +146,7 @@ data Dominant (k :: KeyType) (l :: Nat) where
     -- | Subdominant followed by dominant.
     DomSD   :: Subdominant k l1 -> Dominant k (l - l1) -> Dominant k l
     -- | Secondary dominant followed by dominant.
-    DomSecD :: DegreeC II DomQ k Inv0 (OctPred o) -> DegreeC V DomQ k Inv2 o -> Dominant k 2
+    DomSecD :: DegreeC II DomQ k Inv0 o -> DegreeC V DomQ k Inv2 (OctPred o) -> Dominant k 2
 
 -- | A subdominant chord progression.
 data Subdominant (k :: KeyType) (l :: Nat) where
@@ -284,9 +284,9 @@ instance (IntLListRep sd, IntLListRep d) => Primitive (DomSD (sd :: Subdominant 
     prim _ = prim (Sub @k @sdur @sd) ++ prim (Dom @k @(l - sdur) @d)
     pretty _ = pretty (Sub @k @sdur @sd) ++ " | " ++ pretty (Dom @k @(l - sdur) @d)
 
-instance (ch ~ DegToChord d, IntListRep ch) => Primitive (DomSecD d) where
-    type Rep (DomSecD d) = [[Int]]
-    prim _ = [prim (Cho @4 @ch)]
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (DomSecD d1 d2) where
+    type Rep (DomSecD d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1)] ++ [prim (Cho @4 @ch2)]
     pretty _ = "Dom SecD"
 
 -- Subdominant
