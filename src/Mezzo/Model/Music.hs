@@ -69,7 +69,7 @@ data Music :: forall n l. Partiture n l -> Type where
     (:-:) :: HarmConstraints m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
     -- | A chord specified by a chord type and a duration.
     Chord :: ChordConstraints c d => Cho c -> Dur d -> Music (FromChord c d)
-    Progression :: ProgressionConstraints p => TimeSig t -> Prog p -> Music (FromProg p t)
+    Progression :: ProgConstraints t p => TimeSig t -> Prog p -> Music (FromProg p t)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
@@ -102,7 +102,7 @@ type HarmConstraints m1 m2 = IfStrict (ValidHarmConcat (Align m1 m2))
 type ChordConstraints (c :: ChordType n) d = (IntListRep c, Primitive n, Primitive d)
 
 -- | Ensures that a progression is valid.
-type ProgressionConstraints p = Valid
+type ProgConstraints t p = (IntLListRep p, IntRep t, KnownNat t)
 
 ---- Melodic constraints
 
@@ -278,7 +278,7 @@ instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
 -- Pretty-printing
 -------------------------------------------------------------------------------
 
-instance Show (Music m) where show = render . ppMusic
+-- instance Show (Music m) where show = render . ppMusic
 
 -- | Pretty-print a 'Music' value.
 ppMusic :: Music m -> Box

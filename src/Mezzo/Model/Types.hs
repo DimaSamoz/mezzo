@@ -664,15 +664,18 @@ instance Primitive VI   where type Rep VI   = Int ; prim d = 5 ; pretty d = "VI"
 instance Primitive VII  where type Rep VII  = Int ; prim d = 6 ; pretty d = "VII"
 
 
-instance (IntRep pc, IntRep acc, IntRep mo) => Primitive (Key pc acc mo) where
-    type Rep (Key pc acc mo) = Int
-    prim k = 0 -- to be changed
+instance (IntRep pc, IntRep acc, BoolRep mo) => Primitive (Key pc acc mo) where
+    type Rep (Key pc acc mo) = [Int]
+    prim k = (+ (prim (PC @pc) + prim (Acc @acc))) <$> baseScale
+        where baseScale = if (prim (Mod @ mo))
+                            then [0, 2, 4, 5, 7, 9, 11]
+                            else [0, 2, 3, 5, 7, 8, 10]
     pretty k = pretty (PC @pc) ++ pretty (Acc @acc) ++ " " ++ pretty (Mod @mo)
 
 
-instance (IntRep p, RootToPitch (DegreeRoot k sd) ~ p, Primitive sd)
-        => Primitive (Root (DegreeRoot k sd)) where
-    type Rep (Root (DegreeRoot k sd)) = Int
+instance (IntRep p, RootToPitch (DegreeRoot k sd) ~ p, Primitive sd, Primitive k)
+        => Primitive (DegreeRoot k sd) where
+    type Rep (DegreeRoot k sd) = Int
     prim r = prim (Pit @p)
     pretty r = pretty (ScaDeg @sd)
 

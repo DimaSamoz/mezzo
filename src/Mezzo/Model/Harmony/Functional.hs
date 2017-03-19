@@ -1,5 +1,5 @@
-{-# LANGUAGE  TypeInType, MultiParamTypeClasses, FlexibleInstances,
-    UndecidableInstances, GADTs, TypeOperators, TypeFamilies, FlexibleContexts #-}
+{-# LANGUAGE  TypeInType, MultiParamTypeClasses, FlexibleInstances, TypeApplications, ScopedTypeVariables,
+    UndecidableInstances, GADTs, TypeOperators, TypeFamilies, FlexibleContexts, ViewPatterns #-}
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
@@ -22,7 +22,6 @@ module Mezzo.Model.Harmony.Functional
       Quality (..)
     , Degree (..)
     , ProgType (..)
-    , Prog (..)
     , Phrase (..)
     , Cadence (..)
     , Tonic (..)
@@ -33,12 +32,19 @@ module Mezzo.Model.Harmony.Functional
     , ChordsToPartiture
     , ProgTypeToChords
     , FromProg
+    , Prog (..)
+    , Ton (..)
+    , Dom (..)
+    , Sub (..)
+    , Cade (..)
+    , Phr (..)
     )
     where
 
 import GHC.TypeLits
 import Data.Kind (Type)
 
+import Mezzo.Model.Reify
 import Mezzo.Model.Types hiding (IntervalClass (..))
 import Mezzo.Model.Prim
 import Mezzo.Model.Harmony.Chords
@@ -237,3 +243,129 @@ type family ShowDeg (d :: ScaleDegree) :: ErrorMessage where
     ShowDeg V = Text "5th"
     ShowDeg VI = Text "6th"
     ShowDeg VII = Text "7th"
+
+-- Singletons
+
+data Ton (t :: Tonic k d) = Ton
+data Dom (d :: Dominant k d) = Dom
+data Sub (s :: Subdominant k d) = Sub
+
+data Cade (c :: Cadence k d) = Cade
+data Phr (p :: Phrase k d) = Phr
+
+-- Tonic
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (TonMaj d) where
+    type Rep (TonMaj d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Ton Maj"
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (TonMin d) where
+    type Rep (TonMin d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Ton Min"
+
+-- Dominant
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (DomVM d) where
+    type Rep (DomVM d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Dom Maj"
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (DomV7 d) where
+    type Rep (DomV7 d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Dom Maj7"
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (DomVii0 d) where
+    type Rep (DomVii0 d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Dom VII0"
+
+instance (IntLListRep sd, IntLListRep d) => Primitive (DomSD (sd :: Subdominant k sdur) (d :: Dominant k (l - sdur)) :: Dominant k l) where
+    type Rep (DomSD sd d) = [[Int]]
+    prim _ = prim (Sub @k @sdur @sd) ++ prim (Dom @k @(l - sdur) @d)
+    pretty _ = pretty (Sub @k @sdur @sd) ++ " | " ++ pretty (Dom @k @(l - sdur) @d)
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (DomSecD d) where
+    type Rep (DomSecD d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Dom SecD"
+
+-- Subdominant
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (SubIIm d) where
+    type Rep (SubIIm d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Sub ii"
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (SubIVM d) where
+    type Rep (SubIVM d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Sub IV"
+
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (SubIIImIVM d1 d2) where
+    type Rep (SubIIImIVM d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
+    pretty _ = "Sub iii IV"
+
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (SubIVm d) where
+    type Rep (SubIVm d) = [[Int]]
+    prim _ = [prim (Cho @4 @ch)]
+    pretty _ = "Sub iv"
+
+-- Cadences
+
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (AuthCad d1 d2) where
+    type Rep (AuthCad d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
+    pretty _ = "AuthCad"
+
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (AuthCad7 d1 d2) where
+    type Rep (AuthCad7 d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
+    pretty _ = "AuthCad V7"
+
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (AuthCadVii d1 d2) where
+    type Rep (AuthCadVii d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
+    pretty _ = "AuthCad vii"
+
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2, ch3 ~ DegToChord d3, IntListRep ch3) => Primitive (AuthCad64 d1 d2 d3) where
+    type Rep (AuthCad64 d1 d2 d3) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2), prim (Cho @4 @ch3)]
+    pretty _ = "AuthCad 6-4"
+
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (HalfCad d1 d2) where
+    type Rep (HalfCad d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
+    pretty _ = "HalfCad"
+
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (DeceptCad d1 d2) where
+    type Rep (DeceptCad d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
+    pretty _ = "DeceptCad"
+
+-- Phrases
+
+instance (IntLListRep t1, IntLListRep d, IntLListRep t2) => Primitive (PhraseIVI (t1 :: Tonic k (l2 - l1)) (d :: Dominant k l1) (t2 :: Tonic k (l - l2)) :: Phrase k l) where
+    type Rep (PhraseIVI t1 d t2) = [[Int]]
+    prim _ = prim (Ton @k @(l2 - l1) @t1) ++ prim (Dom @k @l1 @d) ++ prim (Ton @k @(l - l2) @t2)
+    pretty _ = pretty (Ton @k @(l2 - l1) @t1) ++ " | " ++ pretty (Dom @k @l1 @d) ++ " | " ++ pretty (Ton @k @(l - l2) @t2)
+
+instance (IntLListRep d, IntLListRep t) => Primitive (PhraseVI (d :: Dominant k l1) (t :: Tonic k (l - l1)) :: Phrase k l) where
+    type Rep (PhraseVI d t) = [[Int]]
+    prim _ = prim (Dom @k @l1 @d) ++ prim (Ton @k @(l - l1) @t)
+    pretty _ = pretty (Dom @k @l1 @d) ++ " | " ++ pretty (Ton @k @(l - l1) @t)
+
+-- Progressions
+
+instance (IntLListRep c) => Primitive (Cad c :: ProgType k l) where
+    type Rep (Cad c) = [[Int]]
+    prim _ = prim (Cade @k @l @c)
+    pretty _ = pretty (Cade @k @l @c)
+
+instance (IntLListRep ph, IntLListRep pr) => Primitive ((ph :: Phrase k l) := (pr :: ProgType k (n - l)) :: ProgType k n) where
+    type Rep (ph := pr) = [[Int]]
+    prim _ = prim (Phr @k @l @ph) ++ prim (Prog @k @(n - l) @pr)
+    pretty _ = pretty (Phr @k @l @ph) ++ " || " ++ pretty (Prog @k @(n - l) @pr)
