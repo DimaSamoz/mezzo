@@ -21,6 +21,7 @@ module Mezzo.Render.MIDI
     where
 
 import Mezzo.Model
+import Mezzo.Compose (_qu, _wh)
 
 import Codec.Midi
 
@@ -106,6 +107,12 @@ musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
 musicToMidi (m1 :-: m2) = musicToMidi m1 >< musicToMidi m2
 musicToMidi (Chord c d) = foldr1 (><) notes
     where notes = map (`playNote` durToTicks d) $ prim c
+musicToMidi (Progression ts p) = foldr1 (++) chords
+    where chords = (toChords <$> init (prim p)) ++ [cadence (last (prim p))]
+          toChords :: [Int] -> MidiTrack
+          toChords = concat . replicate (prim ts) . foldr1 (><) . map (`playNote` durToTicks _qu)
+          cadence :: [Int] -> MidiTrack
+          cadence = foldr1 (><) . map (`playNote` durToTicks _wh)
 
 -- | Create a MIDI file with the specified name and track.
 createMidi :: FilePath -> MidiTrack -> IO ()
