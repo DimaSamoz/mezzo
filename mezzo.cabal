@@ -32,7 +32,8 @@ library
                      , Mezzo.Compose.Builder
                      , Mezzo.Compose.Templates
                      , Mezzo.Compose.Basic
-                     , Mezzo.Compose.Harmonic
+                     , Mezzo.Compose.Chords
+                     , Mezzo.Compose.Harmony
                      , Mezzo.Compose.Combine
 
                      , Mezzo.Render

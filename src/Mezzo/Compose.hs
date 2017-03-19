@@ -22,4 +22,5 @@ import Mezzo.Compose.Basic as X
 import Mezzo.Compose.Builder as X
 import Mezzo.Compose.Types as X
 import Mezzo.Compose.Combine as X
+import Mezzo.Compose.Chords as X
 import Mezzo.Compose.Harmonic as X

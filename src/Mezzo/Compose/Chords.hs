@@ -3,7 +3,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Mezzo.Compose.Harmonic
+-- Module      :  Mezzo.Compose.Chords
 -- Description :  Harmonic composition units
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
@@ -16,7 +16,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Mezzo.Compose.Harmonic where
+module Mezzo.Compose.Chords where
 
 import Mezzo.Model
 import Mezzo.Compose.Types
