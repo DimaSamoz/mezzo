@@ -27,6 +27,7 @@ module Mezzo.Model.Music
     , MelConstraints
     , HarmConstraints
     , ChordConstraints
+    , ProgConstraints
     ) where
 
 import Data.Kind
@@ -278,7 +279,7 @@ instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
 -- Pretty-printing
 -------------------------------------------------------------------------------
 
--- instance Show (Music m) where show = render . ppMusic
+instance Show (Music m) where show = render . ppMusic
 
 -- | Pretty-print a 'Music' value.
 ppMusic :: Music m -> Box
@@ -287,6 +288,7 @@ ppMusic (Rest d) = char '|' <+> text "~~~~" <+> doc d
 ppMusic (m1 :|: m2) = ppMusic m1 <> emptyBox 1 1 <> ppMusic m2
 ppMusic (m1 :-: m2) = ppMusic m1 // ppMusic m2
 ppMusic (Chord c d) = char '|' <+> doc c <+> doc d
+ppMusic (Progression ts p) = text "Prog" <+> doc ts <+> doc p
 
 -- | Convert a showable value into a pretty-printed box.
 doc :: Show a => a -> Box

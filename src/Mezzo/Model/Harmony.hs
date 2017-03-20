@@ -1,8 +1,8 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Mezzo.Compose
--- Description :  Mezzo music description language
+-- Module      :  Mezzo.Model.Harmony
+-- Description :  Mezzo harmonic constructs
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
 --
@@ -10,17 +10,14 @@
 -- Stability   :  experimental
 -- Portability :  portable
 --
--- Module providing the external interface to the Mezzo EDSL.
+-- Module providing the external interface to the Mezzo harmonic constructs.
 --
 -----------------------------------------------------------------------------
 
-module Mezzo.Compose (module X) where
+module Mezzo.Model.Harmony (module X) where
 
 -- Uses import/export shortcut as suggested by HLint.
 
-import Mezzo.Compose.Basic as X
-import Mezzo.Compose.Builder as X
-import Mezzo.Compose.Types as X
-import Mezzo.Compose.Combine as X
-import Mezzo.Compose.Chords as X
-import Mezzo.Compose.Harmony as X
+import Mezzo.Model.Harmony.Chords as X
+import Mezzo.Model.Harmony.Functional as X
+import Mezzo.Model.Harmony.Motion as X

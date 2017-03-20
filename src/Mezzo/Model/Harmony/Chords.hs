@@ -30,6 +30,7 @@ module Mezzo.Model.Harmony.Chords
     , ChordType (..)
     , Cho (..)
     , FromChord
+    , ChordToPitchList, BuildOnRoot
     ) where
 
 import GHC.TypeLits

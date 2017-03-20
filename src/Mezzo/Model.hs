@@ -44,6 +44,8 @@ import Mezzo.Model.Types as X
     , PitchToNat
     , Sharpen
     , Flatten
+    , OctPred
+    , OctSucc
     , Dot
     , FromRoot
     , FromSilence

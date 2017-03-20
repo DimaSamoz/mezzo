@@ -36,8 +36,9 @@ module Mezzo.Model.Harmony.Functional
     , Ton (..)
     , Dom (..)
     , Sub (..)
-    , Cade (..)
+    , Cad (..)
     , Phr (..)
+    , QualToType, DegToChord
     )
     where
 
@@ -97,7 +98,7 @@ instance {-# OVERLAPPABLE #-} TypeError (Text "Can't have a "
 
 -- | A functionally described piece of music, built from multiple phrases.
 data ProgType (k :: KeyType) (l :: Nat) where
-    Cad :: Cadence k l -> ProgType k l
+    CadPhrase :: Cadence k l -> ProgType k l
     (:=) :: Phrase k l -> ProgType k (n - l) -> ProgType k n
 
 data Prog (p :: ProgType k l) = Prog
@@ -138,9 +139,9 @@ instance NotInv2 Inv3
 -- | A dominant chord progression.
 data Dominant (k :: KeyType) (l :: Nat) where
     -- | Major fifth dominant.
-    DomVM   :: DegreeC V MajQ k i o -> Dominant k 1
+    DomVM   :: DegreeC V MajQ k Inv2 o -> Dominant k 1
     -- | Seventh chord fifth degree dominant.
-    DomV7   :: DegreeC V DomQ k i o -> Dominant k 1
+    DomV7   :: DegreeC V DomQ k Inv2 o -> Dominant k 1
     -- | Diminished seventh degree dominant.
     DomVii0 :: DegreeC VII DimQ k i o -> Dominant k 1
     -- | Subdominant followed by dominant.
@@ -155,13 +156,15 @@ data Subdominant (k :: KeyType) (l :: Nat) where
     -- | Major fourth subdominant.
     SubIVM     :: DegreeC IV MajQ k i o -> Subdominant k 1
     -- | Minor third followed by major fourth subdominant.
-    SubIIImIVM :: DegreeC III MinQ k i1 o -> DegreeC IV MajQ k i2 o -> Subdominant k 2
+    SubIIImIVM :: DegreeC III MinQ k i1 o -> DegreeC IV MajQ k i2 (OctPred o) -> Subdominant k 2
     -- | Minor fourth dominant.
     SubIVm     :: DegreeC IV MinQ k i o -> Subdominant k 1
 
 -- | Convert a scale degree to a chord.
-type family DegToChord (d :: DegreeC d q k i o) :: ChordType 4 where
-    DegToChord (DegChord :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
+-- type family DegToChord (d :: DegreeC d q k i o) :: ChordType 4 where
+--     DegToChord (DegChord :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
+
+type DegToChord (dc :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
 
 -- | Convert a quality to a seventh chord type.
 type family QualToType (q :: Quality) :: SeventhType where
@@ -206,7 +209,7 @@ type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) 
 
 -- | Convert a piece to chords.
 type family ProgTypeToChords (l :: Nat) (p :: ProgType k l) :: Vector (ChordType 4) l where
-    ProgTypeToChords l (Cad (c :: Cadence k l)) = CadToChords c
+    ProgTypeToChords l (CadPhrase (c :: Cadence k l)) = CadToChords c
     ProgTypeToChords l ((p :: Phrase k l1) := ps) = PhraseToChords l1 p ++. ProgTypeToChords (l - l1) ps
 
 -- | The number of beats in a bar.
@@ -217,7 +220,7 @@ data TimeSig (t :: TimeSignature) = TimeSig
 
 -- | Convert a vector of chords ("chord progression") into a 'Partiture'.
 type family ChordsToPartiture (v :: Vector (ChordType n) l) (t :: TimeSignature) :: Partiture n (l * t * 8) where
-    ChordsToPartiture None l = None
+    ChordsToPartiture None _ = (End :-- End :-- End :-- End :-- None)
     ChordsToPartiture (c :-- cs) l = FromChord c (l * 8) +|+ ChordsToPartiture cs l
 
 -- | Convert a progression with a time signature into a partiture.
@@ -247,7 +250,7 @@ data Ton (t :: Tonic k d) = Ton
 data Dom (d :: Dominant k d) = Dom
 data Sub (s :: Subdominant k d) = Sub
 
-data Cade (c :: Cadence k d) = Cade
+data Cad (c :: Cadence k d) = Cad
 data Phr (p :: Phrase k d) = Phr
 
 -- Tonic
@@ -352,10 +355,10 @@ instance (IntLListRep d, IntLListRep t) => Primitive (PhraseVI (d :: Dominant k 
 
 -- Progressions
 
-instance (IntLListRep c) => Primitive (Cad c :: ProgType k l) where
-    type Rep (Cad c) = [[Int]]
-    prim _ = prim (Cade @k @l @c)
-    pretty _ = pretty (Cade @k @l @c)
+instance (IntLListRep c) => Primitive (CadPhrase c :: ProgType k l) where
+    type Rep (CadPhrase c) = [[Int]]
+    prim _ = prim (Cad @k @l @c)
+    pretty _ = pretty (Cad @k @l @c)
 
 instance (IntLListRep ph, IntLListRep pr) => Primitive ((ph :: Phrase k l) := (pr :: ProgType k (n - l)) :: ProgType k n) where
     type Rep (ph := pr) = [[Int]]
