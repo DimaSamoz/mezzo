@@ -105,11 +105,11 @@ full _ _ = const Cad
 -- ** Tonic chords
 
 -- | Major tonic chord.
-ton_maj :: InKey k (Ton (TonMaj (DegChord :: DegreeC I MajQ k Inv0 Oct3)))
+ton_maj :: IsMajor k => InKey k (Ton (TonMaj (DegChord :: DegreeC I MajQ k Inv0 Oct3)))
 ton_maj = const Ton
 
 -- | Minor tonic chord.
-ton_min :: InKey k (Ton (TonMin (DegChord :: DegreeC I MinQ k Inv0 Oct3)))
+ton_min :: IsMinor k => InKey k (Ton (TonMin (DegChord :: DegreeC I MinQ k Inv0 Oct3)))
 ton_min = const Ton
 
 -- ** Dominants
@@ -137,19 +137,19 @@ dom_SD _ _ = const Dom
 -- ** Subdominants
 
 -- | Subdominant minor second (ii) chord.
-subdom_ii :: InKey k (Sub (SubIIm (DegChord :: DegreeC II MinQ k Inv0 Oct3)))
+subdom_ii :: IsMajor k => InKey k (Sub (SubIIm (DegChord :: DegreeC II MinQ k Inv0 Oct3)))
 subdom_ii = const Sub
 
 -- | Subdominant minor second (ii) chord.
-subdom_IV :: InKey k (Sub (SubIVM (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
+subdom_IV :: IsMajor k => InKey k (Sub (SubIVM (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
 subdom_IV = const Sub
 
 -- | Subdominant minor second (ii) chord.
-subdom_iii_IV :: InKey k (Sub (SubIIImIVM (DegChord :: DegreeC III MinQ k Inv0 Oct3) (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
+subdom_iii_IV :: IsMajor k => InKey k (Sub (SubIIImIVM (DegChord :: DegreeC III MinQ k Inv0 Oct3) (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
 subdom_iii_IV = const Sub
 
 -- | Subdominant minor second (ii) chord.
-subdom_iv :: InKey k (Sub (SubIVm (DegChord :: DegreeC IV MinQ k Inv3 Oct2)))
+subdom_iv :: IsMinor k => InKey k (Sub (SubIVm (DegChord :: DegreeC IV MinQ k Inv3 Oct2)))
 subdom_iv = const Sub
 
 

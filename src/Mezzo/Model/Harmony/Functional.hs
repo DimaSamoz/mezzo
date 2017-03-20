@@ -20,6 +20,9 @@
 module Mezzo.Model.Harmony.Functional
     (
       Quality (..)
+    , DiatonicDegree
+    , IsMajor
+    , IsMinor
     , DegreeC (..)
     , ProgType (..)
     , Phrase (..)
@@ -61,6 +64,16 @@ data DegreeC (d :: ScaleDegree) (q :: Quality) (k :: KeyType) (i :: Inversion) (
 class DiatonicDegree (d :: ScaleDegree) (q :: Quality) (k :: KeyType)
 instance MajDegQuality d q => DiatonicDegree d q (Key pc acc MajorMode)
 instance MinDegQuality d q => DiatonicDegree d q (Key pc acc MinorMode)
+
+-- | Enforces that the key is in major mode.
+class IsMajor (k :: KeyType)
+instance IsMajor (Key pc acc MajorMode)
+instance TypeError (Text "The key is minor.") => IsMajor (Key pc acc MinorMode)
+
+-- | Enforces that the key is in minor mode.
+class IsMinor (k :: KeyType)
+instance IsMinor (Key pc acc MinorMode)
+instance TypeError (Text "The key is major.") => IsMinor (Key pc acc MajorMode)
 
 -- | Ensure that the degree and quality are valid in major mode.
 class MajDegQuality (d :: ScaleDegree) (q :: Quality)
@@ -162,9 +175,6 @@ data Subdominant (k :: KeyType) (l :: Nat) where
     -- | Minor fourth dominant.
     SubIVm     :: DegreeC IV MinQ k i o -> Subdominant k 1
 
--- | Convert a scale degree to a chord.
--- type family DegToChord (d :: DegreeC d q k i o) :: ChordType 4 where
---     DegToChord (DegChord :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
 
 type DegToChord (dc :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
 
