@@ -23,7 +23,8 @@ module Mezzo.Render.MIDI
 import Mezzo.Model
 import Mezzo.Compose (_qu, _wh)
 
-import Codec.Midi
+import Codec.Midi hiding (key)
+import qualified Codec.Midi as CM (key)
 
 -------------------------------------------------------------------------------
 -- Types
@@ -56,11 +57,11 @@ midiRest dur = MidiNote {noteNum = 60, vel = 0, start = 0, noteDur = dur}
 
 -- | Start playing the specified 'MidiNote'.
 keyDown :: MidiNote -> MidiEvent
-keyDown n = (start n, NoteOn {channel = 0, key = noteNum n, velocity = vel n})
+keyDown n = (start n, NoteOn {channel = 0, CM.key = noteNum n, velocity = vel n})
 
 -- | Stop playing the specified 'MidiNote'.
 keyUp :: MidiNote -> MidiEvent
-keyUp n = (start n + noteDur n, NoteOn {channel = 0, key = noteNum n, velocity = 0})
+keyUp n = (start n + noteDur n, NoteOn {channel = 0, CM.key = noteNum n, velocity = 0})
 
 -- | Play the specified 'MidiNote'.
 playNote :: Int -> Ticks -> MidiTrack
