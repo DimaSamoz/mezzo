@@ -122,6 +122,8 @@ data Cadence (k :: KeyType) (l :: Nat) where
     AuthCad64  :: DegreeC I MajQ k Inv2 o -> DegreeC V DomQ k Inv3 (OctPred o) -> DegreeC I MajQ k Inv1 o -> Cadence k 3
     -- | Deceptive cadence from a dominant fifth to a sixth.
     DeceptCad  :: DegreeC V DomQ k Inv0 (OctPred o) -> DegreeC VI q k Inv0 o -> Cadence k 2
+    -- | Full cadence from subdominant to dominant to tonic.
+    FullCad :: Subdominant k l1 -> Cadence k (l - l1) -> Cadence k l
 
 -- | A tonic chord.
 data Tonic (k :: KeyType) (l :: Nat) where
@@ -174,12 +176,13 @@ type family QualToType (q :: Quality) :: SeventhType where
     QualToType DimQ = DimSeventh
 
 -- | Convert a cadence to chords.
-type family CadToChords (c :: Cadence k l) :: Vector (ChordType 4) l where
-    CadToChords (AuthCad  d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    CadToChords (AuthCad7 d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    CadToChords (AuthCadVii d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    CadToChords (AuthCad64 d1 d2 d3) = DegToChord d1 :-- DegToChord d2 :-- DegToChord d3 :-- None
-    CadToChords (DeceptCad d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+type family CadToChords (l :: Nat) (c :: Cadence k l) :: Vector (ChordType 4) l where
+    CadToChords 2 (AuthCad  d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords 2 (AuthCad7 d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords 2 (AuthCadVii d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords 3 (AuthCad64 d1 d2 d3) = DegToChord d1 :-- DegToChord d2 :-- DegToChord d3 :-- None
+    CadToChords 2 (DeceptCad d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords l (FullCad (s :: Subdominant k l1) c) = SubdomToChords s ++. CadToChords (l - l1) c
 
 -- | Convert a tonic to chords.
 type family TonToChords (t :: Tonic k l) :: Vector (ChordType 4) l where
@@ -209,7 +212,7 @@ type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) 
 
 -- | Convert a piece to chords.
 type family ProgTypeToChords (l :: Nat) (p :: ProgType k l) :: Vector (ChordType 4) l where
-    ProgTypeToChords l (CadPhrase (c :: Cadence k l)) = CadToChords c
+    ProgTypeToChords l (CadPhrase (c :: Cadence k l)) = CadToChords l c
     ProgTypeToChords l ((p :: Phrase k l1) := ps) = PhraseToChords l1 p ++. ProgTypeToChords (l - l1) ps
 
 -- | The number of beats in a bar.
@@ -340,6 +343,11 @@ instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep c
     type Rep (DeceptCad d1 d2) = [[Int]]
     prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
     pretty _ = "DeceptCad"
+
+instance (IntLListRep sd, IntLListRep c) => Primitive (FullCad (sd :: Subdominant k sdur) (c :: Cadence k (l - sdur)) :: Cadence k l) where
+    type Rep (FullCad sd c) = [[Int]]
+    prim _ = prim (Sub @k @sdur @sd) ++ prim (Cad @k @(l - sdur) @c)
+    pretty _ = pretty (Sub @k @sdur @sd) ++ " | " ++ pretty (Cad @k @(l - sdur) @c)
 
 -- Phrases
 

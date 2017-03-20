@@ -99,6 +99,9 @@ auth_64 = const Cad
 decept :: InKey k (Cad (DeceptCad (DegChord :: DegreeC V DomQ k Inv0 Oct2) (DegChord :: DegreeC VI q k Inv0 Oct3)))
 decept = const Cad
 
+full :: InKey k (Sub s) -> InKey k (Cad c) -> InKey k (Cad (FullCad s c))
+full _ _ = const Cad
+
 -- ** Tonic chords
 
 -- | Major tonic chord.
