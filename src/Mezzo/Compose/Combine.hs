@@ -67,6 +67,7 @@ voices (Rest d) = 1
 voices (m1 :|: m2) = voices m1
 voices (m1 :-: m2) = voices m1 + voices m2
 voices (Chord c d) = chordVoices c
+voices (Progression _ _) = 4
 
 -- | Get the number of voices in a chord.
 -- Thanks to Michael B. Gale
