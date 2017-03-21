@@ -150,6 +150,8 @@ data Cadence (k :: KeyType) (l :: Nat) where
 data Tonic (k :: KeyType) (l :: Nat) where
     -- | A major tonic chord.
     Tonic :: DegreeC I (KeyToQual k) k Inv0 o -> Tonic k 1 -- Temporarily (?) allow only no inversion
+    -- | Doubled tonics.
+    TonicTT :: Tonic k l1 -> Tonic k (l - l1) -> Tonic k l
 
 class NotInv2 (i :: Inversion)
 instance NotInv2 Inv0
@@ -169,6 +171,8 @@ data Dominant (k :: KeyType) (l :: Nat) where
     DomSecD :: DegreeC II DomQ k Inv0 o -> DegreeC V DomQ k Inv2 (OctPred o) -> Dominant k 2
     -- | Subdominant followed by dominant.
     DomSD   :: Subdominant k l1 -> Dominant k (l - l1) -> Dominant k l
+    -- | Doubled dominants.
+    DomDD   :: Dominant k l1 -> Dominant k (l - l1) -> Dominant k l
 
 -- | A subdominant chord progression.
 data Subdominant (k :: KeyType) (l :: Nat) where
@@ -178,6 +182,8 @@ data Subdominant (k :: KeyType) (l :: Nat) where
     SubIIm     :: DegreeC II MinQ k i o -> Subdominant k 1
     -- | Minor third followed by major fourth subdominant.
     SubIIImIVM :: DegreeC III MinQ k i1 o -> DegreeC IV MajQ k i2 (OctPred o) -> Subdominant k 2
+    -- | Doubled subdominants.
+    SubSS      :: Subdominant k l1 -> Subdominant k (l - l1) -> Subdominant k l
 
 
 type DegToChord (dc :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
@@ -196,11 +202,12 @@ type family CadToChords (l :: Nat) (c :: Cadence k l) :: Vector (ChordType 4) l 
     CadToChords 2 (AuthCadVii d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
     CadToChords 3 (AuthCad64 d1 d2 d3) = DegToChord d1 :-- DegToChord d2 :-- DegToChord d3 :-- None
     CadToChords 2 (DeceptCad d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    CadToChords l (FullCad (s :: Subdominant k l1) c) = SubdomToChords s ++. CadToChords (l - l1) c
+    CadToChords l (FullCad (s :: Subdominant k l1) c) = SubdomToChords l1 s ++. CadToChords (l - l1) c
 
 -- | Convert a tonic to chords.
-type family TonToChords (t :: Tonic k l) :: Vector (ChordType 4) l where
-    TonToChords ('Tonic d) = DegToChord d :-- None
+type family TonToChords (l :: Nat) (t :: Tonic k l) :: Vector (ChordType 4) l where
+    TonToChords 1 ('Tonic d) = DegToChord d :-- None
+    TonToChords l (TonicTT (t1 :: Tonic k l1) t2) = TonToChords l1 t1 ++. TonToChords (l - l1) t2
 
 -- | Convert a dominant to chords.
 type family DomToChords (l :: Nat) (t :: Dominant k l) :: Vector (ChordType 4) l where
@@ -209,18 +216,21 @@ type family DomToChords (l :: Nat) (t :: Dominant k l) :: Vector (ChordType 4) l
     DomToChords 1 (DomVii0 d) = DegToChord d :-- None
     DomToChords 2 (DomSecD d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
     DomToChords l (DomSD (s :: Subdominant k l1) d) =
-        SubdomToChords s ++. DomToChords (l - l1) d
+        SubdomToChords l1 s ++. DomToChords (l - l1) d
+    DomToChords l (DomDD (d1 :: Dominant k l1) d2) =
+        DomToChords l1 d1 ++. DomToChords (l - l1) d2
 
 -- | Convert a subdominant to chords.
-type family SubdomToChords (t :: Subdominant k l) :: Vector (ChordType 4) l where
-    SubdomToChords (SubIIm d) = DegToChord d :-- None
-    SubdomToChords (SubIV d) = DegToChord d :-- None
-    SubdomToChords (SubIIImIVM d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+type family SubdomToChords (l :: Nat) (t :: Subdominant k l) :: Vector (ChordType 4) l where
+    SubdomToChords 1 (SubIIm d) = DegToChord d :-- None
+    SubdomToChords 1 (SubIV d) = DegToChord d :-- None
+    SubdomToChords 2 (SubIIImIVM d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+    SubdomToChords l (SubSS (s1 :: Subdominant k l1) s2) = SubdomToChords l1 s1 ++. SubdomToChords (l - l1) s2
 
 -- | Convert a phrase to chords.
 type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) l where
-    PhraseToChords l (PhraseIVI t1 (d :: Dominant k dl) t2) = TonToChords t1 ++. DomToChords dl d ++. TonToChords t2
-    PhraseToChords l (PhraseVI (d :: Dominant k dl) t) = DomToChords dl d ++. TonToChords t
+    PhraseToChords l (PhraseIVI (t1 :: Tonic k (l2 - dl)) (d :: Dominant k dl) (t2 :: Tonic k (l - l2))) = TonToChords (l2 - dl) t1 ++. DomToChords dl d ++. TonToChords (l - l2) t2
+    PhraseToChords l (PhraseVI (d :: Dominant k dl) t) = DomToChords dl d ++. TonToChords (l - dl) t
 
 -- | Convert a piece to chords.
 type family ProgTypeToChords (l :: Nat) (p :: ProgType k l) :: Vector (ChordType 4) l where
@@ -277,6 +287,11 @@ instance (ch ~ DegToChord d, IntListRep ch) => Primitive ('Tonic d) where
     prim _ = [prim (Cho @4 @ch)]
     pretty _ = "Ton"
 
+instance (IntLListRep t1, IntLListRep t2) => Primitive (TonicTT (t1 :: Tonic k dur1) (t2 :: Tonic k (l - dur1)) :: Tonic k l) where
+    type Rep (TonicTT t1 t2) = [[Int]]
+    prim _ = prim (Ton @k @dur1 @t1) ++ prim (Ton @k @(l - dur1) @t2)
+    pretty _ = pretty (Ton @k @dur1 @t1) ++ " | " ++ pretty (Ton @k @(l - dur1) @t2)
+
 -- Dominant
 
 instance (ch ~ DegToChord d, IntListRep ch) => Primitive (DomVM d) where
@@ -304,6 +319,10 @@ instance (IntLListRep sd, IntLListRep d) => Primitive (DomSD (sd :: Subdominant 
     prim _ = prim (Sub @k @sdur @sd) ++ prim (Dom @k @(l - sdur) @d)
     pretty _ = pretty (Sub @k @sdur @sd) ++ " | " ++ pretty (Dom @k @(l - sdur) @d)
 
+instance (IntLListRep d1, IntLListRep d2) => Primitive (DomDD (d1 :: Dominant k dur1) (d2 :: Dominant k (l - dur1)) :: Dominant k l) where
+    type Rep (DomDD d1 d2) = [[Int]]
+    prim _ = prim (Dom @k @dur1 @d1) ++ prim (Dom @k @(l - dur1) @d2)
+    pretty _ = pretty (Dom @k @dur1 @d1) ++ " | " ++ pretty (Dom @k @(l - dur1) @d2)
 
 -- Subdominant
 
@@ -321,6 +340,12 @@ instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep c
     type Rep (SubIIImIVM d1 d2) = [[Int]]
     prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
     pretty _ = "Sub iii IV"
+
+instance (IntLListRep s1, IntLListRep s2) => Primitive (SubSS (s1 :: Subdominant k dur1) (s2 :: Subdominant k (l - dur1)) :: Subdominant k l) where
+    type Rep (SubSS s1 s2) = [[Int]]
+    prim _ = prim (Sub @k @dur1 @s1) ++ prim (Sub @k @(l - dur1) @s2)
+    pretty _ = pretty (Sub @k @dur1 @s1) ++ " | " ++ pretty (Sub @k @(l - dur1) @s2)
+
 
 -- Cadences
 
