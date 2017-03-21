@@ -20,6 +20,8 @@
 module Mezzo.Model.Harmony.Functional
     (
       Quality (..)
+    , KeyToQual
+    , KeyToOtherQual
     , DiatonicDegree
     , IsMajor
     , IsMinor
@@ -55,6 +57,14 @@ import Mezzo.Model.Harmony.Chords
 
 -- | The quality of a scale degree chord.
 data Quality = MajQ | MinQ | DomQ | DimQ
+
+type family KeyToQual (k :: KeyType) where
+    KeyToQual (Key _ _ MajorMode) = MajQ
+    KeyToQual (Key _ _ MinorMode) = MinQ
+
+type family KeyToOtherQual (k :: KeyType) where
+    KeyToOtherQual (Key _ _ MajorMode) = MinQ
+    KeyToOtherQual (Key _ _ MinorMode) = MajQ
 
 -- | A scale degree chord in given key, on the given scale, with the given quality and octave.
 data DegreeC (d :: ScaleDegree) (q :: Quality) (k :: KeyType) (i :: Inversion) (o :: OctaveNum) where
@@ -114,8 +124,6 @@ data ProgType (k :: KeyType) (l :: Nat) where
     CadPhrase :: Cadence k l -> ProgType k l
     (:=) :: Phrase k l -> ProgType k (n - l) -> ProgType k n
 
-data Prog (p :: ProgType k l) = Prog
-
 -- | A phrase matching a specific functional progression.
 data Phrase (k :: KeyType) (l :: Nat) where
     -- | A tonic-dominant-tonic progression.
@@ -132,18 +140,16 @@ data Cadence (k :: KeyType) (l :: Nat) where
     -- | Authentic cadence with diminished seventh chord.
     AuthCadVii :: DegreeC VII DimQ k Inv1 (OctPred o) -> DegreeC I q k Inv0 o -> Cadence k 2
     -- | Authentic cadence with a cadential 6-4 chord
-    AuthCad64  :: DegreeC I MajQ k Inv2 o -> DegreeC V DomQ k Inv3 (OctPred o) -> DegreeC I MajQ k Inv1 o -> Cadence k 3
+    AuthCad64  :: DegreeC I q k Inv2 o -> DegreeC V DomQ k Inv3 (OctPred o) -> DegreeC I q k Inv1 o -> Cadence k 3
     -- | Deceptive cadence from a dominant fifth to a sixth.
-    DeceptCad  :: DegreeC V DomQ k Inv0 (OctPred o) -> DegreeC VI q k Inv0 o -> Cadence k 2
+    DeceptCad  :: DegreeC V DomQ k Inv2 o -> DegreeC VI q k Inv1 o -> Cadence k 2
     -- | Full cadence from subdominant to dominant to tonic.
     FullCad :: Subdominant k l1 -> Cadence k (l - l1) -> Cadence k l
 
 -- | A tonic chord.
 data Tonic (k :: KeyType) (l :: Nat) where
     -- | A major tonic chord.
-    TonMaj :: DegreeC I MajQ k Inv0 o -> Tonic k 1 -- Temporarily (?) allow only no inversion
-    -- | A minor tonic chord.
-    TonMin :: DegreeC I MinQ k Inv0 o -> Tonic k 1
+    Tonic :: DegreeC I (KeyToQual k) k Inv0 o -> Tonic k 1 -- Temporarily (?) allow only no inversion
 
 class NotInv2 (i :: Inversion)
 instance NotInv2 Inv0
@@ -159,21 +165,19 @@ data Dominant (k :: KeyType) (l :: Nat) where
     DomV7   :: DegreeC V DomQ k Inv2 o -> Dominant k 1
     -- | Diminished seventh degree dominant.
     DomVii0 :: DegreeC VII DimQ k i o -> Dominant k 1
-    -- | Subdominant followed by dominant.
-    DomSD   :: Subdominant k l1 -> Dominant k (l - l1) -> Dominant k l
     -- | Secondary dominant followed by dominant.
     DomSecD :: DegreeC II DomQ k Inv0 o -> DegreeC V DomQ k Inv2 (OctPred o) -> Dominant k 2
+    -- | Subdominant followed by dominant.
+    DomSD   :: Subdominant k l1 -> Dominant k (l - l1) -> Dominant k l
 
 -- | A subdominant chord progression.
 data Subdominant (k :: KeyType) (l :: Nat) where
+    -- | Major fourth subdominant.
+    SubIV      :: DegreeC IV (KeyToQual k) k i o -> Subdominant k 1
     -- | Minor second subdominant.
     SubIIm     :: DegreeC II MinQ k i o -> Subdominant k 1
-    -- | Major fourth subdominant.
-    SubIVM     :: DegreeC IV MajQ k i o -> Subdominant k 1
     -- | Minor third followed by major fourth subdominant.
     SubIIImIVM :: DegreeC III MinQ k i1 o -> DegreeC IV MajQ k i2 (OctPred o) -> Subdominant k 2
-    -- | Minor fourth dominant.
-    SubIVm     :: DegreeC IV MinQ k i o -> Subdominant k 1
 
 
 type DegToChord (dc :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
@@ -196,24 +200,22 @@ type family CadToChords (l :: Nat) (c :: Cadence k l) :: Vector (ChordType 4) l 
 
 -- | Convert a tonic to chords.
 type family TonToChords (t :: Tonic k l) :: Vector (ChordType 4) l where
-    TonToChords (TonMaj d) = DegToChord d :-- None
-    TonToChords (TonMin d) = DegToChord d :-- None
+    TonToChords ('Tonic d) = DegToChord d :-- None
 
 -- | Convert a dominant to chords.
 type family DomToChords (l :: Nat) (t :: Dominant k l) :: Vector (ChordType 4) l where
     DomToChords 1 (DomVM d) = DegToChord d :-- None
     DomToChords 1 (DomV7 d) = DegToChord d :-- None
     DomToChords 1 (DomVii0 d) = DegToChord d :-- None
-    DomToChords l (DomSD (s :: Subdominant k l1) d) =
-                    SubdomToChords s ++. DomToChords (l - l1) d
     DomToChords 2 (DomSecD d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+    DomToChords l (DomSD (s :: Subdominant k l1) d) =
+        SubdomToChords s ++. DomToChords (l - l1) d
 
 -- | Convert a subdominant to chords.
 type family SubdomToChords (t :: Subdominant k l) :: Vector (ChordType 4) l where
     SubdomToChords (SubIIm d) = DegToChord d :-- None
-    SubdomToChords (SubIVM d) = DegToChord d :-- None
+    SubdomToChords (SubIV d) = DegToChord d :-- None
     SubdomToChords (SubIIImIVM d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    SubdomToChords (SubIVm d) = DegToChord d :-- None
 
 -- | Convert a phrase to chords.
 type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) l where
@@ -265,18 +267,15 @@ data Sub (s :: Subdominant k d) = Sub
 
 data Cad (c :: Cadence k d) = Cad
 data Phr (p :: Phrase k d) = Phr
+data Prog (p :: ProgType k l) = Prog
+
 
 -- Tonic
 
-instance (ch ~ DegToChord d, IntListRep ch) => Primitive (TonMaj d) where
-    type Rep (TonMaj d) = [[Int]]
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive ('Tonic d) where
+    type Rep ('Tonic d) = [[Int]]
     prim _ = [prim (Cho @4 @ch)]
-    pretty _ = "Ton Maj"
-
-instance (ch ~ DegToChord d, IntListRep ch) => Primitive (TonMin d) where
-    type Rep (TonMin d) = [[Int]]
-    prim _ = [prim (Cho @4 @ch)]
-    pretty _ = "Ton Min"
+    pretty _ = "Ton"
 
 -- Dominant
 
@@ -295,15 +294,16 @@ instance (ch ~ DegToChord d, IntListRep ch) => Primitive (DomVii0 d) where
     prim _ = [prim (Cho @4 @ch)]
     pretty _ = "Dom VII0"
 
+instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (DomSecD d1 d2) where
+    type Rep (DomSecD d1 d2) = [[Int]]
+    prim _ = [prim (Cho @4 @ch1)] ++ [prim (Cho @4 @ch2)]
+    pretty _ = "Dom SecD"
+
 instance (IntLListRep sd, IntLListRep d) => Primitive (DomSD (sd :: Subdominant k sdur) (d :: Dominant k (l - sdur)) :: Dominant k l) where
     type Rep (DomSD sd d) = [[Int]]
     prim _ = prim (Sub @k @sdur @sd) ++ prim (Dom @k @(l - sdur) @d)
     pretty _ = pretty (Sub @k @sdur @sd) ++ " | " ++ pretty (Dom @k @(l - sdur) @d)
 
-instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (DomSecD d1 d2) where
-    type Rep (DomSecD d1 d2) = [[Int]]
-    prim _ = [prim (Cho @4 @ch1)] ++ [prim (Cho @4 @ch2)]
-    pretty _ = "Dom SecD"
 
 -- Subdominant
 
@@ -312,8 +312,8 @@ instance (ch ~ DegToChord d, IntListRep ch) => Primitive (SubIIm d) where
     prim _ = [prim (Cho @4 @ch)]
     pretty _ = "Sub ii"
 
-instance (ch ~ DegToChord d, IntListRep ch) => Primitive (SubIVM d) where
-    type Rep (SubIVM d) = [[Int]]
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (SubIV d) where
+    type Rep (SubIV d) = [[Int]]
     prim _ = [prim (Cho @4 @ch)]
     pretty _ = "Sub IV"
 
@@ -321,11 +321,6 @@ instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep c
     type Rep (SubIIImIVM d1 d2) = [[Int]]
     prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
     pretty _ = "Sub iii IV"
-
-instance (ch ~ DegToChord d, IntListRep ch) => Primitive (SubIVm d) where
-    type Rep (SubIVm d) = [[Int]]
-    prim _ = [prim (Cho @4 @ch)]
-    pretty _ = "Sub iv"
 
 -- Cadences
 

@@ -50,9 +50,6 @@ quadruple = TimeSig
 prog :: ProgConstraints t p => TimeSig t -> Prog p -> Music (FromProg p t)
 prog = Progression
 
-plistToProg :: PhraseList p -> Prog p
-plistToProg _ = Prog
-
 -- ** Phrases
 
 type InKey k v = KeyS k -> v
@@ -71,32 +68,32 @@ cadence :: InKey k (Cad c) -> InKey k (PhraseList (CadPhrase c))
 cadence c = \k -> Cdza (c k) k
 
 -- | Dominant-tonic phrase.
-ph_vi :: InKey k (Dom (d :: Dominant k l1)) -> InKey k (Ton (t :: Tonic k (l - l1))) -> InKey k (Phr (PhraseVI d t :: Phrase k l))
-ph_vi _ _ = const Phr
+ph_VI :: InKey k (Dom (d :: Dominant k l1)) -> InKey k (Ton (t :: Tonic k (l - l1))) -> InKey k (Phr (PhraseVI d t :: Phrase k l))
+ph_VI _ _ = const Phr
 
 -- | Tonic-dominant-tonic phrase.
-ph_ivi :: InKey k (Ton (t1 :: Tonic k (l2 - l1))) -> InKey k (Dom (d :: Dominant k l1)) -> InKey k (Ton (t2 :: Tonic k (l - l2))) -> InKey k (Phr (PhraseIVI t1 d t2 :: Phrase k l))
-ph_ivi _ _ _ = const Phr
+ph_IVI :: InKey k (Ton (t1 :: Tonic k (l2 - l1))) -> InKey k (Dom (d :: Dominant k l1)) -> InKey k (Ton (t2 :: Tonic k (l - l2))) -> InKey k (Phr (PhraseIVI t1 d t2 :: Phrase k l))
+ph_IVI _ _ _ = const Phr
 
 -- ** Cadences
 
 -- | Authentic V-I dominant cadence.
-auth :: InKey k (Cad (AuthCad (DegChord :: DegreeC V MajQ k Inv1 Oct2) (DegChord :: DegreeC I MajQ k Inv0 Oct3)))
-auth = const Cad
+auth_V :: InKey k (Cad (AuthCad (DegChord :: DegreeC V MajQ k Inv1 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
+auth_V = const Cad
 
 -- | Authentic V7-I dominant seventh cadence.
-auth_7 :: InKey k (Cad (AuthCad7 (DegChord :: DegreeC V DomQ k Inv2 Oct2) (DegChord :: DegreeC I MajQ k Inv0 Oct3)))
-auth_7 = const Cad
+auth_V7 :: InKey k (Cad (AuthCad7 (DegChord :: DegreeC V DomQ k Inv2 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
+auth_V7 = const Cad
 
 -- | Authentic vii-I leading tone cadence.
-auth_vii :: InKey k (Cad (AuthCadVii (DegChord :: DegreeC VII DimQ k Inv1 Oct2) (DegChord :: DegreeC I q k Inv0 Oct3)))
+auth_vii :: InKey k (Cad (AuthCadVii (DegChord :: DegreeC VII DimQ k Inv1 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
 auth_vii = const Cad
 
 -- | Authentic cadential 6-4 cadence.
-auth_64 :: InKey k (Cad (AuthCad64 (DegChord :: DegreeC I MajQ k Inv2 Oct3) (DegChord :: DegreeC V DomQ k Inv3 Oct2) (DegChord :: DegreeC I MajQ k Inv1 Oct3)))
+auth_64 :: InKey k (Cad (AuthCad64 (DegChord :: DegreeC I (KeyToQual k) k Inv2 Oct3) (DegChord :: DegreeC V DomQ k Inv3 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv1 Oct3)))
 auth_64 = const Cad
 
-decept :: InKey k (Cad (DeceptCad (DegChord :: DegreeC V DomQ k Inv0 Oct2) (DegChord :: DegreeC VI q k Inv0 Oct3)))
+decept :: InKey k (Cad (DeceptCad (DegChord :: DegreeC V DomQ k Inv2 Oct2) (DegChord :: DegreeC VI (KeyToOtherQual k) k Inv1 Oct2)))
 decept = const Cad
 
 full :: InKey k (Sub s) -> InKey k (Cad c) -> InKey k (Cad (FullCad s c))
@@ -105,12 +102,12 @@ full _ _ = const Cad
 -- ** Tonic chords
 
 -- | Major tonic chord.
-ton_maj :: IsMajor k => InKey k (Ton (TonMaj (DegChord :: DegreeC I MajQ k Inv0 Oct3)))
-ton_maj = const Ton
+ton :: InKey k (Ton ('Tonic (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
+ton = const Ton
 
 -- | Minor tonic chord.
-ton_min :: IsMinor k => InKey k (Ton (TonMin (DegChord :: DegreeC I MinQ k Inv0 Oct3)))
-ton_min = const Ton
+-- ton_min :: IsMinor k => InKey k (Ton (TonMin (DegChord :: DegreeC I MinQ k Inv0 Oct3)))
+-- ton_min = const Ton
 
 -- ** Dominants
 
@@ -127,8 +124,8 @@ dom_vii0 :: InKey k (Dom (DomVii0 (DegChord :: DegreeC VII DimQ k Inv1 Oct2)))
 dom_vii0 = const Dom
 
 -- | Secondary dominant - dominant (V/V-V7) chord.
-dom_secD :: InKey k (Dom (DomSecD (DegChord :: DegreeC II DomQ k Inv0 Oct3) (DegChord :: DegreeC V DomQ k Inv2 Oct2)))
-dom_secD = const Dom
+dom_ii_V7 :: InKey k (Dom (DomSecD (DegChord :: DegreeC II DomQ k Inv0 Oct3) (DegChord :: DegreeC V DomQ k Inv2 Oct2)))
+dom_ii_V7 = const Dom
 
 -- | Subdominant followed by a dominant.
 dom_SD :: InKey k (Sub subdom) -> InKey k (Dom dom) -> InKey k (Dom (DomSD subdom dom))
@@ -137,22 +134,16 @@ dom_SD _ _ = const Dom
 -- ** Subdominants
 
 -- | Subdominant minor second (ii) chord.
-subdom_ii :: IsMajor k => InKey k (Sub (SubIIm (DegChord :: DegreeC II MinQ k Inv0 Oct3)))
-subdom_ii = const Sub
+subdom_IV :: InKey k (Sub (SubIV (DegChord :: DegreeC IV (KeyToQual k) k Inv2 Oct2)))
+subdom_IV = const Sub
 
 -- | Subdominant minor second (ii) chord.
-subdom_IV :: IsMajor k => InKey k (Sub (SubIVM (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
-subdom_IV = const Sub
+subdom_ii :: IsMajor k => InKey k (Sub (SubIIm (DegChord :: DegreeC II MinQ k Inv0 Oct3)))
+subdom_ii = const Sub
 
 -- | Subdominant minor second (ii) chord.
 subdom_iii_IV :: IsMajor k => InKey k (Sub (SubIIImIVM (DegChord :: DegreeC III MinQ k Inv0 Oct3) (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
 subdom_iii_IV = const Sub
 
--- | Subdominant minor second (ii) chord.
-subdom_iv :: IsMinor k => InKey k (Sub (SubIVm (DegChord :: DegreeC IV MinQ k Inv3 Oct2)))
-subdom_iv = const Sub
 
-
-
-c_maj :: KeyS (Key C Natural MajorMode)
-c_maj = KeyS
+-- * Key literals
