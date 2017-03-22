@@ -24,10 +24,11 @@ module Mezzo.Model.Music
       Music (..)
     , Score (..)
     -- * Constraints
-    , MelConstraints
-    , HarmConstraints
     , ChordConstraints
     , ProgConstraints
+    , HomConstraints
+    , MelConstraints
+    , HarmConstraints
     ) where
 
 import Data.Kind
@@ -60,17 +61,20 @@ infixl 4 :-:
 --  * Music must not contain parallel or concealed unisons, fifths or octaves.
 --
 data Music :: forall n l. Partiture n l -> Type where
-    -- | A note specified by a pitch and a duration.
-    Note :: NoteConstraints r d => Root r -> Dur d -> Music (FromRoot r d)
-    -- | A rest specified by a duration.
-    Rest :: RestConstraints d => Dur d -> Music (FromSilence d)
     -- | Sequential or melodic composition of music.
     (:|:) :: MelConstraints m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.
     (:-:) :: HarmConstraints m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
+    -- | A note specified by a pitch and a duration.
+    Note :: NoteConstraints r d => Root r -> Dur d -> Music (FromRoot r d)
+    -- | A rest specified by a duration.
+    Rest :: RestConstraints d => Dur d -> Music (FromSilence d)
     -- | A chord specified by a chord type and a duration.
     Chord :: ChordConstraints c d => Cho c -> Dur d -> Music (FromChord c d)
+    -- | A progression specified by a time signature, and its progression schema.
     Progression :: ProgConstraints t p => TimeSig t -> Prog p -> Music (FromProg p t)
+    -- | A homophonic composition with a melody line and an accompaniment.
+    Homophony :: HomConstraints m a => Music m -> Music a -> Music (m +-+ a)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
@@ -86,24 +90,28 @@ type Strict = True
 -- | Applies the constraint c if strict checking is enabled.
 type IfStrict c = If Strict c Valid
 
+-- | Ensures that two pieces of music can be composed sequentially.
+type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
+    IfStrict (ValidMelConcat m1 m2)
+
+-- | Ensures that two pieces of music can be composed in parallel.
+type HarmConstraints m1 m2 = IfStrict (ValidHarmConcat (Align m1 m2))
+
 -- | Ensures that the note is valid.
 type NoteConstraints r d = (IntRep r, Primitive d)
 
 -- | Ensures that the rest is valid.
 type RestConstraints d = (Primitive d)
 
--- | Ensures that two pieces of music can be composed sequentially.
-type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
-        IfStrict (ValidMelConcat m1 m2)
-
--- | Ensures that two pieces of music can be composed in parallel.
-type HarmConstraints m1 m2 = IfStrict (ValidHarmConcat (Align m1 m2))
-
 -- | Ensures that the chord is valid.
 type ChordConstraints (c :: ChordType n) d = (IntListRep c, Primitive n, Primitive d)
 
 -- | Ensures that a progression is valid.
 type ProgConstraints t p = (IntLListRep p, IntRep t, KnownNat t)
+
+type HomConstraints m1 m2 = Valid
+
+
 
 ---- Melodic constraints
 

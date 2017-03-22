@@ -32,6 +32,9 @@ module Mezzo.Compose.Combine
     -- * Melody composition
     , play
     , melody
+    -- * Textures
+    , hom
+    , melAccomp
     ) where
 
 import Mezzo.Model
@@ -64,10 +67,11 @@ duration = durToInt . musicDur
 voices :: Music m -> Int
 voices (Note r d) = 1
 voices (Rest d) = 1
-voices (m1 :|: m2) = voices m1
-voices (m1 :-: m2) = voices m1 + voices m2
 voices (Chord c d) = chordVoices c
 voices (Progression _ _) = 4
+voices (Homophony m a) = voices m + voices a
+voices (m1 :|: m2) = voices m1
+voices (m1 :-: m2) = voices m1 + voices m2
 
 -- | Get the number of voices in a chord.
 -- Thanks to Michael B. Gale
@@ -153,3 +157,13 @@ melody = Melody
 -- | Get the duration of the notes in a melody.
 melDur :: Primitive d => Melody m d -> Dur d
 melDur _ = Dur
+
+-------------------------------------------------------------------------------
+-- Textures
+-------------------------------------------------------------------------------
+
+hom :: HomConstraints m a => Music m -> Music a -> Music (m +-+ a)
+hom = Homophony
+
+melAccomp :: (ProgConstraints t p, pm ~ FromProg p t, HomConstraints m pm, Primitive d) => Melody m d -> Prog p -> TimeSig t -> Music (m +-+ pm)
+melAccomp m p t = Homophony (play m) (Progression t p)

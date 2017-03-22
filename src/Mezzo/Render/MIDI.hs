@@ -102,10 +102,10 @@ midiSkeleton mel = Midi
 
 -- | Convert a 'Music' piece into a 'MidiTrack'.
 musicToMidi :: Music m -> MidiTrack
-musicToMidi (Note root dur) = playNote (prim root) (durToTicks dur)
-musicToMidi (Rest dur) = playRest (durToTicks dur)
 musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
 musicToMidi (m1 :-: m2) = musicToMidi m1 >< musicToMidi m2
+musicToMidi (Note root dur) = playNote (prim root) (durToTicks dur)
+musicToMidi (Rest dur) = playRest (durToTicks dur)
 musicToMidi (Chord c d) = foldr1 (><) notes
     where notes = map (`playNote` durToTicks d) $ prim c
 musicToMidi (Progression ts p) = foldr1 (++) chords
@@ -114,6 +114,7 @@ musicToMidi (Progression ts p) = foldr1 (++) chords
           toChords = concat . replicate (prim ts) . foldr1 (><) . map (`playNote` durToTicks _qu)
           cadence :: [Int] -> MidiTrack
           cadence = foldr1 (><) . map (`playNote` durToTicks _wh)
+musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
 
 -- | Create a MIDI file with the specified name and track.
 createMidi :: FilePath -> MidiTrack -> IO ()
