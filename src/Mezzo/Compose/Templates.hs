@@ -22,6 +22,7 @@ module Mezzo.Compose.Templates
     , mkDurLits
     , mk32ndLits
     , mkPitchLits
+    , mkKeyLits
     , mkPitchSpecs
     , scaleDegreeLits
     , modeLits
@@ -110,7 +111,7 @@ mkPitchLits = do
                 octStr = shortOctFormatter oct
                 valName = mkName $ pcStr ++ accStr ++ octStr
             tySig <- sigD valName $ [t| Pit (Pitch $(conT pc) $(conT acc) $(conT oct)) |]
-            dec <- [d| $(varP valName) = pitch $(varE $ mkName pcStr) $(varE $ mkName (accFormatter acc)) $(varE $ mkName (octFormatter oct)) |]
+            dec <- [d| $(varP valName) = Pit |]
             return $ tySig : dec
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)    -- Every combination of PCs, Accs and Octs
 
@@ -173,6 +174,22 @@ mk32ndLits = do
             dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName)  |]
             return $ tySig2 : dec2
     return $ literal ++ noteTerm ++ restTerm ++ chordTerm
+
+mkKeyLits :: DecsQ
+mkKeyLits = do
+    pcNames <- getDataCons ''PitchClass
+    accNames <- getDataCons ''Accidental
+    modeNames <- getDataCons ''Mode
+    let declareVal pc acc mode = do  -- Generates a type signature and value declaration for the specified pitch
+            let pcStr = tail $ pcFormatter pc
+                accStr = shorterAccFormatter acc
+                modeStr = shortModeFormatter mode
+                valName = mkName $ pcStr ++ accStr ++ modeStr
+            tySig <- sigD valName $ [t| KeyS (Key $(conT pc) $(conT acc) $(conT mode)) |]
+            dec <- [d| $(varP valName) = KeyS |]
+            return $ tySig : dec
+    join <$> sequence (declareVal <$> pcNames <*> accNames <*> modeNames)    -- Every combination of PCs, Accs and Octs
+
 
 -- | Generate pitch root specifiers for earch pitch class, accidental and octave.
 -- These allow for combinatorial input with CPS-style durations and modifiers.
@@ -305,6 +322,9 @@ scaDegFormatter name = "_" ++ map toLower (nameBase name)
 -- | Formatter for key modes.
 modeFormatter :: Formatter
 modeFormatter (nameBase -> name) = map toLower (take 3 name) ++ dropWhile isLower (tail name)
+
+shortModeFormatter :: Formatter
+shortModeFormatter (modeFormatter -> name) = '_' : take 3 name
 
 -- | Formatter for chords types.
 choTyFormatter :: Formatter

@@ -32,11 +32,17 @@ class Primitive (a :: k) where
 instance {-# OVERLAPPABLE #-} Primitive t => Show (sing t) where
     show = pretty
 
+-- | Primitive types with Boolean representations.
+type BoolRep t = (Primitive t, Rep t ~ Bool)
+
 -- | Primitive types with integer representations.
 type IntRep t = (Primitive t, Rep t ~ Int)
 
 -- | Primitive types with integer list representations.
 type IntListRep t = (Primitive t, Rep t ~ [Int])
+
+-- | Primitive types with list of integer list representations.
+type IntLListRep t = (Primitive t, Rep t ~ [[Int]])
 
 -- | Primitive types with function representations from type a to type b.
 type FunRep a b t = (Primitive t, Rep t ~ (a -> b))

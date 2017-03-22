@@ -32,16 +32,20 @@ import Mezzo.Model.Types as X
     , Pit (..)
     , Mode (..)
     , ScaleDegree (..)
+    , DegreeType (..)
     , KeyType (..)
     , RootType (..)
     , Mod (..)
     , ScaDeg (..)
+    , Deg (..)
     , KeyS (..)
     , Root (..)
     , RootToPitch
     , PitchToNat
     , Sharpen
     , Flatten
+    , OctPred
+    , OctSucc
     , Dot
     , FromRoot
     , FromSilence

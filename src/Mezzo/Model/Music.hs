@@ -23,12 +23,12 @@ module Mezzo.Model.Music
     -- * Music
       Music (..)
     , Score (..)
-    -- * Harmonic constructs
-    , Progression
     -- * Constraints
+    , ChordConstraints
+    , ProgConstraints
+    , HomConstraints
     , MelConstraints
     , HarmConstraints
-    , ChordConstraints
     ) where
 
 import Data.Kind
@@ -61,28 +61,23 @@ infixl 4 :-:
 --  * Music must not contain parallel or concealed unisons, fifths or octaves.
 --
 data Music :: forall n l. Partiture n l -> Type where
-    -- | A note specified by a pitch and a duration.
-    Note :: NoteConstraints r d => Root r -> Dur d -> Music (FromRoot r d)
-    -- | A rest specified by a duration.
-    Rest :: RestConstraints d => Dur d -> Music (FromSilence d)
     -- | Sequential or melodic composition of music.
     (:|:) :: MelConstraints m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.
     (:-:) :: HarmConstraints m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
+    -- | A note specified by a pitch and a duration.
+    Note :: NoteConstraints r d => Root r -> Dur d -> Music (FromRoot r d)
+    -- | A rest specified by a duration.
+    Rest :: RestConstraints d => Dur d -> Music (FromSilence d)
     -- | A chord specified by a chord type and a duration.
     Chord :: ChordConstraints c d => Cho c -> Dur d -> Music (FromChord c d)
-    -- Progression :: ProgressionConstraints p => Prog p -> Music (FromProg p)
+    -- | A progression specified by a time signature, and its progression schema.
+    Progression :: ProgConstraints t p => TimeSig t -> Prog p -> Music (FromProg p t)
+    -- | A homophonic composition with a melody line and an accompaniment.
+    Homophony :: HomConstraints m a => Music m -> Music a -> Music (m +-+ a)
 
 -- | A type encapsulating every 'Music' composition.
 data Score = forall m. Score (Music m)
-
--------------------------------------------------------------------------------
--- Harmonic constructs
--- Types and type synonyms constructing 'Music' instances from harmonic types.
--------------------------------------------------------------------------------
-
--- | A chord progression with the given scheme and chord length.
-type Progression (p :: Piece k l) (d :: Nat) = Music (ChordsToPartiture (PieceToChords l p) d)
 
 -------------------------------------------------------------------------------
 -- Musical constraints
@@ -95,24 +90,28 @@ type Strict = True
 -- | Applies the constraint c if strict checking is enabled.
 type IfStrict c = If Strict c Valid
 
+-- | Ensures that two pieces of music can be composed sequentially.
+type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
+    IfStrict (ValidMelConcat m1 m2)
+
+-- | Ensures that two pieces of music can be composed in parallel.
+type HarmConstraints m1 m2 = IfStrict (ValidHarmConcat (Align m1 m2))
+
 -- | Ensures that the note is valid.
 type NoteConstraints r d = (IntRep r, Primitive d)
 
 -- | Ensures that the rest is valid.
 type RestConstraints d = (Primitive d)
 
--- | Ensures that two pieces of music can be composed sequentially.
-type MelConstraints (m1 :: Partiture n l1) (m2 :: Partiture n l2) =
-        IfStrict (ValidMelConcat m1 m2)
-
--- | Ensures that two pieces of music can be composed in parallel.
-type HarmConstraints m1 m2 = IfStrict (ValidHarmConcat (Align m1 m2))
-
 -- | Ensures that the chord is valid.
 type ChordConstraints (c :: ChordType n) d = (IntListRep c, Primitive n, Primitive d)
 
 -- | Ensures that a progression is valid.
-type ProgressionConstraints p = Valid
+type ProgConstraints t p = (IntLListRep p, IntRep t, KnownNat t)
+
+type HomConstraints m1 m2 = Valid
+
+
 
 ---- Melodic constraints
 
@@ -297,6 +296,7 @@ ppMusic (Rest d) = char '|' <+> text "~~~~" <+> doc d
 ppMusic (m1 :|: m2) = ppMusic m1 <> emptyBox 1 1 <> ppMusic m2
 ppMusic (m1 :-: m2) = ppMusic m1 // ppMusic m2
 ppMusic (Chord c d) = char '|' <+> doc c <+> doc d
+ppMusic (Progression ts p) = text "Prog" <+> doc ts <+> doc p
 
 -- | Convert a showable value into a pretty-printed box.
 doc :: Show a => a -> Box
