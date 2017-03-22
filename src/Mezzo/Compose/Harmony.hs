@@ -158,3 +158,4 @@ subdom_S_S _ _ = const Sub
 
 
 -- * Key literals
+mkKeyLits
