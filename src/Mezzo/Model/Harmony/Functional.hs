@@ -19,109 +19,99 @@
 
 module Mezzo.Model.Harmony.Functional
     (
+    -- * Types and operations
       Quality (..)
+    , DegreeC (..)
+    , TimeSignature
+    , TimeSig (..)
     , KeyToQual
     , KeyToOtherQual
-    , DiatonicDegree
     , IsMajor
     , IsMinor
-    , DegreeC (..)
+    -- * Functional harmony
+    -- ** Types and constructors
     , ProgType (..)
     , Phrase (..)
     , Cadence (..)
     , Tonic (..)
     , Dominant (..)
     , Subdominant (..)
-    , TimeSignature
-    , TimeSig (..)
     , ChordsToPartiture
     , ProgTypeToChords
     , FromProg
+    -- ** Singletons
     , Prog (..)
     , Ton (..)
     , Dom (..)
     , Sub (..)
     , Cad (..)
     , Phr (..)
-    , QualToType, DegToChord
     )
     where
-
-import GHC.TypeLits
-import Data.Kind (Type)
 
 import Mezzo.Model.Reify
 import Mezzo.Model.Types hiding (IntervalClass (..))
 import Mezzo.Model.Prim
 import Mezzo.Model.Harmony.Chords
 
+import GHC.TypeLits
+import Data.Kind (Type)
+
+infix 5 :=
+
+-------------------------------------------------------------------------------
+-- Types and operations
+-------------------------------------------------------------------------------
+
 -- | The quality of a scale degree chord.
 data Quality = MajQ | MinQ | DomQ | DimQ
-
-type family KeyToQual (k :: KeyType) where
-    KeyToQual (Key _ _ MajorMode) = MajQ
-    KeyToQual (Key _ _ MinorMode) = MinQ
-
-type family KeyToOtherQual (k :: KeyType) where
-    KeyToOtherQual (Key _ _ MajorMode) = MinQ
-    KeyToOtherQual (Key _ _ MinorMode) = MajQ
 
 -- | A scale degree chord in given key, on the given scale, with the given quality and octave.
 data DegreeC (d :: ScaleDegree) (q :: Quality) (k :: KeyType) (i :: Inversion) (o :: OctaveNum) where
     DegChord :: DegreeC d q k i o
 
--- | Ensure that the degree and quality match the mode.
-class DiatonicDegree (d :: ScaleDegree) (q :: Quality) (k :: KeyType)
-instance MajDegQuality d q => DiatonicDegree d q (Key pc acc MajorMode)
-instance MinDegQuality d q => DiatonicDegree d q (Key pc acc MinorMode)
+-- | The number of beats in a bar.
+type TimeSignature = Nat
 
--- | Enforces that the key is in major mode.
+-- | Singleton for 'TimeSignature'.
+data TimeSig (t :: TimeSignature) = TimeSig
+
+-- | Convert the key mode to the corresponding chord quality (i.e., major mode into a major chord).
+type family KeyToQual (k :: KeyType) where
+    KeyToQual (Key _ _ MajorMode) = MajQ
+    KeyToQual (Key _ _ MinorMode) = MinQ
+
+-- | Convert the key mode to the opposite chord quality (i.e., major mode into a minor chord).
+type family KeyToOtherQual (k :: KeyType) where
+    KeyToOtherQual (Key _ _ MajorMode) = MinQ
+    KeyToOtherQual (Key _ _ MinorMode) = MajQ
+
+-- | Convert a quality to a seventh chord type.
+type family QualToType (q :: Quality) :: SeventhType where
+    QualToType MajQ = Doubled MajTriad
+    QualToType MinQ = Doubled MinTriad
+    QualToType DomQ = MajMinSeventh
+    QualToType DimQ = DimSeventh
+
+-- | Enforce that the key is in major mode.
 class IsMajor (k :: KeyType)
 instance IsMajor (Key pc acc MajorMode)
 instance TypeError (Text "The key is minor.") => IsMajor (Key pc acc MinorMode)
 
--- | Enforces that the key is in minor mode.
+-- | Enforce that the key is in minor mode.
 class IsMinor (k :: KeyType)
 instance IsMinor (Key pc acc MinorMode)
 instance TypeError (Text "The key is major.") => IsMinor (Key pc acc MajorMode)
 
--- | Ensure that the degree and quality are valid in major mode.
-class MajDegQuality (d :: ScaleDegree) (q :: Quality)
-instance {-# OVERLAPPING #-} MajDegQuality I MajQ
-instance {-# OVERLAPPING #-} MajDegQuality II MinQ
-instance {-# OVERLAPPING #-} MajDegQuality II DomQ  -- Secondary dominant
-instance {-# OVERLAPPING #-} MajDegQuality III MinQ
-instance {-# OVERLAPPING #-} MajDegQuality IV MajQ
-instance {-# OVERLAPPING #-} MajDegQuality V MajQ
-instance {-# OVERLAPPING #-} MajDegQuality V DomQ
-instance {-# OVERLAPPING #-} MajDegQuality VI MinQ
-instance {-# OVERLAPPING #-} MajDegQuality VII DimQ
-instance {-# OVERLAPPABLE #-} TypeError (Text "Can't have a "
-                                    :<>: ShowQual q
-                                    :<>: ShowDeg d
-                                    :<>: Text " degree chord in major mode.")
-                                => MajDegQuality d q
-
--- | Ensure that the degree and quality are valid in minor mode.
-class MinDegQuality (d :: ScaleDegree) (q :: Quality)
-instance {-# OVERLAPPING #-} MinDegQuality I MinQ
-instance {-# OVERLAPPING #-} MinDegQuality II DimQ
-instance {-# OVERLAPPING #-} MinDegQuality II DomQ  -- Secondary dominant
-instance {-# OVERLAPPING #-} MinDegQuality III MajQ
-instance {-# OVERLAPPING #-} MinDegQuality IV MinQ
-instance {-# OVERLAPPING #-} MinDegQuality V MajQ
-instance {-# OVERLAPPING #-} MinDegQuality V DomQ
-instance {-# OVERLAPPING #-} MinDegQuality VI MajQ
-instance {-# OVERLAPPING #-} MinDegQuality VII MajQ
-instance {-# OVERLAPPABLE #-} TypeError (Text "Can't have a "
-                                    :<>: ShowType q :<>: Text " "
-                                    :<>: ShowType d
-                                    :<>: Text " degree chord in minor mode.")
-                                => MinDegQuality d q
+-------------------------------------------------------------------------------
+-- Functional harmony
+-------------------------------------------------------------------------------
 
 -- | A functionally described piece of music, built from multiple phrases.
 data ProgType (k :: KeyType) (l :: Nat) where
+    -- | A cadential phrase, ending the progression.
     CadPhrase :: Cadence k l -> ProgType k l
+    -- | Add a new phrase to the beginning of the progression.
     (:=) :: Phrase k l -> ProgType k (n - l) -> ProgType k n
 
 -- | A phrase matching a specific functional progression.
@@ -144,20 +134,14 @@ data Cadence (k :: KeyType) (l :: Nat) where
     -- | Deceptive cadence from a dominant fifth to a sixth.
     DeceptCad  :: DegreeC V DomQ k Inv2 o -> DegreeC VI q k Inv1 o -> Cadence k 2
     -- | Full cadence from subdominant to dominant to tonic.
-    FullCad :: Subdominant k l1 -> Cadence k (l - l1) -> Cadence k l
+    FullCad    :: Subdominant k l1 -> Cadence k (l - l1) -> Cadence k l
 
 -- | A tonic chord.
 data Tonic (k :: KeyType) (l :: Nat) where
     -- | A major tonic chord.
-    Tonic :: DegreeC I (KeyToQual k) k Inv0 o -> Tonic k 1 -- Temporarily (?) allow only no inversion
+    TonT   :: DegreeC I (KeyToQual k) k Inv0 o -> Tonic k 1
     -- | Doubled tonics.
-    TonicTT :: Tonic k l1 -> Tonic k (l - l1) -> Tonic k l
-
-class NotInv2 (i :: Inversion)
-instance NotInv2 Inv0
-instance TypeError (Text "Can't have a tonic in second inversion.") => NotInv2 Inv2
-instance NotInv2 Inv1
-instance NotInv2 Inv3
+    TonTT  :: Tonic k l1 -> Tonic k (l - l1) -> Tonic k l
 
 -- | A dominant chord progression.
 data Dominant (k :: KeyType) (l :: Nat) where
@@ -188,107 +172,96 @@ data Subdominant (k :: KeyType) (l :: Nat) where
 
 type DegToChord (dc :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
 
--- | Convert a quality to a seventh chord type.
-type family QualToType (q :: Quality) :: SeventhType where
-    QualToType MajQ = Doubled MajTriad
-    QualToType MinQ = Doubled MinTriad
-    QualToType DomQ = MajMinSeventh
-    QualToType DimQ = DimSeventh
-
 -- | Convert a cadence to chords.
 type family CadToChords (l :: Nat) (c :: Cadence k l) :: Vector (ChordType 4) l where
-    CadToChords 2 (AuthCad  d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    CadToChords 2 (AuthCad7 d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    CadToChords 2 (AuthCadVii d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords 2 (AuthCad d1 d2)      = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords 2 (AuthCad7 d1 d2)     = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords 2 (AuthCadVii d1 d2)   = DegToChord d1 :-- DegToChord d2 :-- None
+    CadToChords 2 (DeceptCad d1 d2)    = DegToChord d1 :-- DegToChord d2 :-- None
     CadToChords 3 (AuthCad64 d1 d2 d3) = DegToChord d1 :-- DegToChord d2 :-- DegToChord d3 :-- None
-    CadToChords 2 (DeceptCad d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
     CadToChords l (FullCad (s :: Subdominant k l1) c) = SubdomToChords l1 s ++. CadToChords (l - l1) c
 
 -- | Convert a tonic to chords.
 type family TonToChords (l :: Nat) (t :: Tonic k l) :: Vector (ChordType 4) l where
-    TonToChords 1 ('Tonic d) = DegToChord d :-- None
-    TonToChords l (TonicTT (t1 :: Tonic k l1) t2) = TonToChords l1 t1 ++. TonToChords (l - l1) t2
+    TonToChords 1 (TonT d) = DegToChord d :-- None
+    TonToChords l (TonTT (t1 :: Tonic k l1) t2) = TonToChords l1 t1 ++. TonToChords (l - l1) t2
 
 -- | Convert a dominant to chords.
 type family DomToChords (l :: Nat) (t :: Dominant k l) :: Vector (ChordType 4) l where
-    DomToChords 1 (DomVM d) = DegToChord d :-- None
-    DomToChords 1 (DomV7 d) = DegToChord d :-- None
-    DomToChords 1 (DomVii0 d) = DegToChord d :-- None
+    DomToChords 1 (DomVM d)       = DegToChord d  :-- None
+    DomToChords 1 (DomV7 d)       = DegToChord d  :-- None
+    DomToChords 1 (DomVii0 d)     = DegToChord d  :-- None
     DomToChords 2 (DomSecD d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
     DomToChords l (DomSD (s :: Subdominant k l1) d) =
         SubdomToChords l1 s ++. DomToChords (l - l1) d
-    DomToChords l (DomDD (d1 :: Dominant k l1) d2) =
+    DomToChords l (DomDD (d1 :: Dominant k l1) d2)  =
         DomToChords l1 d1 ++. DomToChords (l - l1) d2
 
 -- | Convert a subdominant to chords.
 type family SubdomToChords (l :: Nat) (t :: Subdominant k l) :: Vector (ChordType 4) l where
-    SubdomToChords 1 (SubIIm d) = DegToChord d :-- None
-    SubdomToChords 1 (SubIV d) = DegToChord d :-- None
+    SubdomToChords 1 (SubIIm d)         = DegToChord d :-- None
+    SubdomToChords 1 (SubIV d)          = DegToChord d :-- None
     SubdomToChords 2 (SubIIImIVM d1 d2) = DegToChord d1 :-- DegToChord d2 :-- None
-    SubdomToChords l (SubSS (s1 :: Subdominant k l1) s2) = SubdomToChords l1 s1 ++. SubdomToChords (l - l1) s2
+    SubdomToChords l (SubSS (s1 :: Subdominant k l1) s2) =
+        SubdomToChords l1 s1 ++. SubdomToChords (l - l1) s2
 
 -- | Convert a phrase to chords.
 type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) l where
-    PhraseToChords l (PhraseIVI (t1 :: Tonic k (l2 - dl)) (d :: Dominant k dl) (t2 :: Tonic k (l - l2))) = TonToChords (l2 - dl) t1 ++. DomToChords dl d ++. TonToChords (l - l2) t2
-    PhraseToChords l (PhraseVI (d :: Dominant k dl) t) = DomToChords dl d ++. TonToChords (l - dl) t
+    PhraseToChords l (PhraseIVI (t1 :: Tonic k (l2 - dl)) (d :: Dominant k dl)
+                                (t2 :: Tonic k (l - l2))) =
+        TonToChords (l2 - dl) t1 ++. DomToChords dl d ++. TonToChords (l - l2) t2
+    PhraseToChords l (PhraseVI (d :: Dominant k dl) t) =
+        DomToChords dl d ++. TonToChords (l - dl) t
 
 -- | Convert a piece to chords.
 type family ProgTypeToChords (l :: Nat) (p :: ProgType k l) :: Vector (ChordType 4) l where
     ProgTypeToChords l (CadPhrase (c :: Cadence k l)) = CadToChords l c
-    ProgTypeToChords l ((p :: Phrase k l1) := ps) = PhraseToChords l1 p ++. ProgTypeToChords (l - l1) ps
-
--- | The number of beats in a bar.
-type TimeSignature = Nat
-
--- | Singleton for 'TimeSignature'.
-data TimeSig (t :: TimeSignature) = TimeSig
+    ProgTypeToChords l ((p :: Phrase k l1) := ps) =
+        PhraseToChords l1 p ++. ProgTypeToChords (l - l1) ps
 
 -- | Convert a vector of chords ("chord progression") into a 'Partiture'.
 type family ChordsToPartiture (v :: Vector (ChordType n) l) (t :: TimeSignature) :: Partiture n (l * t * 8) where
     ChordsToPartiture None _ = (End :-- End :-- End :-- End :-- None)
     ChordsToPartiture (c :-- cs) l = FromChord c (l * 8) +|+ ChordsToPartiture cs l
 
--- | Convert a progression with a time signature into a partiture.
+-- | Convert a progression with a time signature into a 'Partiture'.
 type family FromProg (p :: ProgType k l) (t :: TimeSignature) :: Partiture 4 (l * t * 8) where
     FromProg (p :: ProgType k l) t = ChordsToPartiture (ProgTypeToChords l p) t
 
--- | Convert a quality to text.
-type family ShowQual (q :: Quality) :: ErrorMessage where
-    ShowQual MajQ = Text "major "
-    ShowQual MinQ = Text "minor "
-    ShowQual DomQ = Text "dominant "
-    ShowQual DimQ = Text "diminished "
-
--- | Convert a degree to text.
-type family ShowDeg (d :: ScaleDegree) :: ErrorMessage where
-    ShowDeg I = Text "1st"
-    ShowDeg II = Text "2nd"
-    ShowDeg III = Text "3rd"
-    ShowDeg IV = Text "4th"
-    ShowDeg V = Text "5th"
-    ShowDeg VI = Text "6th"
-    ShowDeg VII = Text "7th"
 
 -- Singletons
 
+-- | The singleton type for 'Tonic'.
 data Ton (t :: Tonic k d) = Ton
+
+-- | The singleton type for 'Tonic'.
 data Dom (d :: Dominant k d) = Dom
+
+-- | The singleton type for 'Tonic'.
 data Sub (s :: Subdominant k d) = Sub
 
+-- | The singleton type for 'Tonic'.
 data Cad (c :: Cadence k d) = Cad
+
+-- | The singleton type for 'Tonic'.
 data Phr (p :: Phrase k d) = Phr
+
+-- | The singleton type for 'Tonic'.
 data Prog (p :: ProgType k l) = Prog
 
+-------------------------------------------------------------------------------
+-- Primitive instances
+-------------------------------------------------------------------------------
 
 -- Tonic
 
-instance (ch ~ DegToChord d, IntListRep ch) => Primitive ('Tonic d) where
-    type Rep ('Tonic d) = [[Int]]
+instance (ch ~ DegToChord d, IntListRep ch) => Primitive (TonT d) where
+    type Rep (TonT d) = [[Int]]
     prim _ = [prim (Cho @4 @ch)]
     pretty _ = "Ton"
 
-instance (IntLListRep t1, IntLListRep t2) => Primitive (TonicTT (t1 :: Tonic k dur1) (t2 :: Tonic k (l - dur1)) :: Tonic k l) where
-    type Rep (TonicTT t1 t2) = [[Int]]
+instance (IntLListRep t1, IntLListRep t2) => Primitive (TonTT (t1 :: Tonic k dur1) (t2 :: Tonic k (l - dur1)) :: Tonic k l) where
+    type Rep (TonTT t1 t2) = [[Int]]
     prim _ = prim (Ton @k @dur1 @t1) ++ prim (Ton @k @(l - dur1) @t2)
     pretty _ = pretty (Ton @k @dur1 @t1) ++ " | " ++ pretty (Ton @k @(l - dur1) @t2)
 

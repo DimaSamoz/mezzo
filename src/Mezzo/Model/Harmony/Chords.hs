@@ -30,7 +30,6 @@ module Mezzo.Model.Harmony.Chords
     , ChordType (..)
     , Cho (..)
     , FromChord
-    , ChordToPitchList, BuildOnRoot
     ) where
 
 import GHC.TypeLits
@@ -53,6 +52,13 @@ data SeventhType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | Di
 -- | The inversion of a chord.
 data Inversion = Inv0 | Inv1 | Inv2 | Inv3
 
+-- | A chord type, indexed by the number of notes.
+data ChordType :: Nat -> Type where
+    -- | A triad, consisting of three pitches.
+    Triad        :: RootType -> TriadType -> Inversion -> ChordType 3
+    -- | A seventh chord, consisting of four pitches.
+    SeventhChord :: RootType -> SeventhType -> Inversion -> ChordType 4
+
 -- | The singleton type for 'TriadType'.
 data TriType (t :: TriadType) = TriType
 
@@ -62,11 +68,7 @@ data SevType (t :: SeventhType) = SevType
 -- | The singleton type for 'Inversion'.
 data Inv (t :: Inversion) = Inv
 
--- | A chord type, indexed by the number of notes.
-data ChordType :: Nat -> Type where
-    Triad :: RootType -> TriadType   -> Inversion -> ChordType 3
-    SeventhChord :: RootType -> SeventhType -> Inversion -> ChordType 4
-
+-- | THe singleton type for 'ChordType'.
 data Cho (c :: ChordType n) = Cho
 
 -- | Convert a triad type to a list of intervals between the individual pitches.
@@ -104,12 +106,14 @@ type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType 4) :: Vector 
     InvertDoubled Inv2 ps = Invert Inv2 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' (Tail' ps))))
     InvertDoubled Inv3 ps = RaiseAllBy' ps (Interval Perf Octave)
 
+-- | Enumerate inversions.
 type family InvSucc (i :: Inversion) :: Inversion where
     InvSucc Inv0 = Inv1
     InvSucc Inv1 = Inv2
     InvSucc Inv2 = Inv3
     InvSucc Inv3 = Inv0
 
+-- | Invert a chord once.
 type family InvertChord (c :: ChordType n) :: ChordType n where
     InvertChord (Triad r t Inv2) = Triad r t Inv0
     InvertChord (Triad r t i) = Triad r t (InvSucc i)
@@ -117,16 +121,18 @@ type family InvertChord (c :: ChordType n) :: ChordType n where
 
 -- | Build a list of pitches with the given intervals starting from a root.
 type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector PitchType n where
-    BuildOnRoot (PitchRoot Silence) _    = TypeError (Text "Can't build a chord on a rest.")
-    BuildOnRoot r None       = None
-    BuildOnRoot r (i :-- is) = RaiseBy (RootToPitch r) i :-- BuildOnRoot r is
+    BuildOnRoot (PitchRoot Silence) _          = TypeError (Text "Can't build a chord on a rest.")
+    BuildOnRoot r                   None       = None
+    BuildOnRoot r                   (i :-- is) = RaiseBy (RootToPitch r) i :-- BuildOnRoot r is
 
 -- | Convert a chord to a list of constituent pitches.
 type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
-    ChordToPitchList (Triad        r t i) = Invert i 3 (BuildOnRoot r (TriadTypeToIntervals t))
+    ChordToPitchList (Triad r t i)
+                    = Invert i 3 (BuildOnRoot r (TriadTypeToIntervals t))
     ChordToPitchList (SeventhChord r (Doubled tt) i)
-                                          = InvertDoubled i (BuildOnRoot r (SeventhTypeToIntervals (Doubled tt)))
-    ChordToPitchList (SeventhChord r t i) = Invert i 4 (BuildOnRoot r (SeventhTypeToIntervals t))
+                    = InvertDoubled i (BuildOnRoot r (SeventhTypeToIntervals (Doubled tt)))
+    ChordToPitchList (SeventhChord r t i)
+                    = Invert i 4 (BuildOnRoot r (SeventhTypeToIntervals t))
 
 -- | Convert a chord to a partiture with the given length (one voice for each pitch).
 type family FromChord (c :: ChordType n) (l :: Nat) :: Partiture n l where
