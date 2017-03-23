@@ -40,7 +40,7 @@ inKey k p = Prog
 -- ** Progressions
 
 -- | Create a new musical progression from the given time signature and progression schema.
-prog :: ProgConstraints t p => TimeSig t -> Prog p -> Music (FromProg p t)
+prog :: ValidProg t p => TimeSig t -> Prog p -> Music (FromProg p t)
 prog = Progression
 
 -- ** Phrases

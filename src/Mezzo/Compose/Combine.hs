@@ -76,30 +76,30 @@ chordVoices :: forall (n :: Nat) (c :: ChordType n) . Primitive n => Cho c -> In
 chordVoices _ = prim (undefined :: ChordType n) -- Need to get a kind-level variable to the term level
 
 -- | Add an empty voice to the piece of music.
-pad :: (HarmConstraints m (FromSilence b), Primitive b)
+pad :: (ValidHarm m (FromSilence b), Primitive b)
     => Music (m :: Partiture (a - 1) b) -> Music ((m +-+ FromSilence b) :: Partiture a b)
 pad m = m :-: restWhile m
 
 -- | Add two empty voices to the piece of music.
-pad2 :: ( HarmConstraints m (FromSilence b)
-        , HarmConstraints (m +-+ FromSilence b) (FromSilence b)
+pad2 :: ( ValidHarm m (FromSilence b)
+        , ValidHarm (m +-+ FromSilence b) (FromSilence b)
         , Primitive b)
      => Music (m :: Partiture (a - 2) b) -> Music ((m +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
 pad2 m = m :-: restWhile m :-: restWhile m
 
 -- | Add three empty voices to the piece of music.
-pad3 :: ( HarmConstraints m (FromSilence b)
-        , HarmConstraints (m +-+ FromSilence b) (FromSilence b)
-        , HarmConstraints (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+pad3 :: ( ValidHarm m (FromSilence b)
+        , ValidHarm (m +-+ FromSilence b) (FromSilence b)
+        , ValidHarm (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
         , Primitive b)
      => Music (m :: Partiture (a - 3) b) -> Music ((m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
 pad3 m = m :-: restWhile m :-: restWhile m :-: restWhile m
 
 -- | Add four empty voices to the piece of music.
-pad4 :: ( HarmConstraints m (FromSilence b)
-        , HarmConstraints (m +-+ FromSilence b) (FromSilence b)
-        , HarmConstraints (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
-        , HarmConstraints (m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+pad4 :: ( ValidHarm m (FromSilence b)
+        , ValidHarm (m +-+ FromSilence b) (FromSilence b)
+        , ValidHarm (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+        , ValidHarm (m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
         , Primitive b)
      => Music (m :: Partiture (a - 4) b) -> Music ((m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
 pad4 m = m :-: restWhile m :-: restWhile m :-: restWhile m :-: restWhile m
@@ -159,8 +159,8 @@ melDur _ = Dur
 -- Textures
 -------------------------------------------------------------------------------
 
-hom :: HomConstraints m a => Music m -> Music a -> Music (m +-+ a)
+hom :: ValidHom m a => Music m -> Music a -> Music (m +-+ a)
 hom = Homophony
 
-melAccomp :: (ProgConstraints t p, pm ~ FromProg p t, HomConstraints m pm, Primitive d) => Melody m d -> Prog p -> TimeSig t -> Music (m +-+ pm)
+melAccomp :: (ValidProg t p, pm ~ FromProg p t, ValidHom m pm, Primitive d) => Melody m d -> Prog p -> TimeSig t -> Music (m +-+ pm)
 melAccomp m p t = Homophony (play m) (Progression t p)

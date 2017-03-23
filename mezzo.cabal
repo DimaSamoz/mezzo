@@ -27,6 +27,8 @@ library
                      , Mezzo.Model.Harmony.Chords
                      , Mezzo.Model.Harmony.Functional
                      , Mezzo.Model.Reify
+                     , Mezzo.Model.Rules.RuleSet
+                     , Mezzo.Model.Rules.ClassicalRules
 
                      , Mezzo.Compose
                      , Mezzo.Compose.Types
