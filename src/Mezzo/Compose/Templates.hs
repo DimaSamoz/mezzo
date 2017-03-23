@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeInType, TemplateHaskell, ExplicitForAll, ViewPatterns #-}
+{-# LANGUAGE TemplateHaskell, ExplicitForAll, ViewPatterns #-}
 
 -----------------------------------------------------------------------------
 -- |

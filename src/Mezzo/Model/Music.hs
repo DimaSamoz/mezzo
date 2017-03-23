@@ -1,7 +1,3 @@
-{-# LANGUAGE TypeInType, RankNTypes, TypeOperators, GADTs, ConstraintKinds,
-    FlexibleContexts, MultiParamTypeClasses, TypeFamilies, UndecidableInstances,
-    FlexibleInstances #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
 -- |

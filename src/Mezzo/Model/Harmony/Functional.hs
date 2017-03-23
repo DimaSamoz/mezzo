@@ -1,6 +1,4 @@
-{-# LANGUAGE  TypeInType, MultiParamTypeClasses, FlexibleInstances, TypeApplications, ScopedTypeVariables,
-    UndecidableInstances, GADTs, TypeOperators, TypeFamilies, FlexibleContexts, ViewPatterns #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
+{-# LANGUAGE ViewPatterns #-}
 
 -----------------------------------------------------------------------------
 -- |

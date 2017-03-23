@@ -1,7 +1,5 @@
-{-# LANGUAGE  TypeInType, MultiParamTypeClasses, FlexibleInstances,
-    UndecidableInstances #-}
 
------------------------------------------------------------------------------
+----------------------------------------------------------------------------
 -- |
 -- Module      :  Mezzo.Model.Harmony.Motion
 -- Description :  Models of harmonic motion

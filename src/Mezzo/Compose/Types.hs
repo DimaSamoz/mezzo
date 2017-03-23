@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeInType, TypeOperators, GADTs, TypeFamilies, MultiParamTypeClasses,
-    FlexibleInstances, UndecidableInstances, ScopedTypeVariables, FlexibleContexts, RankNTypes #-}
 
 {-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 

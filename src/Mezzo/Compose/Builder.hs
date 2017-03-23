@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeInType, RankNTypes, ExistentialQuantification, GADTs #-}
 
 -----------------------------------------------------------------------------
 -- |

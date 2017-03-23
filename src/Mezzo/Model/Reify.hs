@@ -1,5 +1,3 @@
-{-# LANGUAGE TypeInType, ScopedTypeVariables, TypeFamilies, FlexibleInstances,
-    UndecidableInstances, ConstraintKinds #-}
 
 -----------------------------------------------------------------------------
 -- |

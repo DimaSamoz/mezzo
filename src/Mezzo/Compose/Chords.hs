@@ -1,5 +1,4 @@
-{-# LANGUAGE TypeInType, TypeApplications, TemplateHaskell, RankNTypes,
-    GADTs, ImplicitParams, FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 -----------------------------------------------------------------------------
 -- |

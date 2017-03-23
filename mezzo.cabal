@@ -46,7 +46,21 @@ library
                      , HCodecs
                      , boxes
                      , ghc-prim
+  ghc-options:         -fplugin GHC.TypeLits.Normalise
   default-language:    Haskell2010
+  default-extensions:  TypeInType
+                     , TypeApplications
+                     , TypeFamilies
+                     , GADTs
+                     , RankNTypes
+                     , ScopedTypeVariables
+                     , TypeOperators
+                     , MultiParamTypeClasses
+                     , FlexibleInstances
+                     , FlexibleContexts
+                     , UndecidableInstances
+                     , ConstraintKinds
+
 
 test-suite mezzo-test
   type:                exitcode-stdio-1.0

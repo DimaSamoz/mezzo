@@ -1,6 +1,3 @@
-{-# LANGUAGE TypeInType, TypeOperators, TypeFamilies, GADTs,
-    UndecidableInstances, ConstraintKinds #-}
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
 
 -----------------------------------------------------------------------------
 -- |
