@@ -30,11 +30,11 @@ typeSpec =
 
 rootToPitch ::
         ( (RootToPitch (PitchRoot (Pitch C Natural Oct3)) ~ (Pitch C Natural Oct3))
-        , (RootToPitch (DegreeRoot (Key D Flat MinorMode) IV) ~ (Pitch F Sharp Oct2))
+        , (RootToPitch (DegreeRoot (Key D Flat MinorMode) (Degree IV Natural Oct2)) ~ (Pitch F Sharp Oct2))
         ) => Bool
 rootToPitch = True
 
-rootToPitchInv :: Proxy (RootToPitch (DegreeRoot (Key D Flat MinorMode) IV))
+rootToPitchInv :: Proxy (RootToPitch (DegreeRoot (Key D Flat MinorMode) (Degree IV Natural Oct2)))
                -> Proxy (Pitch E Natural Oct2)
 rootToPitchInv = id
 
@@ -42,12 +42,12 @@ sharpen :: ( (Sharpen (PitchRoot (Pitch C Natural Oct3))) ~ (PitchRoot (Pitch C 
            , (Sharpen (PitchRoot (Pitch E Natural Oct3))) ~ (PitchRoot (Pitch F Natural Oct3))
            , (Sharpen (PitchRoot (Pitch C Flat Oct3))) ~ (PitchRoot (Pitch C Natural Oct3))
            , (Sharpen (PitchRoot (Pitch B Natural Oct3))) ~ (PitchRoot (Pitch C Natural Oct4))
-           , (Sharpen (DegreeRoot (Key F Sharp MinorMode) VI)) ~ (PitchRoot (Pitch D Sharp Oct3))
-           , (Sharpen (DegreeRoot (Key E Sharp MajorMode) VII)) ~ (PitchRoot (Pitch F Natural Oct3))
+           , (Sharpen (DegreeRoot (Key F Sharp MinorMode) (Degree VI Natural Oct3))) ~ (PitchRoot (Pitch D Sharp Oct4))
+           , (Sharpen (DegreeRoot (Key E Sharp MajorMode) (Degree VII Natural Oct3))) ~ (PitchRoot (Pitch F Natural Oct4))
            ) => Bool
 sharpen = True
 
-sharpenInv :: Proxy '(Sharpen (PitchRoot (Pitch B Flat Oct5)), Sharpen (DegreeRoot (Key C Flat MajorMode) IV))
+sharpenInv :: Proxy '(Sharpen (PitchRoot (Pitch B Flat Oct5)), Sharpen (DegreeRoot (Key C Flat MajorMode) (Degree IV Natural Oct3)))
            -> Proxy '(PitchRoot (Pitch C Flat Oct6), PitchRoot (Pitch F Natural Oct3))
 sharpenInv = id
 
@@ -55,12 +55,12 @@ flatten :: ( (Flatten (PitchRoot (Pitch D Natural Oct3))) ~ (PitchRoot (Pitch D 
            , (Flatten (PitchRoot (Pitch F Natural Oct3))) ~ (PitchRoot (Pitch E Natural Oct3))
            , (Flatten (PitchRoot (Pitch C Sharp Oct3))) ~ (PitchRoot (Pitch C Natural Oct3))
            , (Flatten (PitchRoot (Pitch C Natural Oct3))) ~ (PitchRoot (Pitch B Natural Oct2))
-           , (Flatten (DegreeRoot (Key F Sharp MinorMode) VI)) ~ (PitchRoot (Pitch D Flat Oct3))
-           , (Flatten (DegreeRoot (Key E Sharp MajorMode) VII)) ~ (PitchRoot (Pitch E Flat Oct3))
+           , (Flatten (DegreeRoot (Key F Sharp MinorMode) (Degree VI Natural Oct3))) ~ (PitchRoot (Pitch D Flat Oct4))
+           , (Flatten (DegreeRoot (Key E Sharp MajorMode) (Degree VII Natural Oct3))) ~ (PitchRoot (Pitch E Flat Oct4))
            ) => Bool
 flatten = True
 
-flattenInv :: Proxy '(Flatten (PitchRoot (Pitch C Sharp Oct5)), Flatten (DegreeRoot (Key C Flat MajorMode) V))
+flattenInv :: Proxy '(Flatten (PitchRoot (Pitch C Sharp Oct5)), Flatten (DegreeRoot (Key C Flat MajorMode) (Degree V Natural Oct3)))
            -> Proxy '(PitchRoot (Pitch B Sharp Oct4), PitchRoot (Pitch E Natural Oct3))
 flattenInv = id
 
