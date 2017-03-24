@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Mezzo.Model.Errors
--- Description :  MIDI exporting
+-- Description :  Musical error handling
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
 --
