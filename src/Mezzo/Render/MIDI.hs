@@ -20,7 +20,7 @@ module Mezzo.Render.MIDI
     where
 
 import Mezzo.Model
-import Mezzo.Compose (_qu, _wh)
+import Mezzo.Compose (_th, _si, _ei, _qu, _ha, _wh)
 
 import Codec.Midi hiding (key)
 import qualified Codec.Midi as CM (key)

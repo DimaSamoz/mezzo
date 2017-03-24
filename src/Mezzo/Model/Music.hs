@@ -82,7 +82,7 @@ data Score = forall m. Score (Music m)
 -------------------------------------------------------------------------------
 
 -- | Select the active rule set.
-type ActRuleSet = Free
+type ActRuleSet = Classical
 
 -- | Ensures that two pieces of music can be composed sequentially.
 type ValidMel m1 m2 = MelConstraints ActRuleSet m1 m2

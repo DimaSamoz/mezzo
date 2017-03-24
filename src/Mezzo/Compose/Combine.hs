@@ -38,6 +38,7 @@ import Mezzo.Model
 import Mezzo.Compose.Basic
 import Mezzo.Compose.Builder
 import Mezzo.Compose.Types
+import Mezzo.Compose.Harmony
 import Mezzo.Model.Prim
 import Mezzo.Model.Types
 import Mezzo.Model.Music
@@ -162,5 +163,5 @@ melDur _ = Dur
 hom :: ValidHom m a => Music m -> Music a -> Music (m +-+ a)
 hom = Homophony
 
-melAccomp :: (ValidProg t p, pm ~ FromProg p t, ValidHom m pm, Primitive d) => Melody m d -> Prog p -> TimeSig t -> Music (m +-+ pm)
-melAccomp m p t = Homophony (play m) (Progression t p)
+melAccomp :: (ValidProg t p, pm ~ FromProg p t, ValidHom m pm, Primitive d) => KeyS k -> TimeSig t -> Melody m d -> InKey k (PhraseList p) -> Music (m +-+ pm)
+melAccomp k t m p = Homophony (play m) (Progression t (inKey k p))
