@@ -30,6 +30,7 @@ import GHC.TypeLits
 
 import Mezzo.Model.Types
 import Mezzo.Model.Prim
+import Mezzo.Model.Errors
 
 -------------------------------------------------------------------------------
 -- Consonant and dissonant intervals
@@ -72,14 +73,20 @@ instance DissonantInterval (Interval ic Seventh)
 -------------------------------------------------------------------------------
 
 -- | Ensures that direct motion is permitted between the two intervals.
-class DirectMotion (i1 :: IntervalType) (i2 :: IntervalType)
-instance {-# OVERLAPPING #-} TypeError (Text "Direct motion into a perfect unison is forbidden.")
-                                => DirectMotion i1 (Interval Perf Unison)
-instance {-# OVERLAPPING #-} TypeError (Text "Direct motion into a perfect fifth is forbidden.")
-                                => DirectMotion i1 (Interval Perf Fifth)
-instance {-# OVERLAPPING #-} TypeError (Text "Direct motion into a perfect octave is forbidden.")
-                                => DirectMotion i1 (Interval Perf Octave)
-instance {-# OVERLAPPABLE #-}      DirectMotion i1 i2
+class DirectMotion (e :: DyadPair) (i1 :: IntervalType) (i2 :: IntervalType)
+instance {-# OVERLAPPING #-} MotionError "Parallel unisons are forbidden: " e
+                                => DirectMotion e (Interval Perf Unison) (Interval Perf Unison)
+instance {-# OVERLAPS #-} MotionError "Direct motion into a perfect unison is forbidden: " e
+                                => DirectMotion e i1 (Interval Perf Unison)
+instance {-# OVERLAPPING #-} MotionError "Parallel fifths are forbidden: " e
+                                => DirectMotion e (Interval Perf Fifth) (Interval Perf Fifth)
+instance {-# OVERLAPS #-} MotionError "Direct motion into a perfect fifth is forbidden: " e
+                                => DirectMotion e i1 (Interval Perf Fifth)
+instance {-# OVERLAPPING #-} MotionError "Parallel octaves are forbidden: " e
+                                => DirectMotion e (Interval Perf Octave) (Interval Perf Octave)
+instance {-# OVERLAPS #-} MotionError "Direct motion into a perfect octave is forbidden: " e
+                                => DirectMotion e i1 (Interval Perf Octave)
+instance {-# OVERLAPPABLE #-}      DirectMotion e i1 i2
 
 -- | Ensures that contrary motion is permitted between the two intervals.
 class ContraryMotion (i1 :: IntervalType) (i2 :: IntervalType)

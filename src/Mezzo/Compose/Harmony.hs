@@ -134,11 +134,13 @@ subdom_IV :: InKey k (Sub (SubIV (DegChord :: DegreeC IV (KeyToQual k) k Inv2 Oc
 subdom_IV = const Sub
 
 -- | Subdominant minor second (ii) chord.
-subdom_ii :: IsMajor k => InKey k (Sub (SubIIm (DegChord :: DegreeC II MinQ k Inv0 Oct3)))
+subdom_ii :: IsMajor k "ii subdominant"
+    => InKey k (Sub (SubIIm (DegChord :: DegreeC II MinQ k Inv0 Oct3)))
 subdom_ii = const Sub
 
 -- | Subdominant third-fourth (iii-IV) progression.
-subdom_iii_IV :: IsMajor k => InKey k (Sub (SubIIImIVM (DegChord :: DegreeC III MinQ k Inv0 Oct3) (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
+subdom_iii_IV :: IsMajor k "iii-IV subdominant"
+    => InKey k (Sub (SubIIImIVM (DegChord :: DegreeC III MinQ k Inv0 Oct3) (DegChord :: DegreeC IV MajQ k Inv3 Oct2)))
 subdom_iii_IV = const Sub
 
 -- | Doubled subdominants.
