@@ -29,6 +29,7 @@ library
                      , Mezzo.Model.Reify
                      , Mezzo.Model.Rules.RuleSet
                      , Mezzo.Model.Rules.ClassicalRules
+                     , Mezzo.Model.Errors
 
                      , Mezzo.Compose
                      , Mezzo.Compose.Types

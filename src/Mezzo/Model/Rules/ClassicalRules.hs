@@ -23,11 +23,14 @@ module Mezzo.Model.Rules.ClassicalRules
 import Mezzo.Model.Types
 import Mezzo.Model.Prim
 import Mezzo.Model.Harmony
+import Mezzo.Model.Errors
 
 import GHC.TypeLits
 import Data.Kind
 
----- Melodic constraints
+-------------------------------------------------------------------------------
+-- Melodic constraints
+-------------------------------------------------------------------------------
 
 -- | Ensures that melodic intervals are valid.
 --
@@ -36,15 +39,15 @@ import Data.Kind
 --  * any augmented interval or
 --  * any diminished interval or
 --  * any seventh interval.
-class ValidMelInterval (i :: IntervalType)
-instance {-# OVERLAPPING #-}       ValidMelInterval (Interval Aug Unison)
-instance {-# OVERLAPS #-} TypeError (Text "Augmented melodic intervals are not permitted.")
-                                => ValidMelInterval (Interval Aug a)
-instance {-# OVERLAPS #-} TypeError (Text "Diminished melodic intervals are not permitted.")
-                                => ValidMelInterval (Interval Dim a)
-instance {-# OVERLAPPING #-} TypeError (Text "Seventh intervals are not permitted in melody.")
-                                => ValidMelInterval (Interval a Seventh)
-instance {-# OVERLAPPABLE #-}      ValidMelInterval i
+class ValidMelInterval (e :: PitchPair) (i :: IntervalType)
+instance {-# OVERLAPPING #-}       ValidMelInterval e (Interval Aug Unison)
+instance {-# OVERLAPS #-} PitchPairError "Augmented melodic intervals are not permitted: " e
+                                => ValidMelInterval e (Interval Aug a)
+instance {-# OVERLAPS #-} PitchPairError "Diminished melodic intervals are not permitted: " e
+                                => ValidMelInterval e (Interval Dim a)
+instance {-# OVERLAPPING #-} PitchPairError "Seventh intervals are not permitted in melody: " e
+                                => ValidMelInterval e (Interval a Seventh)
+instance {-# OVERLAPPABLE #-}      ValidMelInterval e i
 
 -- | Ensures that two pitches form valid melodic leaps.
 --
@@ -56,7 +59,7 @@ class ValidMelLeap (p1 :: PitchType) (p2 :: PitchType)
 instance {-# OVERLAPPING #-}  ValidMelLeap Silence Silence
 instance {-# OVERLAPPING #-}  ValidMelLeap Silence (Pitch pc acc oct)
 instance {-# OVERLAPPING #-}  ValidMelLeap (Pitch pc acc oct) Silence
-instance {-# OVERLAPPABLE #-} ValidMelInterval (MakeInterval a b) => ValidMelLeap a b
+instance {-# OVERLAPPABLE #-} ValidMelInterval '(a, b) (MakeInterval a b) => ValidMelLeap a b
 
 -- | Ensures that two voices can be appended.
 --
@@ -82,7 +85,9 @@ instance {-# OVERLAPPABLE #-} (ValidMelAppend v1 v2, ValidMelConcat vs1 vs2)
                                 => ValidMelConcat (v1 :-- vs1) (v2 :-- vs2)
 
 
----- Harmonic constraints
+-------------------------------------------------------------------------------
+-- Harmonic constraints
+-------------------------------------------------------------------------------
 
 -- | Ensures that harmonic intervals are valid.
 --
@@ -91,18 +96,18 @@ instance {-# OVERLAPPABLE #-} (ValidMelAppend v1 v2, ValidMelConcat vs1 vs2)
 --  * a minor second or
 --  * a major seventh or
 --  * an augmented octave.
-class ValidHarmInterval (i :: IntervalType)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have minor seconds in chords.")
-                                => ValidHarmInterval (Interval Aug Unison)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have minor seconds in chords.")
-                                => ValidHarmInterval (Interval Min Second)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have major sevenths in chords.")
-                                => ValidHarmInterval (Interval Maj Seventh)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have major sevenths in chords.")
-                                => ValidHarmInterval (Interval Dim Octave)
-instance {-# OVERLAPPING #-} TypeError (Text "Can't have augmented octaves in chords.")
-                                => ValidHarmInterval (Interval Aug Octave)
-instance {-# OVERLAPPABLE #-}      ValidHarmInterval i
+class ValidHarmInterval (e :: PitchPair) (i :: IntervalType)
+instance {-# OVERLAPPING #-} PitchPairError "Can't have minor seconds in chords: " e
+                                => ValidHarmInterval e (Interval Aug Unison)
+instance {-# OVERLAPPING #-} PitchPairError "Can't have minor seconds in chords: " e
+                                => ValidHarmInterval e (Interval Min Second)
+instance {-# OVERLAPPING #-} PitchPairError "Can't have major sevenths in chords: " e
+                                => ValidHarmInterval e (Interval Maj Seventh)
+instance {-# OVERLAPPING #-} PitchPairError "Can't have major sevenths in chords: " e
+                                => ValidHarmInterval e (Interval Dim Octave)
+instance {-# OVERLAPPING #-} PitchPairError "Can't have augmented octaves in chords: " e
+                                => ValidHarmInterval e (Interval Aug Octave)
+instance {-# OVERLAPPABLE #-}      ValidHarmInterval e i
 
 -- | Ensures that two pitches form valid harmonic dyad (interval).
 --
@@ -114,7 +119,7 @@ class ValidHarmDyad (p1 :: PitchType) (p2 :: PitchType)
 instance {-# OVERLAPPING #-}  ValidHarmDyad Silence Silence
 instance {-# OVERLAPPING #-}  ValidHarmDyad (Pitch pc acc oct) Silence
 instance {-# OVERLAPPING #-}  ValidHarmDyad Silence (Pitch pc acc oct)
-instance {-# OVERLAPPABLE #-} ValidHarmInterval (MakeInterval a b) => ValidHarmDyad a b
+instance {-# OVERLAPPABLE #-} ValidHarmInterval '(a, b) (MakeInterval a b) => ValidHarmDyad a b
 
 -- | Ensures that two voices form pairwise valid harmonic dyads.
 class ValidHarmDyadsInVectors (v1 :: Voice l) (v2 :: Voice l)
@@ -136,7 +141,9 @@ instance {-# OVERLAPPABLE #-} ( ValidHarmConcat '(vs, us)
                                 => ValidHarmConcat '((v :-- vs), us)
 
 
----- Voice leading constraints
+-------------------------------------------------------------------------------
+-- Voice leading constraints
+-------------------------------------------------------------------------------
 
 -- | Ensures that four pitches (representing two consequent intervals) follow
 -- the rules for valid harmonic motion.
@@ -157,11 +164,11 @@ type family ValidMotion (p1 :: PitchType) (p2 :: PitchType)
                 (ObliqueMotion (MakeInterval p1 p2) (MakeInterval q1 q2))
                 (If (p1 <<? q1)
                     (If (p2 <<? q2)
-                        (DirectMotion (MakeInterval p1 p2) (MakeInterval q1 q2))
+                        (DirectMotion (DyPair p1 p2 q1 q2) (MakeInterval p1 p2) (MakeInterval q1 q2))
                         (ContraryMotion (MakeInterval p1 p2) (MakeInterval q1 q2)))
                     (If (p2 <<? q2)
                         (ContraryMotion (MakeInterval p1 p2) (MakeInterval q1 q2))
-                        (DirectMotion (MakeInterval p1 p2) (MakeInterval q1 q2))))
+                        (DirectMotion (DyPair p1 p2 q1 q2) (MakeInterval p1 p2) (MakeInterval q1 q2))))
 
 -- | Ensures that the interval formed by the first pitch and the last element
 -- of the first voice can move to the interval formed by the second

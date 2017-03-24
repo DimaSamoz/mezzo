@@ -92,14 +92,16 @@ type family QualToType (q :: Quality) :: SeventhType where
     QualToType DimQ = DimSeventh
 
 -- | Enforce that the key is in major mode.
-class IsMajor (k :: KeyType)
-instance IsMajor (Key pc acc MajorMode)
-instance TypeError (Text "The key is minor.") => IsMajor (Key pc acc MinorMode)
+class IsMajor (k :: KeyType) (s :: Symbol)
+instance IsMajor (Key pc acc MajorMode) s
+instance TypeError (Text "Can't have a " :<>: Text s :<>: Text " in minor mode.")
+    => IsMajor (Key pc acc MinorMode) s
 
 -- | Enforce that the key is in minor mode.
-class IsMinor (k :: KeyType)
-instance IsMinor (Key pc acc MinorMode)
-instance TypeError (Text "The key is major.") => IsMinor (Key pc acc MajorMode)
+class IsMinor (k :: KeyType) (s :: Symbol)
+instance IsMinor (Key pc acc MinorMode) s
+instance TypeError (Text "Can't have a " :<>: Text s :<>: Text " in minor mode.")
+    => IsMinor (Key pc acc MajorMode) s
 
 -------------------------------------------------------------------------------
 -- Functional harmony
