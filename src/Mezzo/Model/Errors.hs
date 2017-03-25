@@ -91,3 +91,7 @@ type family PitchPairError (t :: Symbol) (p :: PitchPair) where
 -- | Create an error message with the given text and pair of dyads.
 type family MotionError (t :: Symbol) (d :: DyadPair) where
     MotionError t p = TypeError (Text t :<>: PpDyadPair p)
+
+-- | Create an error message with the given text and chord root.
+type family ChordError (t1 :: Symbol) (r :: RootType) (t2 :: Symbol) where
+    ChordError t1 r t2 = TypeError (Text t1  :<>: PpPitch (RootToPitch r) :<>: Text t2)

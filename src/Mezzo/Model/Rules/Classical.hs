@@ -1,7 +1,7 @@
 
 -----------------------------------------------------------------------------
 -- |
--- Module      :  Mezzo.Model.Rules.ClassicalRules
+-- Module      :  Mezzo.Model.Rules.Classical
 -- Description :  MIDI exporting
 -- Copyright   :  (c) Dima Szamozvancev
 -- License     :  MIT
@@ -14,10 +14,11 @@
 --
 -----------------------------------------------------------------------------
 
-module Mezzo.Model.Rules.ClassicalRules
+module Mezzo.Model.Rules.Classical
     ( ValidMelConcat
     , ValidHarmConcat
-    , Align
+    , ValidHomConcat
+    , ValidMotion
     ) where
 
 import Mezzo.Model.Types
@@ -140,6 +141,20 @@ instance {-# OVERLAPPABLE #-} ( ValidHarmConcat '(vs, us)
                                               , ValidHarmMotionInVectors v] us)
                                 => ValidHarmConcat '((v :-- vs), us)
 
+-- | Ensures that two partitures can be vertically concatenated.
+--
+-- Two partitures can be vertically concatenated if
+--
+--  * the top one is empty or
+--  * all but the first voice can be concatenated, and the first voice
+--    forms valid harmonic dyads with every other voice and follows the rules
+--    of valid harmonic motion.
+class ValidHomConcat (ps :: (Partiture n1 l, Partiture n2 l))
+instance {-# OVERLAPPING #-}       ValidHomConcat '(None, vs)
+instance {-# OVERLAPPABLE #-} ( ValidHomConcat '(vs, us)
+                              , AllSatisfyAll '[ValidHarmDyadsInVectors v] us)
+                                => ValidHomConcat '((v :-- vs), us)
+
 
 -------------------------------------------------------------------------------
 -- Voice leading constraints
@@ -169,31 +184,6 @@ type family ValidMotion (p1 :: PitchType) (p2 :: PitchType)
                     (If (p2 <<? q2)
                         (ContraryMotion (MakeInterval p1 p2) (MakeInterval q1 q2))
                         (DirectMotion (DyPair p1 p2 q1 q2) (MakeInterval p1 p2) (MakeInterval q1 q2))))
-
--- | Ensures that the interval formed by the first pitch and the last element
--- of the first voice can move to the interval formed by the second
--- pitch and the first element of the second voice.
-class ValidMelPitchVectorMotion (p1 :: PitchType) (p2 :: PitchType) (v1 :: Voice l1) (v2 :: Voice l2)
-instance {-# OVERLAPPING #-}    ValidMelPitchVectorMotion p1 p2 End End
-instance {-# OVERLAPPABLE #-} ValidMotion p1 (Last v1) p2 (Head v2)
-                            =>  ValidMelPitchVectorMotion p1 p2 v1 v2
--- Can't have v1 be End and v2 be not End, since if v1 under p1 is not nil, there
--- must be an accompanying voice under p2
-
--- | Ensures that two partitures follow the rules of motion when
--- horizontally concatenated.
---
--- Two horizontally concatenated partitures follow the rules of harmonic motion if
---
---  * both are empty or
---  * their lower voices can be concatenated and the joining elements of the
---    top voice form intervals with the joining elements of the other voices
---    which follow the rules of harmonic motion.
-class ValidMelMatrixMotion (ps1 :: Partiture n l1) (ps2 :: Partiture n l2)
-instance {-# OVERLAPPING #-}       ValidMelMatrixMotion None None
-instance {-# OVERLAPPABLE #-} ( ValidMelMatrixMotion vs1 vs2
-                              , AllPairsSatisfy' (ValidMelPitchVectorMotion (Last v1) (Head v2)) vs1 vs2)
-                                => ValidMelMatrixMotion (v1 :-- vs1) (v2 :-- vs2)
 
 -- | Ensures that two voices form pairwise intervals which follow the
 -- rules of harmonic motion.

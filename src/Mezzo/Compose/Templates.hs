@@ -143,10 +143,10 @@ mkDurLits name = do
             return $ tySig2 : dec2 ++ tySig2' : dec2'
     chordTerm <- do
             let valName = mkName $ (durLitFormatter name) !! 1 : "c"
-            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, IntListRep r) => ChorT (r :: ChordType n) $(conT name) |]
+            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, IntListRep r, ValidChord r $(conT name)) => ChorT (r :: ChordType n) $(conT name) |]
             dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName) |]
             let valName' = mkName $ (durLitFormatter name) !! 1 : "c\'"
-            tySig2' <- sigD valName' $ [t| forall n r. (Primitive n, IntListRep r) => ChorT (r :: ChordType n) (Dot $(conT name)) |]
+            tySig2' <- sigD valName' $ [t| forall n r. (Primitive n, IntListRep r, ValidChord r (Dot $(conT name))) => ChorT (r :: ChordType n) (Dot $(conT name)) |]
             dec2' <- [d| $(varP valName') = \c -> Chord c $(varE litName') |]
             return $ tySig2 : dec2 ++ tySig2' : dec2'
     return $ literal ++ noteTerm ++ restTerm ++ chordTerm
@@ -170,7 +170,7 @@ mk32ndLits = do
             return $ tySig2 : dec2
     chordTerm <- do
             let valName = mkName $ "tc"
-            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, IntListRep r) => ChorT (r :: ChordType n) $(conT ''ThirtySecond) |]
+            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, IntListRep r, ValidChord r $(conT ''ThirtySecond)) => ChorT (r :: ChordType n) $(conT ''ThirtySecond) |]
             dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName)  |]
             return $ tySig2 : dec2
     return $ literal ++ noteTerm ++ restTerm ++ chordTerm

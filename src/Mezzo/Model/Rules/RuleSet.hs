@@ -21,15 +21,17 @@ import Mezzo.Model.Harmony
 import Mezzo.Model.Reify
 import Mezzo.Model.Prim
 
-import qualified Mezzo.Model.Rules.ClassicalRules as CR
+import qualified Mezzo.Model.Rules.Classical as CR
+import qualified Mezzo.Model.Rules.Strict as SR
 
 import Data.Kind
 import GHC.TypeLits
 
 -- | The types of rule sets implemented.
 data RuleSetType =
-      Classical     -- ^ Classical rules.
-    | Free          -- ^ No composition rules.
+      Free          -- ^ No composition rules.
+    | Classical     -- ^ Classical rules.
+    | Strict        -- ^ Strict rules.
 
 -- ** Default constraints
 
@@ -61,14 +63,33 @@ class RuleSet (t :: RuleSetType) where
     type ChordConstraints t c d = DefChordConstraints c d
     type ProgConstraints t s p = DefProgConstraints s p
 
--- | Classical rules.
-instance RuleSet Classical where
-    type MelConstraints Classical m1 m2 = CR.ValidMelConcat m1 m2
-    type HarmConstraints Classical m1 m2 = CR.ValidHarmConcat (CR.Align m1 m2)
-    type HomConstraints Classical m1 m2 = Valid
 
 -- | No rules.
 instance RuleSet Free where
     type MelConstraints Free m1 m2 = Valid
     type HarmConstraints Free m1 m2 = Valid
     type HomConstraints Free m1 m2 = Valid
+
+-- | Classical rules.
+--
+-- Forbids
+--
+-- * seventh, augmented and diminished melodic intervals,
+-- * minor second, major seventh and augmented octave harmonic intervals, and
+-- * direct motion into perfect intervals on harmonic composition.
+instance RuleSet Classical where
+    type MelConstraints Classical m1 m2 = CR.ValidMelConcat m1 m2
+    type HarmConstraints Classical m1 m2 = CR.ValidHarmConcat (Align m1 m2)
+    type HomConstraints Classical m1 m2 = CR.ValidHomConcat (Align m1 m2)
+
+-- | Strict rules.
+--
+-- Forbids all of the above ('Classical'), as well as
+--
+-- * direct motion into perfect intervals on melodic and homophonic composition, and
+-- * major seventh chords.
+instance RuleSet Strict where
+    type MelConstraints Strict m1 m2 = (SR.ValidMelConcat m1 m2, SR.ValidMelMatrixMotion m1 m2)
+    type HarmConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
+    type HomConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
+    type ChordConstraints Strict c d = (DefChordConstraints c d, SR.ValidChordType c)
