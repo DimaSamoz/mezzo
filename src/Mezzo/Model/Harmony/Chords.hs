@@ -94,7 +94,7 @@ type family Invert (i :: Inversion) (n :: Nat) (ps :: Vector PitchType n) :: Vec
     -- Need awkward workarounds because of #12564.
     Invert Inv1 n (p :-- ps) = ps :-| RaiseByOct p
     Invert Inv2 n (p :-- ps) = Invert Inv1 (n - 1) (p :-- Tail' ps) :-| RaiseByOct (Head' ps)
-    Invert Inv3 n (p :-- ps) = Invert Inv2 (n - 1) (p :-- (Head' (Tail' ps)) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' ps)
+    Invert Inv3 n (p :-- ps) = Invert Inv2 (n - 1) (p :-- (Head' ps) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' (Tail' ps))
 
 -- | Invert a doubled triad chord.
 type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType 4) :: Vector PitchType 4 where
