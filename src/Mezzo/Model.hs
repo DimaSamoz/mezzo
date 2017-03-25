@@ -40,6 +40,12 @@ import Mezzo.Model.Types as X
     , Deg (..)
     , KeyS (..)
     , Root (..)
+    , IntervalSize (..)
+    , IntervalClass (..)
+    , IntervalType (..)
+    , IS (..)
+    , IC (..)
+    , Intv (..)
     , RootToPitch
     , PitchToNat
     , Sharpen
@@ -51,7 +57,12 @@ import Mezzo.Model.Types as X
     , FromSilence
     , Voice
     , Partiture
-    , RaiseAllByOct
+    , RaiseBy
+    , LowerBy
+    , RaiseAllBy
+    , LowerAllBy
+    , TransposeUpBy
+    , TransposeDownBy
     )
 import Mezzo.Model.Harmony.Chords as X
 import Mezzo.Model.Harmony.Functional as X

@@ -1,6 +1,4 @@
 
-{-# OPTIONS_GHC -fplugin GHC.TypeLits.Normalise #-}
-
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Mezzo.Compose.Types
@@ -166,5 +164,3 @@ data Melody :: forall l. Partiture 1 l -> Nat -> Type where
     -- | Add a dotted whole rest.
     (:~>>.) :: (ValidMel ms (FromSilence (Dot Whole)), Primitive d)
            => Melody ms d -> RestS -> Melody (ms +|+ FromSilence (Dot Whole)) (Dot Whole)
-
--- raiseByOct :: Melody m d -> Melody (RaiseAllByOct m) d

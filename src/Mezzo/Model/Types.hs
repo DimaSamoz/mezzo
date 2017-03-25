@@ -59,17 +59,26 @@ module Mezzo.Model.Types
     , IntervalClass (..)
     , IntervalType (..)
     , MakeInterval
+    -- ** Singleton types for interval properties
+    , IC (..)
+    , IS (..)
+    , Intv (..)
+    -- * Operations
     , OctPred
     , OctSucc
     , HalfStepsUpBy
     , HalfStepsDownBy
     , RaiseBy
     , LowerBy
+    , RaiseAllBy
+    , LowerAllBy
     , RaiseAllBy'
     , LowerAllBy'
     , RaiseByOct
     , LowerByOct
     , RaiseAllByOct
+    , TransposeUpBy
+    , TransposeDownBy
     ) where
 
 import GHC.TypeLits
@@ -255,6 +264,15 @@ data IntervalType where
     -- | An interval larger than 13 semitones, which is large enough
     -- so that dissonance effects are not significant.
     Compound :: IntervalType
+
+-- | The singleton type for 'IntervalSize'.
+data IS (is :: IntervalSize) = IS
+
+-- | The singleton type for 'IntervalClass'.
+data IC (ic :: IntervalClass) = IC
+
+-- | The singleton type for 'IntervalType'.
+data Intv (i :: IntervalType) = Intv
 
 -------------------------------------------------------------------------------
 -- Interval construction
@@ -616,6 +634,18 @@ type family LowerByOct (p :: PitchType) :: PitchType where
 type family RaiseAllByOct (ps :: Voice l) :: Voice l where
     RaiseAllByOct v = RaiseAllBy v (Interval Perf Octave)
 
+-- | Transpose a partiture up by the given interval.
+type family TransposeUpBy (p :: Partiture n l) (i :: IntervalType) :: Partiture n l where
+    TransposeUpBy _ Compound = TypeError (Text "Can't transpose by compound interval.")
+    TransposeUpBy None i = None
+    TransposeUpBy (v :-- vs) i = RaiseAllBy v i :-- TransposeUpBy vs i
+
+-- | Transpose a partiture down by the given interval.
+type family TransposeDownBy (p :: Partiture n l) (i :: IntervalType) :: Partiture n l where
+    TransposeDownBy _ Compound = TypeError (Text "Can't transpose by compound interval.")
+    TransposeDownBy None i = None
+    TransposeDownBy (v :-- vs) i = LowerAllBy v i :-- TransposeDownBy vs i
+
 -------------------------------------------------------------------------------
 -- Primitive instances
 -------------------------------------------------------------------------------
@@ -711,3 +741,85 @@ instance KnownNat n => Primitive n where
     pretty (natVal -> 32) = "Wh"
     pretty (natVal -> 48) = "Wh."
     pretty (natVal -> n) = ":" ++ show n
+
+-- Intervals
+
+---- Interval classes
+
+instance Primitive Maj where
+    type Rep Maj = Int -> Int
+    prim _ = id
+    pretty _ = "Maj"
+
+instance Primitive Min where
+    type Rep Min = Int -> Int
+    prim _ = pred
+    pretty _ = "Min"
+
+instance Primitive Perf where
+    type Rep Perf = Int -> Int
+    prim _ = id
+    pretty _ = "Perf"
+
+instance Primitive Aug where
+    type Rep Aug = Int -> Int
+    prim _ = (+ 1)
+    pretty _ = "Aug"
+
+instance Primitive Dim where
+    type Rep Dim = Int -> Int
+    prim _ 2 = 0
+    prim _ 4 = 2
+    prim _ 5 = 4
+    prim _ 7 = 6
+    prim _ 9 = 7
+    prim _ 11 = 9
+    prim _ 12 = 11
+    pretty _ = "Dim"
+
+---- Interval sizes
+
+instance Primitive Unison where
+    type Rep Unison = Int
+    prim _ = 0
+    pretty _ = "1"
+
+instance Primitive Second where
+    type Rep Second = Int
+    prim _ = 2
+    pretty _ = "2"
+
+instance Primitive Third where
+    type Rep Third = Int
+    prim _ = 4
+    pretty _ = "3"
+
+instance Primitive Fourth where
+    type Rep Fourth = Int
+    prim _ = 5
+    pretty _ = "4"
+
+instance Primitive Fifth where
+    type Rep Fifth = Int
+    prim _ = 7
+    pretty _ = "5"
+
+instance Primitive Sixth where
+    type Rep Sixth = Int
+    prim _ = 9
+    pretty _ = "6"
+
+instance Primitive Seventh where
+    type Rep Seventh = Int
+    prim _ = 11
+    pretty _ = "7"
+
+instance Primitive Octave where
+    type Rep Octave = Int
+    prim _ = 12
+    pretty _ = "8"
+
+instance (FunRep Int Int ic, IntRep is) => Primitive (Interval ic is) where
+    type Rep (Interval ic is) = Int
+    prim _ = prim (IC @ic) (prim (IS @ is))
+    pretty _ = pretty (IC @ic) ++ " " ++ pretty (IS @is)
