@@ -11,6 +11,8 @@ import Data.Proxy
 import Test.ShouldNotTypecheck (shouldNotTypecheck)
 
 import Mezzo.Model.Types
+import Mezzo.Model.Prim
+import Mezzo.Model.Harmony
 
 typeSpec :: Spec
 typeSpec =
@@ -26,7 +28,12 @@ typeSpec =
                 flatten `shouldBe` True
                 shouldNotTypecheck flattenInv
             it "should make intervals" $ do
-                flatten `shouldBe` True
+                makeInterval `shouldBe` True
+            it "should shift pitches by an interval" $
+                shift `shouldBe` True
+        describe "Chords" $ do
+            it "should convert chords to Music" $
+                fromChord `shouldBe` True
 
 rootToPitch ::
         ( (RootToPitch (PitchRoot (Pitch C Natural Oct3)) ~ (Pitch C Natural Oct3))
@@ -75,5 +82,57 @@ makeInterval ::
             , (MakeInterval (Pitch C Natural Oct3) (Pitch C Natural Oct4)) ~ (Interval Perf Octave)
             , (MakeInterval (Pitch E Flat Oct3) (Pitch F Flat Oct4)) ~ Compound
             , (MakeInterval (Pitch E Sharp Oct3) (Pitch F Flat Oct4)) ~ (Interval Maj Seventh)
+            , (MakeInterval (Pitch C Natural Oct3) (Pitch F Sharp Oct3)) ~ (Interval Aug Fourth)
+            , (MakeInterval (Pitch C Natural Oct3) (Pitch G Flat Oct3)) ~ (Interval Dim Fifth)
             ) => Bool
 makeInterval = True
+
+shift ::
+            ( (RaiseBy (Pitch C Natural Oct3) (Interval Maj Third) ~ (Pitch E Natural Oct3))
+            , (LowerBy (Pitch E Natural Oct3) (Interval Maj Third)) ~ (Pitch C Natural Oct3)
+            , (RaiseBy (Pitch C Natural Oct3) (Interval Min Seventh)) ~ (Pitch B Flat Oct3)
+            , (RaiseBy (Pitch E Sharp Oct3) (Interval Perf Unison)) ~ (Pitch E Sharp Oct3)
+            , (RaiseBy (Pitch E Natural Oct3) (Interval Min Second)) ~ (Pitch F Natural Oct3)
+            , (LowerBy (Pitch F Natural Oct3) (Interval Min Second)) ~ (Pitch E Natural Oct3)
+            , (RaiseBy (Pitch C Natural Oct3) (Interval Perf Octave)) ~ (Pitch C Natural Oct4)
+            , (LowerBy (Pitch C Natural Oct4) (Interval Perf Octave)) ~ (Pitch C Natural Oct3)
+            , (RaiseBy (Pitch E Sharp Oct3) (Interval Maj Seventh)) ~ (Pitch E Natural Oct4)
+            , (RaiseBy (Pitch C Natural Oct3) (Interval Aug Fourth)) ~ (Pitch F Sharp Oct3)
+            , (LowerBy (Pitch F Natural Oct4) (Interval Aug Fourth)) ~ (Pitch B Natural Oct3)
+            , (RaiseBy (Pitch C Natural Oct3) (Interval Dim Fifth)) ~ (Pitch G Flat Oct3)
+            , (LowerBy (Pitch F Natural Oct4) (Interval Dim Fifth)) ~ (Pitch B Natural Oct3)
+            ) => Bool
+shift = True
+
+
+fromChord ::
+            ( (FromChord (Triad (PitchRoot (Pitch C Natural Oct4)) MajTriad Inv0) 8)
+                ~ ( Pitch G Natural Oct4 ** 8 :- End
+                :-- Pitch E Natural Oct4 ** 8 :- End
+                :-- Pitch C Natural Oct4 ** 8 :- End :-- None)
+            , (FromChord (Triad (PitchRoot (Pitch A Flat Oct4)) DimTriad Inv2) 8)
+                ~ ( Pitch B Natural Oct5 ** 8 :- End
+                :-- Pitch G Sharp Oct5 ** 8 :- End
+                :-- Pitch D Natural Oct5 ** 8 :- End :-- None)
+            , (FromChord (SeventhChord (PitchRoot (Pitch G Natural Oct4)) MajMinSeventh Inv0) 8)
+                ~ ( Pitch F Natural Oct5 ** 8 :- End
+                :-- Pitch D Natural Oct5 ** 8 :- End
+                :-- Pitch B Natural Oct4 ** 8 :- End
+                :-- Pitch G Natural Oct4 ** 8 :- End :-- None)
+            , (FromChord (SeventhChord (PitchRoot (Pitch B Sharp Oct3)) HalfDimSeventh Inv3) 8)
+                ~ ( Pitch F Sharp Oct5 ** 8 :- End
+                :-- Pitch D Sharp Oct5 ** 8 :- End
+                :-- Pitch C Natural Oct5 ** 8 :- End
+                :-- Pitch B Flat Oct4 ** 8 :- End :-- None)
+            , (FromChord (SeventhChord (PitchRoot (Pitch C Natural Oct4)) (Doubled MajTriad) Inv0) 8)
+                ~ ( Pitch C Natural Oct5 ** 8 :- End
+                :-- Pitch G Natural Oct4 ** 8 :- End
+                :-- Pitch E Natural Oct4 ** 8 :- End
+                :-- Pitch C Natural Oct4 ** 8 :- End :-- None)
+            , (FromChord (SeventhChord (PitchRoot (Pitch C Sharp Oct4)) (Doubled AugTriad) Inv1) 8)
+                ~ ( Pitch F Natural Oct5 ** 8 :- End
+                :-- Pitch C Sharp Oct5 ** 8 :- End
+                :-- Pitch A Natural Oct4 ** 8 :- End
+                :-- Pitch F Natural Oct4 ** 8 :- End :-- None)
+            ) => Bool
+fromChord = True
