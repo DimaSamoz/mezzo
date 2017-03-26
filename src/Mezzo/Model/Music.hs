@@ -39,7 +39,7 @@ import Mezzo.Model.Types
 import Mezzo.Model.Reify
 import Mezzo.Model.Rules.RuleSet
 
-infixl 4 :|:
+infixl 3 :|:
 infixl 4 :-:
 
 -------------------------------------------------------------------------------
