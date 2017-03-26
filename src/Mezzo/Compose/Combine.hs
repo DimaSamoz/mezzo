@@ -39,6 +39,7 @@ import Mezzo.Compose.Basic
 import Mezzo.Compose.Builder
 import Mezzo.Compose.Types
 import Mezzo.Compose.Harmony
+import Mezzo.Compose.Intervals
 import Mezzo.Model.Prim
 import Mezzo.Model.Types
 import Mezzo.Model.Music

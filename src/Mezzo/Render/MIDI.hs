@@ -86,7 +86,7 @@ durToTicks d = prim d * 60 -- 1 Mezzo tick (a 32nd note) ~ 60 MIDI ticks
 midiSkeleton :: MidiTrack -> Midi
 midiSkeleton mel = Midi
     { fileType = MultiTrack
-    , timeDiv = TicksPerBeat 480
+    , timeDiv = TicksPerBeat 120
     , tracks =
         [ [ (0, ChannelPrefix 0)
           , (0, TrackName " Grand Piano  ")

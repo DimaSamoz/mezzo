@@ -170,31 +170,6 @@ iAug8 = Intv
 
 -- * Operations
 
-data Dir (d :: Bool) = Dir
-
-up :: Dir True
-up = Dir
-
-down :: Dir False
-down = Dir
-
--- transposeRoot :: (tr ~ PitchRoot (If d (RaiseBy (RootToPitch r) i) (LowerBy (RootToPitch r) i)), IntRep tr)
---     => Dir d -> Intv i -> Root r -> Root tr
--- transposeRoot _ _ _ = Root
-
-transposeRootUp :: (tr ~ (PitchRoot (RaiseBy (RootToPitch r) i)), IntRep tr)
-    => Intv i -> Root r -> Root tr
-transposeRootUp _ _ = Root
-
-transposeRootDown :: (tr ~ (PitchRoot (LowerBy (RootToPitch r) i)), IntRep tr)
-    => Intv i -> Root r -> Root tr
-transposeRootDown _ _ = Root
-
--- transposeUp :: Intv i -> Music m -> Music (TransposeUpBy m i)
--- transposeUp i (Note r dur) = Note (transposeRootUp i r) dur
--- transposeUp i (Rest dur) = Rest dur
--- transposeUp i (m1 :-: m2) = transposeUp i m1 :-: transposeUp i m2
-
 transUp :: (tr ~ (PitchRoot (RaiseBy (RootToPitch r) i)), IntRep tr)
     => Intv i -> RootS r -> RootS tr
 transUp i _ = spec Root
@@ -202,37 +177,3 @@ transUp i _ = spec Root
 transDown :: (tr ~ (PitchRoot (LowerBy (RootToPitch r) i)), IntRep tr)
     => Intv i -> RootS r -> RootS tr
 transDown i _ = spec Root
-
-type family AllRootsVoice (v :: Voice l) :: Constraint where
-    AllRootsVoice End = Valid
-    AllRootsVoice (p :* _ :- ps) = (IntRep (PitchRoot p), AllRootsVoice ps)
-
-type family AllRoots (p :: Partiture 1 l) :: Constraint where
-    AllRoots (ps :-- None) = AllRootsVoice ps
-
-transMelUp ::  (AllRoots m, AllRoots (TransposeUpBy m i))
-    => Intv i -> Melody m d -> Melody (TransposeUpBy m i) d
-transMelUp i m@(ps :| p)    = case ps of Melody -> Melody :| transUp i p ; ps' -> transMelUp i ps' :| transUp i p
--- transMelUp i m@(ps :<<< p)  = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :<< p)   = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :< p)    = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :^ p)    = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :> p)    = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :>> p)   = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :<<. p)  = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :<. p)   = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :^. p)   = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :>. p)   = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :>>. p)  = case ps of Melody -> transUp i p ; ps' -> transMelUp ps' :|: transUp i p
--- transMelUp i m@(ps :~| p)   = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~<<< p) = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~<< p)  = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~< p)   = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~^ p)   = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~> p)   = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~>> p)  = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~<<. p) = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~<. p)  = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~^. p)  = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~>. p)  = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
--- transMelUp i m@(ps :~>>. p) = case ps of Melody -> mkMelRest m ; ps' -> transMelUp ps'   :|: mkMelRest m
