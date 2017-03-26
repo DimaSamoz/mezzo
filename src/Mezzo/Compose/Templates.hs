@@ -33,7 +33,7 @@ module Mezzo.Compose.Templates
     , mkDyaConvs
     , mkTriConvs
     , mkTetConvs
-    , mkDoubledConvs
+    , mkDoubledTConvs
     ) where
 
 import Mezzo.Model
@@ -80,7 +80,7 @@ triTyLits = genLitDecs choTyFormatter "TriType" ''TriadType
 -- | Generate seventh type literal declarations.
 tetTyLits :: DecsQ
 tetTyLits = do
-    dcs <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''TetradType
+    dcs <- filter (\n -> nameBase n /= "DoubledT") <$> getDataCons ''TetradType
     join <$> traverse (mkSingLit choTyFormatter "TetType") dcs
 
 invLits :: DecsQ
@@ -251,7 +251,7 @@ mkTriConvs = do
 -- | Generate converters from roots to seventh chords, for each seventh type.
 mkTetConvs :: DecsQ
 mkTetConvs = do
-    sevTyNames <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''TetradType
+    sevTyNames <- filter (\n -> nameBase n /= "DoubledT") <$> getDataCons ''TetradType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "'"
@@ -266,18 +266,18 @@ mkTetConvs = do
     join <$> traverse declareFun sevTyNames
 
 -- | Generate converters from roots to doubled seventh chords, for each triad type.
-mkDoubledConvs :: DecsQ
-mkDoubledConvs = do
+mkDoubledTConvs :: DecsQ
+mkDoubledTConvs = do
     triTyNames <- getDataCons ''TriadType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "D'"
                 valName2 = mkName $ choStr ++ "D"
             tySig1 <- sigD valName1 $
-                [t| forall r i. ChorC' Tetrad r (Doubled $(conT choTy)) i |]
+                [t| forall r i. ChorC' Tetrad r (DoubledT $(conT choTy)) i |]
             dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
             tySig2 <- sigD valName2 $
-                [t| forall r. ChorC Tetrad r (Doubled $(conT choTy)) |]
+                [t| forall r. ChorC Tetrad r (DoubledT $(conT choTy)) |]
             dec2 <- [d| $(varP valName2) = constConv Cho |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun triTyNames

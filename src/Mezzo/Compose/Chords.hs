@@ -40,7 +40,7 @@ triTyLits
 -- ** Tetrad type literals
 tetTyLits
 
-_dbl :: TriType t -> TetType (Doubled t)
+_dbl :: TriType t -> TetType (DoubledT t)
 _dbl t = TetType
 
 -- ** Inversion literals
@@ -71,8 +71,8 @@ mkTriConvs
 -- ** Tetrad converters
 mkTetConvs
 
--- ** Doubled triad converters
-mkDoubledConvs
+-- ** DoubledT triad converters
+mkDoubledTConvs
 
 -- ** Inversion mutators
 inv :: ChorM c (InvertChord c)

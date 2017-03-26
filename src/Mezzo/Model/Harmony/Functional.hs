@@ -86,8 +86,8 @@ type family KeyToOtherQual (k :: KeyType) where
 
 -- | Convert a quality to a seventh chord type.
 type family QualToType (q :: Quality) :: TetradType where
-    QualToType MajQ = Doubled MajTriad
-    QualToType MinQ = Doubled MinTriad
+    QualToType MajQ = DoubledT MajTriad
+    QualToType MinQ = DoubledT MinTriad
     QualToType DomQ = MajMinSeventh
     QualToType DimQ = DimSeventh
 

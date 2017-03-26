@@ -49,7 +49,7 @@ data DyadType = MinThird | MajThird | PerfFourth | PerfFifth | PerfOct
 data TriadType = MajTriad | MinTriad | AugTriad | DimTriad
 
 -- | The type of a tetrad.
-data TetradType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | Doubled TriadType
+data TetradType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | DoubledT TriadType
 
 -- | The inversion of a chord.
 data Inversion = Inv0 | Inv1 | Inv2 | Inv3
@@ -109,7 +109,7 @@ type family TetradTypeToIntervals (s :: TetradType) :: Vector IntervalType 4 whe
     TetradTypeToIntervals MinSeventh     = TriadTypeToIntervals MinTriad :-| Interval Min Seventh
     TetradTypeToIntervals HalfDimSeventh = TriadTypeToIntervals DimTriad :-| Interval Min Seventh
     TetradTypeToIntervals DimSeventh     = TriadTypeToIntervals DimTriad :-| Interval Dim Seventh
-    TetradTypeToIntervals (Doubled tt)   = TriadTypeToIntervals tt       :-| Interval Perf Octave
+    TetradTypeToIntervals (DoubledT tt)  = TriadTypeToIntervals tt       :-| Interval Perf Octave
 
 -- | Apply an inversion to a list of pitches.
 type family Invert (i :: Inversion) (n :: Nat) (ps :: Vector PitchType n) :: Vector PitchType n where
@@ -120,11 +120,12 @@ type family Invert (i :: Inversion) (n :: Nat) (ps :: Vector PitchType n) :: Vec
     Invert Inv3 n (p :-- ps) = Invert Inv2 (n - 1) (p :-- (Head' ps) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' (Tail' ps))
 
 -- | Invert a doubled triad chord.
-type family InvertDoubled (i :: Inversion) (ps :: Vector PitchType 4) :: Vector PitchType 4 where
-    InvertDoubled Inv0 ps = ps
-    InvertDoubled Inv1 ps = Invert Inv1 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' ps)))
-    InvertDoubled Inv2 ps = Invert Inv2 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' (Tail' ps))))
-    InvertDoubled Inv3 ps = RaiseAllBy' ps (Interval Perf Octave)
+-- | Invert a doubled triad chord.
+type family InvertDoubledT (i :: Inversion) (ps :: Vector PitchType 4) :: Vector PitchType 4 where
+    InvertDoubledT Inv0 ps = ps
+    InvertDoubledT Inv1 ps = Invert Inv1 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' ps)))
+    InvertDoubledT Inv2 ps = Invert Inv2 3 (Init' ps) :-| (RaiseByOct (Head' (Tail' (Tail' ps))))
+    InvertDoubledT Inv3 ps = RaiseAllBy' ps (Interval Perf Octave)
 
 -- | Enumerate inversions.
 type family InvSucc (i :: Inversion) :: Inversion where
@@ -153,8 +154,8 @@ type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
                     = Invert i 2 (BuildOnRoot r (DyadTypeToIntervals t))
     ChordToPitchList (Triad r t i)
                     = Invert i 3 (BuildOnRoot r (TriadTypeToIntervals t))
-    ChordToPitchList (Tetrad r (Doubled tt) i)
-                    = InvertDoubled i (BuildOnRoot r (TetradTypeToIntervals (Doubled tt)))
+    ChordToPitchList (Tetrad r (DoubledT tt) i)
+                    = InvertDoubledT i (BuildOnRoot r (TetradTypeToIntervals (DoubledT tt)))
     ChordToPitchList (Tetrad r t i)
                     = Invert i 4 (BuildOnRoot r (TetradTypeToIntervals t))
 
@@ -242,8 +243,8 @@ instance Primitive DimSeventh where
     prim t = \r -> [r, r + 3, r + 6, r + 9]
     pretty t = "dim7"
 
-instance FunRep Int [Int] c => Primitive (Doubled c) where
-    type Rep (Doubled c) = Int -> [Int]
+instance FunRep Int [Int] c => Primitive (DoubledT c) where
+    type Rep (DoubledT c) = Int -> [Int]
     prim t = \r -> prim (TriType @c) r ++ [r + 12]
     pretty t = pretty (TriType @c) ++ "D"
 
@@ -288,8 +289,8 @@ instance (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
 
 instance (IntRep r, FunRep Int [Int] tt, FunRep [Int] [Int] i)
-        => Primitive (Tetrad r (Doubled tt) i) where
-    type Rep (Tetrad r (Doubled tt) i) = [Int]
+        => Primitive (Tetrad r (DoubledT tt) i) where
+    type Rep (Tetrad r (DoubledT tt) i) = [Int]
     prim c = inverted ++ [head inverted + 12]
         where rootPos = prim (TriType @tt) $ prim (Root @r)
               inverted = prim (Inv @i) rootPos

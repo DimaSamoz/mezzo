@@ -124,12 +124,12 @@ fromChord ::
                 :-- Pitch D Sharp Oct5 ** 8 :- End
                 :-- Pitch C Natural Oct5 ** 8 :- End
                 :-- Pitch B Flat Oct4 ** 8 :- End :-- None)
-            , (FromChord (Tetrad (PitchRoot (Pitch C Natural Oct4)) (Doubled MajTriad) Inv0) 8)
+            , (FromChord (Tetrad (PitchRoot (Pitch C Natural Oct4)) (DoubledT MajTriad) Inv0) 8)
                 ~ ( Pitch C Natural Oct5 ** 8 :- End
                 :-- Pitch G Natural Oct4 ** 8 :- End
                 :-- Pitch E Natural Oct4 ** 8 :- End
                 :-- Pitch C Natural Oct4 ** 8 :- End :-- None)
-            , (FromChord (Tetrad (PitchRoot (Pitch C Sharp Oct4)) (Doubled AugTriad) Inv1) 8)
+            , (FromChord (Tetrad (PitchRoot (Pitch C Sharp Oct4)) (DoubledT AugTriad) Inv1) 8)
                 ~ ( Pitch F Natural Oct5 ** 8 :- End
                 :-- Pitch C Sharp Oct5 ** 8 :- End
                 :-- Pitch A Natural Oct4 ** 8 :- End
