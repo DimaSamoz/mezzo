@@ -31,11 +31,14 @@ scaleDegreeLits
 -- ** Mode literals
 modeLits
 
+-- ** Dyad type literals
+dyaTyLits
+
 -- ** Triad type literals
 triTyLits
 
--- ** Seventh type literals
-sevTyLits
+-- ** Tetrad type literals
+tetTyLits
 
 _dbl :: TriType t -> TetType (Doubled t)
 _dbl t = TetType
@@ -59,11 +62,14 @@ seventh r t i = Cho
 
 -- * Chord builders
 
+-- ** Dyad converters
+mkDyaConvs
+
 -- ** Triad converters
 mkTriConvs
 
--- ** Seventh chord converters
-mkSevConvs
+-- ** Tetrad converters
+mkTetConvs
 
 -- ** Doubled triad converters
 mkDoubledConvs

@@ -17,9 +17,11 @@
 module Mezzo.Model.Harmony.Chords
     (
     -- * Chords
-      TriadType (..)
+      DyadType (..)
+    , TriadType (..)
     , TetradType (..)
     , Inversion (..)
+    , DyaType (..)
     , TriType (..)
     , TetType (..)
     , Inv (..)
@@ -40,10 +42,13 @@ import Mezzo.Model.Reify
 -- Chords
 -------------------------------------------------------------------------------
 
+-- | The type of a dyad.
+data DyadType = MinThird | MajThird | PerfFourth | PerfFifth | PerfOct
+
 -- | The type of a triad.
 data TriadType = MajTriad | MinTriad | AugTriad | DimTriad
 
--- | The type of a seventh chord.
+-- | The type of a tetrad.
 data TetradType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | Doubled TriadType
 
 -- | The inversion of a chord.
@@ -51,10 +56,15 @@ data Inversion = Inv0 | Inv1 | Inv2 | Inv3
 
 -- | A chord type, indexed by the number of notes.
 data ChordType :: Nat -> Type where
+    -- | A dyad, consisting of two pitches.
+    Dyad   :: RootType -> DyadType -> Inversion -> ChordType 2
     -- | A triad, consisting of three pitches.
     Triad  :: RootType -> TriadType -> Inversion -> ChordType 3
     -- | A tetrad, consisting of four pitches.
     Tetrad :: RootType -> TetradType -> Inversion -> ChordType 4
+
+-- | The singleton type for 'DyadType'
+data DyaType (t :: DyadType) = DyaType
 
 -- | The singleton type for 'TriadType'.
 data TriType (t :: TriadType) = TriType
@@ -65,8 +75,21 @@ data TetType (t :: TetradType) = TetType
 -- | The singleton type for 'Inversion'.
 data Inv (t :: Inversion) = Inv
 
--- | THe singleton type for 'ChordType'.
+-- | The singleton type for 'ChordType'.
 data Cho (c :: ChordType n) = Cho
+
+-- | Convert a dyad type to a list of intervals between the individual pitches.
+type family DyadTypeToIntervals (t :: DyadType) :: Vector IntervalType 2 where
+    DyadTypeToIntervals MinThird =
+                Interval Perf Unison :-- Interval Min Third   :-- None
+    DyadTypeToIntervals MajThird =
+                Interval Perf Unison :-- Interval Maj Third   :-- None
+    DyadTypeToIntervals PerfFourth =
+                Interval Perf Unison :-- Interval Perf Fourth :-- None
+    DyadTypeToIntervals PerfFifth =
+                Interval Perf Unison :-- Interval Perf Fifth  :-- None
+    DyadTypeToIntervals PerfOct =
+                Interval Perf Unison :-- Interval Perf Octave :-- None
 
 -- | Convert a triad type to a list of intervals between the individual pitches.
 type family TriadTypeToIntervals (t :: TriadType) :: Vector IntervalType 3 where
@@ -112,6 +135,8 @@ type family InvSucc (i :: Inversion) :: Inversion where
 
 -- | Invert a chord once.
 type family InvertChord (c :: ChordType n) :: ChordType n where
+    InvertChord (Dyad r t Inv0) = Dyad r t Inv1
+    InvertChord (Dyad r t Inv1) = Dyad r t Inv0
     InvertChord (Triad r t Inv2) = Triad r t Inv0
     InvertChord (Triad r t i) = Triad r t (InvSucc i)
     InvertChord (Tetrad r t i) = Tetrad r t (InvSucc i)
@@ -124,6 +149,8 @@ type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector 
 
 -- | Convert a chord to a list of constituent pitches.
 type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
+    ChordToPitchList (Dyad r t i)
+                    = Invert i 2 (BuildOnRoot r (DyadTypeToIntervals t))
     ChordToPitchList (Triad r t i)
                     = Invert i 3 (BuildOnRoot r (TriadTypeToIntervals t))
     ChordToPitchList (Tetrad r (Doubled tt) i)
@@ -140,6 +167,35 @@ type family FromChord (c :: ChordType n) (l :: Nat) :: Partiture n l where
 -------------------------------------------------------------------------------
 
 -- Chord types
+
+
+
+instance Primitive MajThird where
+    type Rep MajThird = Int -> [Int]
+    prim t = \r -> [r, r + 4]
+    pretty t = "M3"
+
+instance Primitive MinThird where
+    type Rep MinThird = Int -> [Int]
+    prim t = \r -> [r, r + 3]
+    pretty t = "m3"
+
+instance Primitive PerfFourth where
+    type Rep PerfFourth = Int -> [Int]
+    prim t = \r -> [r, r + 5]
+    pretty t = "P4"
+
+instance Primitive PerfFifth where
+    type Rep PerfFifth = Int -> [Int]
+    prim t = \r -> [r, r + 7]
+    pretty t = "P5"
+
+instance Primitive PerfOct where
+    type Rep PerfOct = Int -> [Int]
+    prim t = \r -> [r, r + 12]
+    pretty t = "P8"
+
+
 instance Primitive MajTriad where
     type Rep MajTriad = Int -> [Int]
     prim t = \r -> [r, r + 4, r + 7]
@@ -159,6 +215,7 @@ instance Primitive DimTriad where
     type Rep DimTriad = Int -> [Int]
     prim t = \r -> [r, r + 3, r + 6]
     pretty t = "dim"
+
 
 instance Primitive MajSeventh where
     type Rep MajSeventh = Int -> [Int]
@@ -215,6 +272,13 @@ instance Primitive Inv3 where
     type Rep Inv3 = [Int] -> [Int]
     prim i = invChord . invChord . invChord
     pretty i = "I3"
+
+instance (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
+        => Primitive (Dyad r t i) where
+    type Rep (Dyad r t i) = [Int]
+    prim c = prim (Inv @i) . prim (DyaType @t) $ prim (Root @r)
+    pretty c = pc ++ " " ++ pretty (DyaType @t) ++ " " ++ pretty (Inv @i)
+        where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
 
 instance (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
         => Primitive (Triad r t i) where

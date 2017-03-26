@@ -26,11 +26,13 @@ module Mezzo.Compose.Templates
     , mkPitchSpecs
     , scaleDegreeLits
     , modeLits
+    , dyaTyLits
     , triTyLits
-    , sevTyLits
+    , tetTyLits
     , invLits
+    , mkDyaConvs
     , mkTriConvs
-    , mkSevConvs
+    , mkTetConvs
     , mkDoubledConvs
     ) where
 
@@ -68,13 +70,16 @@ scaleDegreeLits = genLitDecs scaDegFormatter "ScaDeg" ''ScaleDegree
 modeLits :: DecsQ
 modeLits = genLitDecs modeFormatter "Mod" ''Mode -- Might want to extend modes later
 
+dyaTyLits :: DecsQ
+dyaTyLits = genLitDecs choTyFormatter "DyaType" ''DyadType
+
 -- | Generate triad type literal declarations.
 triTyLits :: DecsQ
 triTyLits = genLitDecs choTyFormatter "TriType" ''TriadType
 
 -- | Generate seventh type literal declarations.
-sevTyLits :: DecsQ
-sevTyLits = do
+tetTyLits :: DecsQ
+tetTyLits = do
     dcs <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''TetradType
     join <$> traverse (mkSingLit choTyFormatter "TetType") dcs
 
@@ -210,6 +215,23 @@ mkPitchSpecs = do
     join <$> sequence (declareVal <$> pcNames <*> accNames <*> octNames)
 
 -- | Generate converters from roots to triads, for each triad type.
+mkDyaConvs :: DecsQ
+mkDyaConvs = do
+    triTyNames <- getDataCons ''DyadType
+    let declareFun choTy = do
+            let choStr = tail (choTyFormatter choTy)
+                valName1 = mkName $ choStr ++ "'"
+                valName2 = mkName $ choStr
+            tySig1 <- sigD valName1 $
+                [t| forall r i. ChorC' Dyad r $(conT choTy) i |]
+            dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
+            tySig2 <- sigD valName2 $
+                [t| forall r. ChorC Dyad r $(conT choTy) |]
+            dec2 <- [d| $(varP valName2) = constConv Cho |]
+            return $ (tySig1 : dec1) ++ (tySig2 : dec2)
+    join <$> traverse declareFun triTyNames
+
+-- | Generate converters from roots to triads, for each triad type.
 mkTriConvs :: DecsQ
 mkTriConvs = do
     triTyNames <- getDataCons ''TriadType
@@ -227,8 +249,8 @@ mkTriConvs = do
     join <$> traverse declareFun triTyNames
 
 -- | Generate converters from roots to seventh chords, for each seventh type.
-mkSevConvs :: DecsQ
-mkSevConvs = do
+mkTetConvs :: DecsQ
+mkTetConvs = do
     sevTyNames <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''TetradType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
@@ -329,6 +351,11 @@ shortModeFormatter (modeFormatter -> name) = '_' : take 3 name
 -- | Formatter for chords types.
 choTyFormatter :: Formatter
 choTyFormatter n = case nameBase n of
+    "MajThird"       -> "_maj3"
+    "MinThird"       -> "_min3"
+    "PerfFourth"     -> "_fourth"
+    "PerfFifth"      -> "_fifth"
+    "PerfOct"        -> "_oct"
     "MajTriad"       -> "_maj"
     "MinTriad"       -> "_min"
     "AugTriad"       -> "_aug"
