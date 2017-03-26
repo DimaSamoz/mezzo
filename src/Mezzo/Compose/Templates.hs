@@ -75,8 +75,8 @@ triTyLits = genLitDecs choTyFormatter "TriType" ''TriadType
 -- | Generate seventh type literal declarations.
 sevTyLits :: DecsQ
 sevTyLits = do
-    dcs <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''SeventhType
-    join <$> traverse (mkSingLit choTyFormatter "SevType") dcs
+    dcs <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''TetradType
+    join <$> traverse (mkSingLit choTyFormatter "TetType") dcs
 
 invLits :: DecsQ
 invLits = genLitDecs invFormatter "Inv" ''Inversion
@@ -229,16 +229,16 @@ mkTriConvs = do
 -- | Generate converters from roots to seventh chords, for each seventh type.
 mkSevConvs :: DecsQ
 mkSevConvs = do
-    sevTyNames <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''SeventhType
+    sevTyNames <- filter (\n -> nameBase n /= "Doubled") <$> getDataCons ''TetradType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "'"
                 valName2 = mkName $ choStr
             tySig1 <- sigD valName1 $
-                [t| forall r i. ChorC' SeventhChord r $(conT choTy) i |]
+                [t| forall r i. ChorC' Tetrad r $(conT choTy) i |]
             dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
             tySig2 <- sigD valName2 $
-                [t| forall r. ChorC SeventhChord r $(conT choTy) |]
+                [t| forall r. ChorC Tetrad r $(conT choTy) |]
             dec2 <- [d| $(varP valName2) = constConv Cho |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun sevTyNames
@@ -252,10 +252,10 @@ mkDoubledConvs = do
                 valName1 = mkName $ choStr ++ "D'"
                 valName2 = mkName $ choStr ++ "D"
             tySig1 <- sigD valName1 $
-                [t| forall r i. ChorC' SeventhChord r (Doubled $(conT choTy)) i |]
+                [t| forall r i. ChorC' Tetrad r (Doubled $(conT choTy)) i |]
             dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
             tySig2 <- sigD valName2 $
-                [t| forall r. ChorC SeventhChord r (Doubled $(conT choTy)) |]
+                [t| forall r. ChorC Tetrad r (Doubled $(conT choTy)) |]
             dec2 <- [d| $(varP valName2) = constConv Cho |]
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun triTyNames

@@ -37,8 +37,8 @@ triTyLits
 -- ** Seventh type literals
 sevTyLits
 
-_dbl :: TriType t -> SevType (Doubled t)
-_dbl t = SevType
+_dbl :: TriType t -> TetType (Doubled t)
+_dbl t = TetType
 
 -- ** Inversion literals
 invLits
@@ -54,7 +54,7 @@ triad :: Root r -> TriType t -> Inv i -> Cho (Triad r t i)
 triad r t i = Cho
 
 -- | Create a seventh chord from a root, a triad type and an inversion.
-seventh :: Root r -> SevType t -> Inv i -> Cho (SeventhChord r t i)
+seventh :: Root r -> TetType t -> Inv i -> Cho (Tetrad r t i)
 seventh r t i = Cho
 
 -- * Chord builders

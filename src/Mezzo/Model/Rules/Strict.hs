@@ -68,5 +68,5 @@ instance {-# OVERLAPPABLE #-} ( ValidMelMatrixMotion vs1 vs2
 class ValidChordType (c :: ChordType n)
 instance ValidChordType (Triad r t i)
 instance {-# OVERLAPPING #-} ChordError "Can't have major seventh chords: " r " Maj7"
-                                => ValidChordType (SeventhChord r MajSeventh i)
-instance {-# OVERLAPPABLE #-} ValidChordType (SeventhChord r t i)
+                                => ValidChordType (Tetrad r MajSeventh i)
+instance {-# OVERLAPPABLE #-} ValidChordType (Tetrad r t i)

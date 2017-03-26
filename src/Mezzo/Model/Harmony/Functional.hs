@@ -85,7 +85,7 @@ type family KeyToOtherQual (k :: KeyType) where
     KeyToOtherQual (Key _ _ MinorMode) = MajQ
 
 -- | Convert a quality to a seventh chord type.
-type family QualToType (q :: Quality) :: SeventhType where
+type family QualToType (q :: Quality) :: TetradType where
     QualToType MajQ = Doubled MajTriad
     QualToType MinQ = Doubled MinTriad
     QualToType DomQ = MajMinSeventh
@@ -170,7 +170,7 @@ data Subdominant (k :: KeyType) (l :: Nat) where
     SubSS      :: Subdominant k l1 -> Subdominant k (l - l1) -> Subdominant k l
 
 
-type DegToChord (dc :: DegreeC d q k i o) = SeventhChord (DegreeRoot k (Degree d Natural o)) (QualToType q) i
+type DegToChord (dc :: DegreeC d q k i o) = Tetrad (DegreeRoot k (Degree d Natural o)) (QualToType q) i
 
 -- | Convert a cadence to chords.
 type family CadToChords (l :: Nat) (c :: Cadence k l) :: Vector (ChordType 4) l where

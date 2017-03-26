@@ -18,10 +18,10 @@ module Mezzo.Model.Harmony.Chords
     (
     -- * Chords
       TriadType (..)
-    , SeventhType (..)
+    , TetradType (..)
     , Inversion (..)
     , TriType (..)
-    , SevType (..)
+    , TetType (..)
     , Inv (..)
     , InvertChord
     , ChordType (..)
@@ -44,7 +44,7 @@ import Mezzo.Model.Reify
 data TriadType = MajTriad | MinTriad | AugTriad | DimTriad
 
 -- | The type of a seventh chord.
-data SeventhType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | Doubled TriadType
+data TetradType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | Doubled TriadType
 
 -- | The inversion of a chord.
 data Inversion = Inv0 | Inv1 | Inv2 | Inv3
@@ -52,15 +52,15 @@ data Inversion = Inv0 | Inv1 | Inv2 | Inv3
 -- | A chord type, indexed by the number of notes.
 data ChordType :: Nat -> Type where
     -- | A triad, consisting of three pitches.
-    Triad        :: RootType -> TriadType -> Inversion -> ChordType 3
-    -- | A seventh chord, consisting of four pitches.
-    SeventhChord :: RootType -> SeventhType -> Inversion -> ChordType 4
+    Triad  :: RootType -> TriadType -> Inversion -> ChordType 3
+    -- | A tetrad, consisting of four pitches.
+    Tetrad :: RootType -> TetradType -> Inversion -> ChordType 4
 
 -- | The singleton type for 'TriadType'.
 data TriType (t :: TriadType) = TriType
 
--- | The singleton type for 'SeventhType'.
-data SevType (t :: SeventhType) = SevType
+-- | The singleton type for 'TetradType'.
+data TetType (t :: TetradType) = TetType
 
 -- | The singleton type for 'Inversion'.
 data Inv (t :: Inversion) = Inv
@@ -80,13 +80,13 @@ type family TriadTypeToIntervals (t :: TriadType) :: Vector IntervalType 3 where
                 Interval Perf Unison :-- Interval Min Third :-- Interval Dim Fifth  :-- None
 
 -- | Convert a seventh chord type to a list of intervals between the individual pitches.
-type family SeventhTypeToIntervals (s :: SeventhType) :: Vector IntervalType 4 where
-    SeventhTypeToIntervals MajSeventh     = TriadTypeToIntervals MajTriad :-| Interval Maj Seventh
-    SeventhTypeToIntervals MajMinSeventh  = TriadTypeToIntervals MajTriad :-| Interval Min Seventh
-    SeventhTypeToIntervals MinSeventh     = TriadTypeToIntervals MinTriad :-| Interval Min Seventh
-    SeventhTypeToIntervals HalfDimSeventh = TriadTypeToIntervals DimTriad :-| Interval Min Seventh
-    SeventhTypeToIntervals DimSeventh     = TriadTypeToIntervals DimTriad :-| Interval Dim Seventh
-    SeventhTypeToIntervals (Doubled tt)   = TriadTypeToIntervals tt       :-| Interval Perf Octave
+type family TetradTypeToIntervals (s :: TetradType) :: Vector IntervalType 4 where
+    TetradTypeToIntervals MajSeventh     = TriadTypeToIntervals MajTriad :-| Interval Maj Seventh
+    TetradTypeToIntervals MajMinSeventh  = TriadTypeToIntervals MajTriad :-| Interval Min Seventh
+    TetradTypeToIntervals MinSeventh     = TriadTypeToIntervals MinTriad :-| Interval Min Seventh
+    TetradTypeToIntervals HalfDimSeventh = TriadTypeToIntervals DimTriad :-| Interval Min Seventh
+    TetradTypeToIntervals DimSeventh     = TriadTypeToIntervals DimTriad :-| Interval Dim Seventh
+    TetradTypeToIntervals (Doubled tt)   = TriadTypeToIntervals tt       :-| Interval Perf Octave
 
 -- | Apply an inversion to a list of pitches.
 type family Invert (i :: Inversion) (n :: Nat) (ps :: Vector PitchType n) :: Vector PitchType n where
@@ -114,7 +114,7 @@ type family InvSucc (i :: Inversion) :: Inversion where
 type family InvertChord (c :: ChordType n) :: ChordType n where
     InvertChord (Triad r t Inv2) = Triad r t Inv0
     InvertChord (Triad r t i) = Triad r t (InvSucc i)
-    InvertChord (SeventhChord r t i) = SeventhChord r t (InvSucc i)
+    InvertChord (Tetrad r t i) = Tetrad r t (InvSucc i)
 
 -- | Build a list of pitches with the given intervals starting from a root.
 type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector PitchType n where
@@ -126,10 +126,10 @@ type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector 
 type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
     ChordToPitchList (Triad r t i)
                     = Invert i 3 (BuildOnRoot r (TriadTypeToIntervals t))
-    ChordToPitchList (SeventhChord r (Doubled tt) i)
-                    = InvertDoubled i (BuildOnRoot r (SeventhTypeToIntervals (Doubled tt)))
-    ChordToPitchList (SeventhChord r t i)
-                    = Invert i 4 (BuildOnRoot r (SeventhTypeToIntervals t))
+    ChordToPitchList (Tetrad r (Doubled tt) i)
+                    = InvertDoubled i (BuildOnRoot r (TetradTypeToIntervals (Doubled tt)))
+    ChordToPitchList (Tetrad r t i)
+                    = Invert i 4 (BuildOnRoot r (TetradTypeToIntervals t))
 
 -- | Convert a chord to a partiture with the given length (one voice for each pitch).
 type family FromChord (c :: ChordType n) (l :: Nat) :: Partiture n l where
@@ -224,8 +224,8 @@ instance (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
 
 instance (IntRep r, FunRep Int [Int] tt, FunRep [Int] [Int] i)
-        => Primitive (SeventhChord r (Doubled tt) i) where
-    type Rep (SeventhChord r (Doubled tt) i) = [Int]
+        => Primitive (Tetrad r (Doubled tt) i) where
+    type Rep (Tetrad r (Doubled tt) i) = [Int]
     prim c = inverted ++ [head inverted + 12]
         where rootPos = prim (TriType @tt) $ prim (Root @r)
               inverted = prim (Inv @i) rootPos
@@ -234,8 +234,8 @@ instance (IntRep r, FunRep Int [Int] tt, FunRep [Int] [Int] i)
 
 
 instance {-# OVERLAPPABLE #-} (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
-        => Primitive (SeventhChord r t i) where
-    type Rep (SeventhChord r t i) = [Int]
-    prim c = prim (Inv @i) . prim (SevType @t) $ prim (Root @r)
-    pretty c = pc ++ " " ++ pretty (SevType @t) ++ " " ++ pretty (Inv @i)
+        => Primitive (Tetrad r t i) where
+    type Rep (Tetrad r t i) = [Int]
+    prim c = prim (Inv @i) . prim (TetType @t) $ prim (Root @r)
+    pretty c = pc ++ " " ++ pretty (TetType @t) ++ " " ++ pretty (Inv @i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)

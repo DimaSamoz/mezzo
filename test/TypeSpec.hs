@@ -114,22 +114,22 @@ fromChord ::
                 ~ ( Pitch B Natural Oct5 ** 8 :- End
                 :-- Pitch G Sharp Oct5 ** 8 :- End
                 :-- Pitch D Natural Oct5 ** 8 :- End :-- None)
-            , (FromChord (SeventhChord (PitchRoot (Pitch G Natural Oct4)) MajMinSeventh Inv0) 8)
+            , (FromChord (Tetrad (PitchRoot (Pitch G Natural Oct4)) MajMinSeventh Inv0) 8)
                 ~ ( Pitch F Natural Oct5 ** 8 :- End
                 :-- Pitch D Natural Oct5 ** 8 :- End
                 :-- Pitch B Natural Oct4 ** 8 :- End
                 :-- Pitch G Natural Oct4 ** 8 :- End :-- None)
-            , (FromChord (SeventhChord (PitchRoot (Pitch B Sharp Oct3)) HalfDimSeventh Inv3) 8)
+            , (FromChord (Tetrad (PitchRoot (Pitch B Sharp Oct3)) HalfDimSeventh Inv3) 8)
                 ~ ( Pitch F Sharp Oct5 ** 8 :- End
                 :-- Pitch D Sharp Oct5 ** 8 :- End
                 :-- Pitch C Natural Oct5 ** 8 :- End
                 :-- Pitch B Flat Oct4 ** 8 :- End :-- None)
-            , (FromChord (SeventhChord (PitchRoot (Pitch C Natural Oct4)) (Doubled MajTriad) Inv0) 8)
+            , (FromChord (Tetrad (PitchRoot (Pitch C Natural Oct4)) (Doubled MajTriad) Inv0) 8)
                 ~ ( Pitch C Natural Oct5 ** 8 :- End
                 :-- Pitch G Natural Oct4 ** 8 :- End
                 :-- Pitch E Natural Oct4 ** 8 :- End
                 :-- Pitch C Natural Oct4 ** 8 :- End :-- None)
-            , (FromChord (SeventhChord (PitchRoot (Pitch C Sharp Oct4)) (Doubled AugTriad) Inv1) 8)
+            , (FromChord (Tetrad (PitchRoot (Pitch C Sharp Oct4)) (Doubled AugTriad) Inv1) 8)
                 ~ ( Pitch F Natural Oct5 ** 8 :- End
                 :-- Pitch C Sharp Oct5 ** 8 :- End
                 :-- Pitch A Natural Oct4 ** 8 :- End
