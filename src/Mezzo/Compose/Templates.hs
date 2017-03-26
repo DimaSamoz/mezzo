@@ -32,6 +32,7 @@ module Mezzo.Compose.Templates
     , invLits
     , mkDyaConvs
     , mkTriConvs
+    , mkDoubledDConvs
     , mkTetConvs
     , mkDoubledTConvs
     ) where
@@ -75,7 +76,9 @@ dyaTyLits = genLitDecs choTyFormatter "DyaType" ''DyadType
 
 -- | Generate triad type literal declarations.
 triTyLits :: DecsQ
-triTyLits = genLitDecs choTyFormatter "TriType" ''TriadType
+triTyLits = do
+    dcs <- filter (\n -> nameBase n /= "DoubledD") <$> getDataCons ''TriadType
+    join <$> traverse (mkSingLit choTyFormatter "TriType") dcs
 
 -- | Generate seventh type literal declarations.
 tetTyLits :: DecsQ
@@ -234,7 +237,7 @@ mkDyaConvs = do
 -- | Generate converters from roots to triads, for each triad type.
 mkTriConvs :: DecsQ
 mkTriConvs = do
-    triTyNames <- getDataCons ''TriadType
+    triTyNames <- filter (\n -> nameBase n /= "DoubledD") <$> getDataCons ''TriadType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "'"
@@ -248,7 +251,24 @@ mkTriConvs = do
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun triTyNames
 
--- | Generate converters from roots to seventh chords, for each seventh type.
+-- | Generate converters from roots to doubled dyads, for each dyad type.
+mkDoubledDConvs :: DecsQ
+mkDoubledDConvs = do
+    triTyNames <- getDataCons ''DyadType
+    let declareFun choTy = do
+            let choStr = tail (choTyFormatter choTy)
+                valName1 = mkName $ choStr ++ "D'"
+                valName2 = mkName $ choStr ++ "D"
+            tySig1 <- sigD valName1 $
+                [t| forall r i. ChorC' Triad r (DoubledD $(conT choTy)) i |]
+            dec1 <- [d| $(varP valName1) = \i -> constConv Cho |]
+            tySig2 <- sigD valName2 $
+                [t| forall r. ChorC Triad r (DoubledD $(conT choTy)) |]
+            dec2 <- [d| $(varP valName2) = constConv Cho |]
+            return $ (tySig1 : dec1) ++ (tySig2 : dec2)
+    join <$> traverse declareFun triTyNames
+
+-- | Generate converters from roots to tetrads, for each tetrad type.
 mkTetConvs :: DecsQ
 mkTetConvs = do
     sevTyNames <- filter (\n -> nameBase n /= "DoubledT") <$> getDataCons ''TetradType
@@ -265,10 +285,10 @@ mkTetConvs = do
             return $ (tySig1 : dec1) ++ (tySig2 : dec2)
     join <$> traverse declareFun sevTyNames
 
--- | Generate converters from roots to doubled seventh chords, for each triad type.
+-- | Generate converters from roots to doubled triads, for each triad type.
 mkDoubledTConvs :: DecsQ
 mkDoubledTConvs = do
-    triTyNames <- getDataCons ''TriadType
+    triTyNames <- filter (\n -> nameBase n /= "DoubledD") <$> getDataCons ''TriadType
     let declareFun choTy = do
             let choStr = tail (choTyFormatter choTy)
                 valName1 = mkName $ choStr ++ "D'"

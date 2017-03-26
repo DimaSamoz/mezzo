@@ -46,7 +46,7 @@ import Mezzo.Model.Reify
 data DyadType = MinThird | MajThird | PerfFourth | PerfFifth | PerfOct
 
 -- | The type of a triad.
-data TriadType = MajTriad | MinTriad | AugTriad | DimTriad
+data TriadType = MajTriad | MinTriad | AugTriad | DimTriad | DoubledD DyadType
 
 -- | The type of a tetrad.
 data TetradType = MajSeventh | MajMinSeventh | MinSeventh | HalfDimSeventh | DimSeventh | DoubledT TriadType
@@ -93,14 +93,12 @@ type family DyadTypeToIntervals (t :: DyadType) :: Vector IntervalType 2 where
 
 -- | Convert a triad type to a list of intervals between the individual pitches.
 type family TriadTypeToIntervals (t :: TriadType) :: Vector IntervalType 3 where
-    TriadTypeToIntervals MajTriad =
-                Interval Perf Unison :-- Interval Maj Third :-- Interval Perf Fifth :-- None
-    TriadTypeToIntervals MinTriad =
-                Interval Perf Unison :-- Interval Min Third :-- Interval Perf Fifth :-- None
-    TriadTypeToIntervals AugTriad =
-                Interval Perf Unison :-- Interval Maj Third :-- Interval Aug Fifth  :-- None
-    TriadTypeToIntervals DimTriad =
-                Interval Perf Unison :-- Interval Min Third :-- Interval Dim Fifth  :-- None
+    TriadTypeToIntervals MajTriad      = DyadTypeToIntervals MajThird :-| Interval Perf Fifth
+    TriadTypeToIntervals MinTriad      = DyadTypeToIntervals MinThird :-| Interval Perf Fifth
+    TriadTypeToIntervals AugTriad      = DyadTypeToIntervals MajThird :-| Interval Aug Fifth
+    TriadTypeToIntervals DimTriad      = DyadTypeToIntervals MinThird :-| Interval Dim Fifth
+    TriadTypeToIntervals (DoubledD dt) = DyadTypeToIntervals dt       :-| Interval Perf Octave
+
 
 -- | Convert a seventh chord type to a list of intervals between the individual pitches.
 type family TetradTypeToIntervals (s :: TetradType) :: Vector IntervalType 4 where
@@ -120,6 +118,11 @@ type family Invert (i :: Inversion) (n :: Nat) (ps :: Vector PitchType n) :: Vec
     Invert Inv3 n (p :-- ps) = Invert Inv2 (n - 1) (p :-- (Head' ps) :-- (Tail' (Tail' (ps)))) :-| RaiseByOct (Head' (Tail' ps))
 
 -- | Invert a doubled triad chord.
+type family InvertDoubledD (i :: Inversion) (ps :: Vector PitchType 3) :: Vector PitchType 3 where
+    InvertDoubledD Inv0 ps = ps
+    InvertDoubledD Inv1 ps = Invert Inv1 2 (Init' ps) :-| (RaiseByOct (Head' (Tail' ps)))
+    InvertDoubledD Inv2 ps = RaiseAllBy' ps (Interval Perf Octave)
+
 -- | Invert a doubled triad chord.
 type family InvertDoubledT (i :: Inversion) (ps :: Vector PitchType 4) :: Vector PitchType 4 where
     InvertDoubledT Inv0 ps = ps
@@ -152,6 +155,8 @@ type family BuildOnRoot (r :: RootType) (is :: Vector IntervalType n) :: Vector 
 type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
     ChordToPitchList (Dyad r t i)
                     = Invert i 2 (BuildOnRoot r (DyadTypeToIntervals t))
+    ChordToPitchList (Triad r (DoubledD dt) i)
+                    = InvertDoubledD i (BuildOnRoot r (TriadTypeToIntervals (DoubledD dt)))
     ChordToPitchList (Triad r t i)
                     = Invert i 3 (BuildOnRoot r (TriadTypeToIntervals t))
     ChordToPitchList (Tetrad r (DoubledT tt) i)
@@ -217,6 +222,11 @@ instance Primitive DimTriad where
     prim t = \r -> [r, r + 3, r + 6]
     pretty t = "dim"
 
+instance FunRep Int [Int] c => Primitive (DoubledD c) where
+    type Rep (DoubledD c) = Int -> [Int]
+    prim t = \r -> prim (DyaType @c) r ++ [r + 12]
+    pretty t = pretty (DyaType @c) ++ "D"
+
 
 instance Primitive MajSeventh where
     type Rep MajSeventh = Int -> [Int]
@@ -281,12 +291,23 @@ instance (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
     pretty c = pc ++ " " ++ pretty (DyaType @t) ++ " " ++ pretty (Inv @i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
 
-instance (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
+
+instance (IntRep r, FunRep Int [Int] dt, FunRep [Int] [Int] i)
+        => Primitive (Triad r (DoubledD dt) i) where
+    type Rep (Triad r (DoubledD dt) i) = [Int]
+    prim c = inverted ++ [head inverted + 12]
+        where rootPos = prim (DyaType @dt) $ prim (Root @r)
+              inverted = prim (Inv @i) rootPos
+    pretty c = pc ++ " " ++ pretty (DyaType @dt) ++ "D " ++ pretty (Inv @i)
+        where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
+
+instance {-# OVERLAPPABLE #-} (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
         => Primitive (Triad r t i) where
     type Rep (Triad r t i) = [Int]
     prim c = prim (Inv @i) . prim (TriType @t) $ prim (Root @r)
     pretty c = pc ++ " " ++ pretty (TriType @t) ++ " " ++ pretty (Inv @i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
+
 
 instance (IntRep r, FunRep Int [Int] tt, FunRep [Int] [Int] i)
         => Primitive (Tetrad r (DoubledT tt) i) where
@@ -296,7 +317,6 @@ instance (IntRep r, FunRep Int [Int] tt, FunRep [Int] [Int] i)
               inverted = prim (Inv @i) rootPos
     pretty c = pc ++ " " ++ pretty (TriType @tt) ++ "D " ++ pretty (Inv @i)
         where pc = takeWhile (\c -> c /= ' ' && c /= '\'' && c /= '_') $ pretty (Root @r)
-
 
 instance {-# OVERLAPPABLE #-} (IntRep r, FunRep Int [Int] t, FunRep [Int] [Int] i)
         => Primitive (Tetrad r t i) where

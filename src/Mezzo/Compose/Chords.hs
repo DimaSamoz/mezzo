@@ -68,10 +68,13 @@ mkDyaConvs
 -- ** Triad converters
 mkTriConvs
 
+-- ** Doubled dyad converters
+mkDoubledDConvs
+
 -- ** Tetrad converters
 mkTetConvs
 
--- ** DoubledT triad converters
+-- ** Doubled triad converters
 mkDoubledTConvs
 
 -- ** Inversion mutators
