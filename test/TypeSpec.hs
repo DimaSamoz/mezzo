@@ -9,6 +9,7 @@ import GHC.TypeLits
 import Control.Exception (evaluate)
 import Data.Proxy
 import Test.ShouldNotTypecheck (shouldNotTypecheck)
+import ShouldTypecheck (shouldTypecheck)
 
 import Mezzo.Model.Types
 import Mezzo.Model.Prim
@@ -19,21 +20,21 @@ typeSpec =
     describe "Mezzo.Model.Types" $ do
         describe "Harmonic types" $ do
             it "should convert roots to pitches" $ do
-                rootToPitch `shouldBe` True
+                shouldTypecheck rootToPitch
                 shouldNotTypecheck rootToPitchInv
             it "should sharpen roots" $ do
-                sharpen `shouldBe` True
+                shouldTypecheck sharpen
                 shouldNotTypecheck sharpenInv
             it "should flatten roots" $ do
-                flatten `shouldBe` True
+                shouldTypecheck flatten
                 shouldNotTypecheck flattenInv
             it "should make intervals" $ do
-                makeInterval `shouldBe` True
+                shouldTypecheck makeInterval
             it "should shift pitches by an interval" $
-                shift `shouldBe` True
+                shouldTypecheck shift
         describe "Chords" $ do
             it "should convert chords to Music" $
-                fromChord `shouldBe` True
+                shouldTypecheck fromChord
 
 rootToPitch ::
         ( (RootToPitch (PitchRoot (Pitch C Natural Oct3)) ~ (Pitch C Natural Oct3))

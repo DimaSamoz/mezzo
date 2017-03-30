@@ -8,6 +8,7 @@ import Test.Hspec
 import GHC.TypeLits
 import Control.Exception (evaluate)
 import Test.ShouldNotTypecheck (shouldNotTypecheck)
+import ShouldTypecheck (shouldTypecheck)
 
 import Mezzo.Model.Prim
 
@@ -16,61 +17,61 @@ primSpec =
     describe "Mezzo.Model.Prim" $ do
         describe "Vector operations" $ do
             it "should replicate elements" $
-                timesReplicate `shouldBe` True
+                shouldTypecheck timesReplicate
             it "should get the head of an optimised vector" $
-                optVectorHead `shouldBe` True
+                shouldTypecheck optVectorHead
             it "should get the head of a vector" $
-                vectorHead `shouldBe` True
+                shouldTypecheck vectorHead
             it "should get the last element of an optimised vector" $
-                optVectorLast `shouldBe` True
+                shouldTypecheck optVectorLast
             it "should get the tail of a vector" $
-                vectorTail `shouldBe` True
+                shouldTypecheck vectorTail
             it "should get the initial elements of a vector" $
-                vectorInit `shouldBe` True
+                shouldTypecheck vectorInit
             it "should get the length of an optimised vector" $
-                optVectorLength `shouldBe` True
+                shouldTypecheck optVectorLength
             it "should get the length of a vector" $
-                vectorLength `shouldBe` True
+                shouldTypecheck vectorLength
             it "should append optimised vectors" $
-                optVectorAppend `shouldBe` True
+                shouldTypecheck optVectorAppend
             it "should append vectors" $
-                vectorAppend `shouldBe` True
+                shouldTypecheck vectorAppend
             it "should add an element to the end of a vector" $
-                snoc `shouldBe` True
+                shouldTypecheck snoc
             it "should repeat an element to an optimised vector" $
-                repeatVec `shouldBe` True
+                shouldTypecheck repeatVec
 
         describe "Matrix operations" $ do
             it "should vertically align matrices" $
-                align `shouldBe` True
+                shouldTypecheck align
             it "should horizontally concatenate matrices" $
-                matHConcat `shouldBe` True
+                shouldTypecheck matHConcat
             it "should vertically concatenate matrices" $
-                matVConcat `shouldBe` True
+                shouldTypecheck matVConcat
             it "should convert vectors to column matrices" $
-                vecToColMatrix `shouldBe` True
+                shouldTypecheck vecToColMatrix
 
         describe "Arithmetic operations" $ do
             it "should calculate maximum of two numbers" $ do
-                maxNat `shouldBe` True
+                shouldTypecheck maxNat
             it "should calculate minimum of two numbers" $ do
-                minNat `shouldBe` True
+                shouldTypecheck minNat
 
         describe "Constraint operations" $ do
             it "should apply a constraint to an optimised vector" $ do
-                allSatisfy `shouldBe` True
+                shouldTypecheck allSatisfy
                 -- shouldNotTypecheck allSatisfyInv
             it "should apply a binary constraint to two optimised vectors" $ do
-                allPairsSatisfy `shouldBe` True
+                shouldTypecheck allPairsSatisfy
                 shouldNotTypecheck allPairsSatisfyInv
             it "should apply a binary constraint to two vectors" $ do
-                allPairsSatisfy' `shouldBe` True
+                shouldTypecheck allPairsSatisfy'
                 shouldNotTypecheck allPairsSatisfyInv'
             it "should apply all constraints to a value" $ do
-                satisfiesAll `shouldBe` True
+                shouldTypecheck satisfiesAll
                 -- shouldNotTypecheck satisfiesAllInv
             it "should apply all constraints to all values" $ do
-                allSatisfyAll `shouldBe` True
+                shouldTypecheck allSatisfyAll
                 -- shouldNotTypecheck allSatisfyAllInv
 
 
