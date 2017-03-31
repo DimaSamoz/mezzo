@@ -37,15 +37,8 @@ import Data.Kind
 --
 -- A melodic interval is invalid if it is
 --
---  * any augmented interval or
---  * any diminished interval or
 --  * any seventh interval.
 class ValidMelInterval (e :: PitchPair) (i :: IntervalType)
-instance {-# OVERLAPPING #-}       ValidMelInterval e (Interval Aug Unison)
-instance {-# OVERLAPS #-} PitchPairError "Augmented melodic intervals are not permitted: " e
-                                => ValidMelInterval e (Interval Aug a)
-instance {-# OVERLAPS #-} PitchPairError "Diminished melodic intervals are not permitted: " e
-                                => ValidMelInterval e (Interval Dim a)
 instance {-# OVERLAPPING #-} PitchPairError "Seventh intervals are not permitted in melody: " e
                                 => ValidMelInterval e (Interval a Seventh)
 instance {-# OVERLAPPABLE #-}      ValidMelInterval e i

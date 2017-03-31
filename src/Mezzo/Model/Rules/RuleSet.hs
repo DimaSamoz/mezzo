@@ -74,7 +74,7 @@ instance RuleSet Free where
 --
 -- Forbids
 --
--- * seventh, augmented and diminished melodic intervals,
+-- * seventh melodic intervals,
 -- * minor second, major seventh and augmented octave harmonic intervals, and
 -- * direct motion into perfect intervals on harmonic composition.
 instance RuleSet Classical where
@@ -86,10 +86,11 @@ instance RuleSet Classical where
 --
 -- Forbids all of the above ('Classical'), as well as
 --
+-- * diminished and augmented melodic intervals,
 -- * direct motion into perfect intervals on melodic and homophonic composition, and
 -- * major seventh chords.
 instance RuleSet Strict where
-    type MelConstraints Strict m1 m2 = (SR.ValidMelConcat m1 m2, SR.ValidMelMatrixMotion m1 m2)
+    type MelConstraints Strict m1 m2 = (SR.ValidMelConcatStrict m1 m2, SR.ValidMelMatrixMotion m1 m2)
     type HarmConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
     type HomConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
     type ChordConstraints Strict c d = (DefChordConstraints c d, SR.ValidChordType c)

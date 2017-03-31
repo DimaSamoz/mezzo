@@ -15,7 +15,8 @@
 -----------------------------------------------------------------------------
 
 module Mezzo.Model.Rules.Strict
-    ( ValidMelConcat
+    ( ValidMelConcatStrict
+    , ValidMelIntervalStrict
     , ValidHarmConcat
     , ValidHomConcat
     , ValidMelMatrixMotion
@@ -30,6 +31,61 @@ import Mezzo.Model.Rules.Classical
 
 import GHC.TypeLits
 import Data.Kind
+
+
+-- | Ensures that melodic intervals are valid.
+--
+-- A melodic interval is invalid if it is
+--
+--  * any augmented interval or
+--  * any diminished interval or
+--  * any seventh interval.
+class ValidMelIntervalStrict (e :: PitchPair) (i :: IntervalType)
+instance {-# OVERLAPPING #-}       ValidMelIntervalStrict e (Interval Aug Unison)
+instance {-# OVERLAPS #-} PitchPairError "Augmented melodic intervals are not permitted: " e
+                                => ValidMelIntervalStrict e (Interval Aug a)
+instance {-# OVERLAPS #-} PitchPairError "Diminished melodic intervals are not permitted: " e
+                                => ValidMelIntervalStrict e (Interval Dim a)
+instance {-# OVERLAPPING #-} PitchPairError "Seventh intervals are not permitted in melody: " e
+                                => ValidMelIntervalStrict e (Interval a Seventh)
+instance {-# OVERLAPPABLE #-}      ValidMelIntervalStrict e i
+
+
+
+-- | Ensures that two pitches form valid melodic leaps.
+--
+-- Two pitches form valid melodic leaps if
+--
+--  * at least one of them is silent (i.e. it is a rest) or
+--  * they form a valid melodic interval.
+class ValidMelLeapStrict (p1 :: PitchType) (p2 :: PitchType)
+instance {-# OVERLAPPING #-}  ValidMelLeapStrict Silence Silence
+instance {-# OVERLAPPING #-}  ValidMelLeapStrict Silence (Pitch pc acc oct)
+instance {-# OVERLAPPING #-}  ValidMelLeapStrict (Pitch pc acc oct) Silence
+instance {-# OVERLAPPABLE #-} ValidMelIntervalStrict '(a, b) (MakeInterval a b) => ValidMelLeapStrict a b
+
+-- | Ensures that two voices can be appended.
+--
+-- Two voices can be appended if
+--
+--  * at least one of them is empty or
+--  * the last pitch of the first vector forms a valid melodic leap
+--    with the first pitch of the second vector.
+class ValidMelAppendStrict (a :: Voice l1) (b :: Voice l2)
+instance {-# OVERLAPPING #-}  ValidMelAppendStrict End a
+instance {-# OVERLAPPING #-}  ValidMelAppendStrict a End
+instance {-# OVERLAPPABLE #-} ValidMelLeapStrict (Last vs1) (Head vs2) => ValidMelAppendStrict vs1 vs2
+
+-- | Ensures that two partitures can be horizontally concatenated.
+--
+-- Two part lists can be horizontally concatenated if
+--
+--  * both of them are empty or
+--  * all of the voices can be appended.
+class ValidMelConcatStrict (ps1 :: Partiture n l1) (ps2 :: Partiture n l2)
+instance {-# OVERLAPPING #-}       ValidMelConcatStrict None None
+instance {-# OVERLAPPABLE #-} (ValidMelAppendStrict v1 v2, ValidMelConcatStrict vs1 vs2)
+                                => ValidMelConcatStrict (v1 :-- vs1) (v2 :-- vs2)
 
 -------------------------------------------------------------------------------
 -- Voice leading constraints
