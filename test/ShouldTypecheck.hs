@@ -21,4 +21,4 @@ shouldTypecheck a = do
   result <- try (evaluate $ force a)
   case result of
     Right _ -> return ()
-    Left e@(TypeError msg) -> assertFailure $ "Expected expression to compile but it did not compile: \n" ++ msg
+    Left (TypeError msg) -> assertFailure $ "Expected expression to compile but it did not compile: \n" ++ msg
