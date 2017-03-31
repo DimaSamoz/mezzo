@@ -2,7 +2,7 @@
 
 import Mezzo
 
-rh1 = c_ minD inv inv qc :|: af_ majD qc :|: ((ef maj3 ec' :|: d min3 sc) :-: b_ qn :-: g_ qn) :|: c_ minD inv qc
+rh1 = c_ minD inv inv qc :|: af_ majD qc :|: ((ef maj3 ec' :|: d min3 sc) :-: g_ maj3 qc) :|: c_ minD inv qc
 lh1 = c__ oct qc :|: f_3 oct qc :|: g_3 oct qc :|: c__ oct qc {- :-: g__ qn -}
 
 rh2 = af__ majD' i2 qc :|: cs_ majD inv qc :|: ((c min3 ec' :|: bf_ min3 sc) :-: g_ qn :-: ef_ qn {- :-: df_ hn -}) :|: af__ majD inv qc
