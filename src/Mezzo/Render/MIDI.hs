@@ -63,20 +63,16 @@ keyUp :: MidiNote -> MidiEvent
 keyUp n = (start n + noteDur n, NoteOn {channel = 0, CM.key = noteNum n, velocity = 0})
 
 -- | Play the specified 'MidiNote'.
-playNote :: Int -> Ticks -> MidiTrack
-playNote root dur = map ($ midiNote root dur) [keyDown, keyUp]
+playNote :: Int -> Int -> MidiTrack
+playNote root dur = map ($ midiNote root (dur * 60)) [keyDown, keyUp]
 
 -- | Play a rest of the specified duration.
 playRest :: Ticks -> MidiTrack
-playRest dur = map ($ midiRest dur) [keyDown, keyUp]
+playRest dur = map ($ midiRest (dur * 60)) [keyDown, keyUp]
 
 -- | Merge two parallel MIDI tracks.
 (><) :: MidiTrack -> MidiTrack -> MidiTrack
 m1 >< m2 = removeTrackEnds $ m1 `merge` m2
-
--- | Convert a 'Dur' to 'Ticks'.
-durToTicks :: Primitive d => Dur d -> Ticks
-durToTicks d = prim d * 60 -- 1 Mezzo tick (a 32nd note) ~ 60 MIDI ticks
 
 -------------------------------------------------------------------------------
 -- Rendering
@@ -103,16 +99,16 @@ midiSkeleton mel = Midi
 musicToMidi :: Music m -> MidiTrack
 musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
 musicToMidi (m1 :-: m2) = musicToMidi m1 >< musicToMidi m2
-musicToMidi (Note root dur) = playNote (prim root) (durToTicks dur)
-musicToMidi (Rest dur) = playRest (durToTicks dur)
+musicToMidi (Note root dur) = playNote (prim root) (prim dur)
+musicToMidi (Rest dur) = playRest (prim dur)
 musicToMidi (Chord c d) = foldr1 (><) notes
-    where notes = map (`playNote` durToTicks d) $ prim c
+    where notes = map (`playNote` prim d) $ prim c
 musicToMidi (Progression ts p) = foldr1 (++) chords
     where chords = (toChords <$> init (prim p)) ++ [cadence (last (prim p))]
           toChords :: [Int] -> MidiTrack
-          toChords = concat . replicate (prim ts) . foldr1 (><) . map (`playNote` durToTicks _qu)
+          toChords = concat . replicate (prim ts) . foldr1 (><) . map (`playNote` prim _qu)
           cadence :: [Int] -> MidiTrack
-          cadence = foldr1 (><) . map (`playNote` durToTicks _wh)
+          cadence = foldr1 (><) . map (`playNote` prim _wh)
 musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
 
 -- | Create a MIDI file with the specified name and track.
