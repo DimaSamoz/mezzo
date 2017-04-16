@@ -18,7 +18,6 @@ module Mezzo.Model.Music
     (
     -- * Music
       Music (..)
-    , Score (..)
     -- * Constraints
     , ValidChord
     , ValidProg
@@ -72,9 +71,6 @@ data Music :: forall n l. Partiture n l -> Type where
     Progression :: ValidProg t p => TimeSig t -> Prog p -> Music (FromProg p t)
     -- | A homophonic composition with a melody line and an accompaniment.
     Homophony :: ValidHom m a => Music m -> Music a -> Music (m +-+ a)
-
--- | A type encapsulating every 'Music' composition.
-data Score = forall m. Score (Music m)
 
 -------------------------------------------------------------------------------
 -- Musical constraints

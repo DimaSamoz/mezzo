@@ -23,6 +23,7 @@ module Mezzo.Compose.Builder
     , Term
     , AConv
     , AMut
+    , ATerm
     , Mut'
     , spec
     , constConv
@@ -65,6 +66,10 @@ type AConv a s t = s -> a -> Spec t
 
 -- | Mutator with argument: mutates a value of type t, consuming an argument of type a.
 type AMut a t = AConv a t t
+
+-- | Terminator with argument: finishes building a value of type t, returning a result of
+-- type r, consuming an argument of type a.
+type ATerm a t r = t -> a -> r
 
 -- | Flexible mutator: mutator that allows slight changes in the type (otherwise use 'Conv').
 type Mut' t t' = Conv t t'

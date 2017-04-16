@@ -44,6 +44,7 @@ library
 
                      , Mezzo.Render
                      , Mezzo.Render.MIDI
+                     , Mezzo.Render.Score
 
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise

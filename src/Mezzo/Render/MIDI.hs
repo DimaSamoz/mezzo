@@ -16,11 +16,12 @@
 -----------------------------------------------------------------------------
 
 module Mezzo.Render.MIDI
-    ( renderMusic, musicToMidi )
+    ( renderMusic, renderScore )
     where
 
 import Mezzo.Model
 import Mezzo.Compose (_th, _si, _ei, _qu, _ha, _wh)
+import Mezzo.Render.Score
 
 import Codec.Midi hiding (key)
 import qualified Codec.Midi as CM (key)
@@ -79,16 +80,17 @@ m1 >< m2 = removeTrackEnds $ m1 `merge` m2
 -------------------------------------------------------------------------------
 
 -- | A basic skeleton of a MIDI file.
-midiSkeleton :: MidiTrack -> Midi
-midiSkeleton mel = Midi
-    { fileType = MultiTrack
-    , timeDiv = TicksPerBeat 120
+midiSkeleton :: MidiTrack -> Attributes -> Midi
+midiSkeleton mel atts = Midi
+    { fileType = SingleTrack
+    , timeDiv = TicksPerBeat 480
     , tracks =
         [ [ (0, ChannelPrefix 0)
-          , (0, TrackName " Grand Piano  ")
+          , (0, TrackName $ title atts)
           , (0, InstrumentName "GM Device  1")
-          , (0, TimeSignature 4 2 24 8)
-          , (0, KeySignature 0 0)
+          , (0, getTimeSig atts)
+          , (0, getKeySig atts)
+          , (0, TempoChange (60000000 `div` tempo atts))
           ]
         ++ mel
         ++ [ (0, TrackEnd) ]
@@ -112,9 +114,13 @@ musicToMidi (Progression ts p) = foldr1 (++) chords
 musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
 
 -- | Create a MIDI file with the specified name and track.
-createMidi :: FilePath -> MidiTrack -> IO ()
-createMidi f notes = exportFile f $ midiSkeleton notes
+createMidi :: FilePath -> MidiTrack -> Attributes -> IO ()
+createMidi f notes atts = exportFile f $ midiSkeleton notes atts
 
 -- | Create a MIDI file with the specified path and composition.
 renderMusic :: FilePath -> Music m -> IO ()
-renderMusic f m = createMidi f (musicToMidi m)
+renderMusic f m = createMidi f (musicToMidi m) defAttributes
+
+-- | Create a MIDI file with the specified path and score.
+renderScore :: FilePath -> Score -> IO ()
+renderScore f (Score atts m) = createMidi f (musicToMidi m) atts
