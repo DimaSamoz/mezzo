@@ -68,3 +68,4 @@ import Mezzo.Model.Harmony.Chords as X
 import Mezzo.Model.Harmony.Functional as X
 import Mezzo.Model.Music as X
 import Mezzo.Model.Reify as X
+import Mezzo.Model.Rules.RuleSet as X

@@ -112,13 +112,13 @@ type ChorC' c r t i = (Primitive r, Primitive t, Primitive i) => AConv (Inv i) (
 type ChorC c r t = (Primitive r, Primitive t) => Conv (Root r) (Cho (c r t Inv0))
 
 -- | Note terminator.
-type RootT r d = Primitive r => Term (Root r) (Music Sig (FromRoot r d))
+type RootT s r d = Primitive r => Term (Root r) (Music s (FromRoot r d))
 
 --  | Rest terminator.
-type RestT d = Term (Pit Silence) (Music Sig (FromSilence d))
+type RestT s d = Term (Pit Silence) (Music s (FromSilence d))
 
 -- | Chord terminator.
-type ChorT c d = Primitive c => Term (Cho c) (Music Sig (FromChord c d))
+type ChorT s c d = Primitive c => Term (Cho c) (Music s (FromChord c d))
 
 -- inKey :: KeyS key -> a -> a
 -- inKey key cont = let ?k = key in cont

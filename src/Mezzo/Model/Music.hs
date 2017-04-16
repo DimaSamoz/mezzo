@@ -20,6 +20,8 @@ module Mezzo.Model.Music
       Music (..)
     , Signature (..)
     -- * Constraints
+    , ValidNote
+    , ValidRest
     , ValidChord
     , ValidProg
     , ValidHom
@@ -46,6 +48,9 @@ infixl 4 :-:
 -- The 'Music' datatype
 -------------------------------------------------------------------------------
 
+-- | Properties of a musical piece: the time signature, the key signature and rule set.
+data Signature (t :: TimeSignature) (k :: KeyType) (r :: RuleSetType) = Sig
+
 -- | A piece of music consisting of parallel and sequential composition of notes
 -- and rests, subject to constraints.
 --
@@ -57,21 +62,21 @@ infixl 4 :-:
 --  * Parallelly composed pieces cannot have any minor second or major seventh harmonic intervals.
 --  * Music must not contain parallel or concealed unisons, fifths or octaves.
 --
-data Music :: forall n l t k. Signature t k -> Partiture n l -> Type where
+data Music :: forall n l t k r. Signature t k r -> Partiture n l -> Type where
     -- | Sequential or melodic composition of music.
-    (:|:) :: ValidMel m1 m2  => Music s m1 -> Music s m2 -> Music s (m1 +|+ m2)
+    (:|:) :: ValidMel s m1 m2  => Music s m1 -> Music s m2 -> Music s (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.
-    (:-:) :: ValidHarm m1 m2 => Music s m1 -> Music s m2 -> Music s (m1 +-+ m2)
+    (:-:) :: ValidHarm s m1 m2 => Music s m1 -> Music s m2 -> Music s (m1 +-+ m2)
     -- | A note specified by a pitch and a duration.
-    Note :: ValidNote r d => Root r -> Dur d -> Music s (FromRoot r d)
+    Note :: ValidNote s r d => Root r -> Dur d -> Music s (FromRoot r d)
     -- | A rest specified by a duration.
-    Rest :: ValidRest d => Dur d -> Music s (FromSilence d)
+    Rest :: ValidRest s d => Dur d -> Music s (FromSilence d)
     -- | A chord specified by a chord type and a duration.
-    Chord :: ValidChord c d => Cho c -> Dur d -> Music s (FromChord c d)
+    Chord :: ValidChord s c d => Cho c -> Dur d -> Music s (FromChord c d)
     -- | A progression specified by a time signature, and its progression schema.
-    Progression :: ValidProg t p => Prog p -> Music (Sig :: Signature t k) (FromProg p t)
+    Progression :: ValidProg r t p => Prog p -> Music (Sig :: Signature t k r) (FromProg p t)
     -- | A homophonic composition with a melody line and an accompaniment.
-    Homophony :: ValidHom m a => Music s m -> Music s a -> Music s (m +-+ a)
+    Homophony :: ValidHom s m a => Music s m -> Music s a -> Music s (m +-+ a)
 
 -------------------------------------------------------------------------------
 -- Musical constraints
@@ -82,25 +87,32 @@ data Music :: forall n l t k. Signature t k -> Partiture n l -> Type where
 type ActRuleSet = Classical
 
 -- | Ensures that two pieces of music can be composed sequentially.
-type ValidMel m1 m2 = MelConstraints ActRuleSet m1 m2
+type ValidMel (s :: Signature t k r) m1 m2 =
+    MelConstraints r m1 m2
 
 -- | Ensures that two pieces of music can be composed in parallel.
-type ValidHarm m1 m2 = HarmConstraints ActRuleSet m1 m2
+type ValidHarm (s :: Signature t k r) m1 m2 =
+    HarmConstraints r m1 m2
 
 -- | Ensures that the note is valid.
-type ValidNote r d = NoteConstraints ActRuleSet r d
+type ValidNote (s :: Signature t k r) ro d =
+    (NoteConstraints r ro d, IntRep ro, Primitive d)
 
 -- | Ensures that the rest is valid.
-type ValidRest d = RestConstraints ActRuleSet d
+type ValidRest (s :: Signature t k r) d =
+    (RestConstraints r d, Primitive d)
 
 -- | Ensures that the chord is valid.
-type ValidChord c d = ChordConstraints ActRuleSet c d
+type ValidChord (s :: Signature t k r) (c :: ChordType n) d =
+    (ChordConstraints r c d, IntListRep c, Primitive n, Primitive d)
 
 -- | Ensures that a progression is valid.
-type ValidProg s p = ProgConstraints ActRuleSet s p
+type ValidProg r t p =
+    (ProgConstraints r t p, IntLListRep p, IntRep t, KnownNat t)
 
 -- | Ensures that a homophonic composition is valid.
-type ValidHom m a = HomConstraints ActRuleSet m a
+type ValidHom (s :: Signature t k r) m a =
+    HomConstraints r m a
 
 -------------------------------------------------------------------------------
 -- Pretty-printing

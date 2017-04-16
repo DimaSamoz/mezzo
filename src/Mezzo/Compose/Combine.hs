@@ -79,36 +79,36 @@ chordVoices :: forall (n :: Nat) (c :: ChordType n) . Primitive n => Cho c -> In
 chordVoices _ = prim (undefined :: ChordType n) -- Need to get a kind-level variable to the term level
 
 -- | Add an empty voice to the piece of music.
-pad :: (ValidHarm m (FromSilence b), Primitive b)
+pad :: (ValidHarm s m (FromSilence b), Primitive b, ValidRest s b)
     => Music s (m :: Partiture (a - 1) b) -> Music s ((m +-+ FromSilence b) :: Partiture a b)
 pad m = m :-: restWhile m
 
 -- | Add two empty voices to the piece of music.
-pad2 :: ( ValidHarm m (FromSilence b)
-        , ValidHarm (m +-+ FromSilence b) (FromSilence b)
-        , Primitive b)
+pad2 :: ( ValidHarm s m (FromSilence b)
+        , ValidHarm s (m +-+ FromSilence b) (FromSilence b)
+        , Primitive b, ValidRest s b)
      => Music s (m :: Partiture (a - 2) b) -> Music s ((m +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
 pad2 m = m :-: restWhile m :-: restWhile m
 
 -- | Add three empty voices to the piece of music.
-pad3 :: ( ValidHarm m (FromSilence b)
-        , ValidHarm (m +-+ FromSilence b) (FromSilence b)
-        , ValidHarm (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
-        , Primitive b)
+pad3 :: ( ValidHarm s m (FromSilence b)
+        , ValidHarm s (m +-+ FromSilence b) (FromSilence b)
+        , ValidHarm s (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+        , Primitive b, ValidRest s b)
      => Music s (m :: Partiture (a - 3) b) -> Music s ((m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
 pad3 m = m :-: restWhile m :-: restWhile m :-: restWhile m
 
 -- | Add four empty voices to the piece of music.
-pad4 :: ( ValidHarm m (FromSilence b)
-        , ValidHarm (m +-+ FromSilence b) (FromSilence b)
-        , ValidHarm (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
-        , ValidHarm (m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
-        , Primitive b)
+pad4 :: ( ValidHarm s m (FromSilence b)
+        , ValidHarm s (m +-+ FromSilence b) (FromSilence b)
+        , ValidHarm s (m +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+        , ValidHarm s (m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) (FromSilence b)
+        , Primitive b, ValidRest s b)
      => Music s (m :: Partiture (a - 4) b) -> Music s ((m +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b +-+ FromSilence b) :: Partiture a b)
 pad4 m = m :-: restWhile m :-: restWhile m :-: restWhile m :-: restWhile m
 
 -- | Rest for the duration of the given music piece.
-restWhile :: Primitive l =>  Music s (m :: Partiture n l) -> Music s (FromSilence l)
+restWhile :: (Primitive l, ValidRest s l) =>  Music s (m :: Partiture n l) -> Music s (FromSilence l)
 restWhile m = rest (musicDur m)
 
 -------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ restWhile m = rest (musicDur m)
 -------------------------------------------------------------------------------
 
 -- | Convert a melody (a sequence of notes and rests) to `Music`.
-play :: (Primitive d) => Melody m d -> Music s m
+play :: (Primitive d) => Melody s m d -> Music s m
 play m@(ps :| p)    = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
 play m@(ps :<<< p)  = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
 play m@(ps :<< p)   = case ps of Melody -> mkMelNote m p ; ps' -> play ps' :|: mkMelNote m p
@@ -143,27 +143,27 @@ play m@(ps :~>. p)  = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: m
 play m@(ps :~>>. p) = case ps of Melody -> mkMelRest m ; ps' -> play ps'   :|: mkMelRest m
 
 -- | Make a note of suitable duration from a root specifier.
-mkMelNote :: (IntRep r, Primitive d) => Melody m d -> RootS r -> Music s (FromRoot r d)
+mkMelNote :: (IntRep r, Primitive d, ValidNote s r d) => Melody s m d -> RootS r -> Music s (FromRoot r d)
 mkMelNote m p = p (\r -> Note r (melDur m))
 
 -- | Make a rest of suitable duration from a rest specifier.
-mkMelRest :: Primitive d => Melody m d -> Music s (FromSilence d)
+mkMelRest :: (Primitive d, ValidRest s d) => Melody s m d -> Music s (FromSilence d)
 mkMelRest m = r (\_ -> Rest (melDur m))
 
 -- | Alias for the start of the melody.
-melody :: Melody (End :-- None) Quarter
+melody :: Melody s (End :-- None) Quarter
 melody = Melody
 
 -- | Get the duration of the notes in a melody.
-melDur :: Primitive d => Melody m d -> Dur d
+melDur :: Primitive d => Melody s m d -> Dur d
 melDur _ = Dur
 
 -------------------------------------------------------------------------------
 -- Textures
 -------------------------------------------------------------------------------
 
-hom :: ValidHom m a => Music s m -> Music s a -> Music s (m +-+ a)
+hom :: ValidHom s m a => Music s m -> Music s a -> Music s (m +-+ a)
 hom = Homophony
 
-melAccomp :: (ValidProg t p, pm ~ FromProg p t, ValidHom m pm, Primitive d) => Melody m d -> InKey k (PhraseList p) -> Music (Sig :: Signature t k) (m +-+ pm)
+melAccomp :: (s ~ (Sig :: Signature t k r), ValidProg r t p, pm ~ FromProg p t, ValidHom s m pm, Primitive d) => Melody s m d -> InKey k (PhraseList p) -> Music s (m +-+ pm)
 melAccomp m p = Homophony (play m) (prog p)

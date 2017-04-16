@@ -135,26 +135,26 @@ mkDurLits name = do
             return $ tySig1 : dec1 ++ tySig1' : dec1'
     noteTerm <- do
             let valName = mkName $ (durLitFormatter name) !! 1 : "n"
-            tySig2 <- sigD valName $ [t| forall r. IntRep r => RootT r $(conT name) |]
+            tySig2 <- sigD valName $ [t| forall r s. (ValidNote s r $(conT name), IntRep r) => RootT s r $(conT name) |]
             dec2 <- [d| $(varP valName) = \p -> Note p $(varE litName) |]
             let valName' = mkName $ (durLitFormatter name) !! 1 : "n\'"
-            tySig2' <- sigD valName' $ [t| forall r. IntRep r => RootT r (Dot $(conT name)) |]
+            tySig2' <- sigD valName' $ [t| forall r s. (ValidNote s r (Dot $(conT name)), IntRep r) => RootT s r (Dot $(conT name)) |]
             dec2' <- [d| $(varP valName') = \p -> Note p $(varE litName') |]
             return $ tySig2 : dec2 ++ tySig2' : dec2'
     restTerm <- do
             let valName = mkName $ (durLitFormatter name) !! 1 : "r"
-            tySig2 <- sigD valName $ [t| RestT $(conT name) |]
+            tySig2 <- sigD valName $ [t| forall s. (ValidRest s $(conT name)) => RestT s $(conT name) |]
             dec2 <- [d| $(varP valName) = const (Rest $(varE litName)) |]
             let valName' = mkName $ (durLitFormatter name) !! 1 : "r\'"
-            tySig2' <- sigD valName' $ [t| RestT (Dot $(conT name)) |]
+            tySig2' <- sigD valName' $ [t| forall s. (ValidRest s (Dot $(conT name))) => RestT s (Dot $(conT name)) |]
             dec2' <- [d| $(varP valName') = const (Rest $(varE litName')) |]
             return $ tySig2 : dec2 ++ tySig2' : dec2'
     chordTerm <- do
             let valName = mkName $ (durLitFormatter name) !! 1 : "c"
-            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, IntListRep r, ValidChord r $(conT name)) => ChorT (r :: ChordType n) $(conT name) |]
+            tySig2 <- sigD valName $ [t| forall n r s. (Primitive n, IntListRep r, ValidChord s r $(conT name)) => ChorT s (r :: ChordType n) $(conT name) |]
             dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName) |]
             let valName' = mkName $ (durLitFormatter name) !! 1 : "c\'"
-            tySig2' <- sigD valName' $ [t| forall n r. (Primitive n, IntListRep r, ValidChord r (Dot $(conT name))) => ChorT (r :: ChordType n) (Dot $(conT name)) |]
+            tySig2' <- sigD valName' $ [t| forall n r s. (Primitive n, IntListRep r, ValidChord s r (Dot $(conT name))) => ChorT s (r :: ChordType n) (Dot $(conT name)) |]
             dec2' <- [d| $(varP valName') = \c -> Chord c $(varE litName') |]
             return $ tySig2 : dec2 ++ tySig2' : dec2'
     return $ literal ++ noteTerm ++ restTerm ++ chordTerm
@@ -168,17 +168,17 @@ mk32ndLits = do
             return $ tySig1 : dec1
     noteTerm <- do
             let valName = mkName $ "tn"
-            tySig2 <- sigD valName $ [t| forall r. IntRep r => RootT r $(conT ''ThirtySecond) |]
+            tySig2 <- sigD valName $ [t| forall r s. (ValidNote s r $(conT ''ThirtySecond), IntRep r) => RootT s r $(conT ''ThirtySecond) |]
             dec2 <- [d| $(varP valName) = \p -> Note p $(varE litName) |]
             return $ tySig2 : dec2
     restTerm <- do
             let valName = mkName $ "tr"
-            tySig2 <- sigD valName $ [t| RestT $(conT ''ThirtySecond) |]
+            tySig2 <- sigD valName $ [t| forall s. ValidRest s $(conT ''ThirtySecond) => RestT s $(conT ''ThirtySecond) |]
             dec2 <- [d| $(varP valName) = const (Rest $(varE litName)) |]
             return $ tySig2 : dec2
     chordTerm <- do
             let valName = mkName $ "tc"
-            tySig2 <- sigD valName $ [t| forall n r. (Primitive n, IntListRep r, ValidChord r $(conT ''ThirtySecond)) => ChorT (r :: ChordType n) $(conT ''ThirtySecond) |]
+            tySig2 <- sigD valName $ [t| forall n r s. (Primitive n, IntListRep r, ValidChord s r $(conT ''ThirtySecond)) => ChorT s (r :: ChordType n) $(conT ''ThirtySecond) |]
             dec2 <- [d| $(varP valName) = \c -> Chord c $(varE litName)  |]
             return $ tySig2 : dec2
     return $ literal ++ noteTerm ++ restTerm ++ chordTerm

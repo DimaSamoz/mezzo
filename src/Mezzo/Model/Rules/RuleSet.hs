@@ -27,25 +27,13 @@ import qualified Mezzo.Model.Rules.Strict as SR
 import Data.Kind
 import GHC.TypeLits
 
+-- * Rule sets
+
 -- | The types of rule sets implemented.
 data RuleSetType =
       Free          -- ^ No composition rules.
     | Classical     -- ^ Classical rules.
     | Strict        -- ^ Strict rules.
-
--- ** Default constraints
-
--- | Default note constraints.
-type DefNoteConstraints r d = (IntRep r, Primitive d)
-
--- | Default resst constraints.
-type DefRestConstraints d = (Primitive d)
-
--- | Default chord constraints.
-type DefChordConstraints (c :: ChordType n) d = (IntListRep c, Primitive n, Primitive d)
-
--- | Default progression constraints.
-type DefProgConstraints s p = (IntLListRep p, IntRep s, KnownNat s)
 
 -- | Class of rule sets for a given rule type.
 class RuleSet (t :: RuleSetType) where
@@ -58,10 +46,10 @@ class RuleSet (t :: RuleSetType) where
     type HomConstraints   t (m1 :: Partiture n1 l) (m2 :: Partiture n2 l) :: Constraint
 
     -- Defaults
-    type NoteConstraints t r d = DefNoteConstraints r d
-    type RestConstraints t d = DefRestConstraints d
-    type ChordConstraints t c d = DefChordConstraints c d
-    type ProgConstraints t s p = DefProgConstraints s p
+    type NoteConstraints t r d = Valid
+    type RestConstraints t d = Valid
+    type ChordConstraints t c d = Valid
+    type ProgConstraints t s p = Valid
 
 
 -- | No rules.
@@ -93,4 +81,9 @@ instance RuleSet Strict where
     type MelConstraints Strict m1 m2 = (SR.ValidMelConcatStrict m1 m2, SR.ValidMelMatrixMotion m1 m2)
     type HarmConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
     type HomConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
-    type ChordConstraints Strict c d = (DefChordConstraints c d, SR.ValidChordType c)
+    type ChordConstraints Strict c d = (SR.ValidChordType c)
+
+-- * Literal values
+
+-- | The proxy type for 'RuleSetType'.
+data RuleS (r :: RuleSetType) = RuleS

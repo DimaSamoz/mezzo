@@ -81,7 +81,7 @@ m1 >< m2 = removeTrackEnds $ m1 `merge` m2
 -------------------------------------------------------------------------------
 
 -- | A basic skeleton of a MIDI file.
-midiSkeleton :: MidiTrack -> (Attributes t k) -> Midi
+midiSkeleton :: MidiTrack -> (Attributes t k r) -> Midi
 midiSkeleton mel atts = Midi
     { fileType = SingleTrack
     , timeDiv = TicksPerBeat 480
@@ -99,7 +99,7 @@ midiSkeleton mel atts = Midi
     }
 
 -- | Convert a 'Music' piece into a 'MidiTrack'.
-musicToMidi :: forall t k m. Music (Sig :: Signature t k) m -> MidiTrack
+musicToMidi :: forall t k m r. Music (Sig :: Signature t k r) m -> MidiTrack
 musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
 musicToMidi (m1 :-: m2) = musicToMidi m1 >< musicToMidi m2
 musicToMidi (Note root dur) = playNote (prim root) (prim dur)
@@ -115,7 +115,7 @@ musicToMidi (Progression p) = foldr1 (++) chords
 musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
 
 -- | Create a MIDI file with the specified name and track.
-createMidi :: FilePath -> MidiTrack -> Attributes t k -> IO ()
+createMidi :: FilePath -> MidiTrack -> Attributes t k r -> IO ()
 createMidi f notes atts = exportFile f $ midiSkeleton notes atts
 
 -- | Create a MIDI file with the specified path and composition.
