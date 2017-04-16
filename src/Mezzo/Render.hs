@@ -19,3 +19,4 @@ module Mezzo.Render (module X) where
 -- Uses import/export shortcut as suggested by HLint.
 
 import Mezzo.Render.MIDI as X
+import Mezzo.Render.Score as X

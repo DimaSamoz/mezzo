@@ -46,8 +46,8 @@ import qualified GHC.TypeLits as GT
 -------------------------------------------------------------------------------
 
 -- | Datatype containing MIDI attributes of a Mezzo composition.
-data Attributes =
-    forall t k. (Primitive t, Primitive k, ScoreAtt t, ScoreAtt k)
+data Attributes t k =
+    (Primitive t, Primitive k, ScoreAtt t, ScoreAtt k)
     => Attributes
     { title :: String               -- ^ The title of the composition.
     , tempo :: Tempo                -- ^ The tempo of the composition in BPM.
@@ -55,10 +55,10 @@ data Attributes =
     , keySignature :: KeyS k        -- ^ The key signature of the composition.
     }
 
-deriving instance Show Attributes
+deriving instance Show (Attributes t k)
 
 -- | Default attributes: "Composition" in C major in common time, with tempo 120 BPM.
-defAttributes :: Attributes
+defAttributes :: Attributes 4 (Key C Natural MajorMode)
 defAttributes = Attributes
     { title = "Composition"
     , tempo = 120
@@ -67,42 +67,42 @@ defAttributes = Attributes
     }
 
 -- | A type encapsulating every 'Music' composition with their MIDI attributes.
-data Score = forall m. Score Attributes (Music m)
+data Score = forall m t k. Score (Attributes t k) (Music (Sig :: Signature t k) m)
 
 -------------------------------------------------------------------------------
 -- Builders
 -------------------------------------------------------------------------------
 
 -- Score attribute specifier: uses the default attributes.
-score :: Spec Attributes
+score :: Spec (Attributes 4 (Key C Natural MajorMode))
 score = spec defAttributes
 
 -- | Sets the title of the composition.
-setTitle :: AMut String Attributes
+setTitle :: AMut String (Attributes t k)
 setTitle atts titl = spec (atts {title = titl})
 
 -- | Sets the tempo of the composition.
-setTempo :: AMut Tempo Attributes
+setTempo :: AMut Tempo (Attributes t k)
 setTempo atts temp = spec (atts {tempo = temp})
 
 -- | Sets the time signature of the composition.
-setTimeSig :: (Primitive t, ScoreAtt t) => AMut (TimeSig t) Attributes
+setTimeSig :: (Primitive t', ScoreAtt t') => AConv (TimeSig t') (Attributes t k) (Attributes t' k)
 setTimeSig Attributes{..} ts = spec (Attributes title tempo ts keySignature)
 
 -- | Sets the key signature of the composition.
-setKeySig :: (Primitive k, ScoreAtt k) => AMut (KeyS k) Attributes
+setKeySig :: (Primitive k', ScoreAtt k') => AConv (KeyS k') (Attributes t k) (Attributes t k')
 setKeySig Attributes{..} ks = spec (Attributes title tempo timeSignature ks)
 
 -- | Sets the music content of the score.
-withMusic :: ATerm (Music m) Attributes Score
+withMusic :: ATerm (Music (Sig :: Signature t k) m) (Attributes t k) Score
 withMusic = Score
 
 -- | Get the time signature MIDI message.
-getTimeSig :: Attributes -> Message
+getTimeSig :: Attributes t k -> Message
 getTimeSig Attributes{timeSignature = t} = getAtt t
 
 -- | Get the key signature MIDI message.
-getKeySig :: Attributes -> Message
+getKeySig :: Attributes t k -> Message
 getKeySig Attributes{keySignature = k} = getAtt k
 
 -- | Class for types that can be converted into score attribute MIDI messages.

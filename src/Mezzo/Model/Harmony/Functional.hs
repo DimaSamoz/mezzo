@@ -22,6 +22,7 @@ module Mezzo.Model.Harmony.Functional
     , DegreeC (..)
     , TimeSignature
     , TimeSig (..)
+    , Signature (..)
     , KeyToQual
     , KeyToOtherQual
     , IsMajor
@@ -73,6 +74,9 @@ type TimeSignature = Nat
 
 -- | Singleton for 'TimeSignature'.
 data TimeSig (t :: TimeSignature) = TimeSig
+
+-- | Time and key signature of a score.
+data Signature (t :: TimeSignature) (k :: KeyType) = Sig
 
 -- | Convert the key mode to the corresponding chord quality (i.e., major mode into a major chord).
 type family KeyToQual (k :: KeyType) where

@@ -18,6 +18,7 @@ module Mezzo.Model.Music
     (
     -- * Music
       Music (..)
+    , Signature (..)
     -- * Constraints
     , ValidChord
     , ValidProg
@@ -56,21 +57,21 @@ infixl 4 :-:
 --  * Parallelly composed pieces cannot have any minor second or major seventh harmonic intervals.
 --  * Music must not contain parallel or concealed unisons, fifths or octaves.
 --
-data Music :: forall n l. Partiture n l -> Type where
+data Music :: forall n l t k. Signature t k -> Partiture n l -> Type where
     -- | Sequential or melodic composition of music.
-    (:|:) :: ValidMel m1 m2  => Music m1 -> Music m2 -> Music (m1 +|+ m2)
+    (:|:) :: ValidMel m1 m2  => Music s m1 -> Music s m2 -> Music s (m1 +|+ m2)
     -- | Parallel or harmonic composition of music.
-    (:-:) :: ValidHarm m1 m2 => Music m1 -> Music m2 -> Music (m1 +-+ m2)
+    (:-:) :: ValidHarm m1 m2 => Music s m1 -> Music s m2 -> Music s (m1 +-+ m2)
     -- | A note specified by a pitch and a duration.
-    Note :: ValidNote r d => Root r -> Dur d -> Music (FromRoot r d)
+    Note :: ValidNote r d => Root r -> Dur d -> Music s (FromRoot r d)
     -- | A rest specified by a duration.
-    Rest :: ValidRest d => Dur d -> Music (FromSilence d)
+    Rest :: ValidRest d => Dur d -> Music s (FromSilence d)
     -- | A chord specified by a chord type and a duration.
-    Chord :: ValidChord c d => Cho c -> Dur d -> Music (FromChord c d)
+    Chord :: ValidChord c d => Cho c -> Dur d -> Music s (FromChord c d)
     -- | A progression specified by a time signature, and its progression schema.
-    Progression :: ValidProg t p => TimeSig t -> Prog p -> Music (FromProg p t)
+    Progression :: ValidProg t p => Prog p -> Music (Sig :: Signature t k) (FromProg p t)
     -- | A homophonic composition with a melody line and an accompaniment.
-    Homophony :: ValidHom m a => Music m -> Music a -> Music (m +-+ a)
+    Homophony :: ValidHom m a => Music s m -> Music s a -> Music s (m +-+ a)
 
 -------------------------------------------------------------------------------
 -- Musical constraints
@@ -105,16 +106,16 @@ type ValidHom m a = HomConstraints ActRuleSet m a
 -- Pretty-printing
 -------------------------------------------------------------------------------
 
-instance Show (Music m) where show = render . ppMusic
+instance Show (Music s m) where show = render . ppMusic
 
 -- | Pretty-print a 'Music' value.
-ppMusic :: Music m -> Box
+ppMusic :: Music s m -> Box
 ppMusic (Note r d) = char '|' <+> doc r <+> doc d
 ppMusic (Rest d) = char '|' <+> text "~~~~" <+> doc d
 ppMusic (m1 :|: m2) = ppMusic m1 <> emptyBox 1 1 <> ppMusic m2
 ppMusic (m1 :-: m2) = ppMusic m1 // ppMusic m2
 ppMusic (Chord c d) = char '|' <+> doc c <+> doc d
-ppMusic (Progression ts p) = text "Prog" <+> doc ts <+> doc p
+-- ppMusic (Progression ts p) = text "Prog" <+> doc ts <+> doc p
 
 -- | Convert a showable value into a pretty-printed box.
 doc :: Show a => a -> Box
