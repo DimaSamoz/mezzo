@@ -169,7 +169,7 @@ data Subdominant (k :: KeyType) (l :: Nat) where
     -- | Doubled subdominants.
     SubSS      :: Subdominant k l1 -> Subdominant k (l - l1) -> Subdominant k l
 
-
+-- | Convert a degree chord to a tetrad.
 type DegToChord (dc :: DegreeC d q k i o) = Tetrad (DegreeRoot k (Degree d Natural o)) (QualToType q) i
 
 -- | Convert a cadence to chords.
