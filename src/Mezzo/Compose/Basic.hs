@@ -82,13 +82,13 @@ rootS :: Primitive (DegreeRoot k d) => KeyS k -> Deg d -> Root (DegreeRoot k d)
 rootS k d = Root
 
 -- | Create a new note from a root and duration.
-noteP :: (Primitive d, IntRep p) => Pit p -> Dur d -> Music (FromRoot (PitchRoot p) d)
+noteP :: (Primitive d, IntRep p, ValidNote s (PitchRoot p) d) => Pit p -> Dur d -> Music s (FromRoot (PitchRoot p) d)
 noteP p = Note (rootP p)
 
-noteS :: (Primitive d, IntRep (DegreeRoot k sd))
-      => KeyS k -> Deg sd -> Dur d -> Music (FromRoot (DegreeRoot k sd) d)
+noteS :: (Primitive d, IntRep (DegreeRoot k sd), ValidNote (Sig :: Signature t k r) (DegreeRoot k sd) d)
+      => KeyS k -> Deg sd -> Dur d -> Music (Sig :: Signature t k r) (FromRoot (DegreeRoot k sd) d)
 noteS k sd = Note (rootS k sd)
 
 -- | Create a rest from a duration.
-rest :: Primitive d => Dur d -> Music (FromSilence d)
+rest :: (Primitive d, ValidRest s d) => Dur d -> Music s (FromSilence d)
 rest = Rest

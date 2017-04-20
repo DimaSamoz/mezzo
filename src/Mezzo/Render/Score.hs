@@ -1,4 +1,4 @@
-{-# LANGUAGE StandaloneDeriving, RecordWildCards #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -29,7 +29,12 @@ module Mezzo.Render.Score
     , setTempo
     , setTimeSig
     , setKeySig
+    , setRuleSet
     , withMusic
+      -- * Rule sets
+    , free
+    , classical
+    , strict
     )
     where
 
@@ -46,64 +51,86 @@ import qualified GHC.TypeLits as GT
 -------------------------------------------------------------------------------
 
 -- | Datatype containing MIDI attributes of a Mezzo composition.
-data Attributes =
-    forall t k. (Primitive t, Primitive k, ScoreAtt t, ScoreAtt k)
+data Attributes t k r =
+    (Primitive t, Primitive k, ScoreAtt t, ScoreAtt k)
     => Attributes
     { title :: String               -- ^ The title of the composition.
     , tempo :: Tempo                -- ^ The tempo of the composition in BPM.
     , timeSignature :: TimeSig t    -- ^ The time signature of the composition.
     , keySignature :: KeyS k        -- ^ The key signature of the composition.
+    , ruleSet :: RuleS r
     }
 
-deriving instance Show Attributes
-
 -- | Default attributes: "Composition" in C major in common time, with tempo 120 BPM.
-defAttributes :: Attributes
+defAttributes :: Attributes 4 (Key C Natural MajorMode) Classical
 defAttributes = Attributes
     { title = "Composition"
     , tempo = 120
     , timeSignature = quadruple
     , keySignature = c_maj
+    , ruleSet = classical
     }
 
 -- | A type encapsulating every 'Music' composition with their MIDI attributes.
-data Score = forall m. Score Attributes (Music m)
+data Score = forall m t k r. Score (Attributes t k r) (Music (Sig :: Signature t k r) m)
 
 -------------------------------------------------------------------------------
 -- Builders
 -------------------------------------------------------------------------------
 
 -- Score attribute specifier: uses the default attributes.
-score :: Spec Attributes
+score :: Spec (Attributes 4 (Key C Natural MajorMode) Classical)
 score = spec defAttributes
 
 -- | Sets the title of the composition.
-setTitle :: AMut String Attributes
+setTitle :: AMut String (Attributes t k r)
 setTitle atts titl = spec (atts {title = titl})
 
 -- | Sets the tempo of the composition.
-setTempo :: AMut Tempo Attributes
+setTempo :: AMut Tempo (Attributes t k r)
 setTempo atts temp = spec (atts {tempo = temp})
 
 -- | Sets the time signature of the composition.
-setTimeSig :: (Primitive t, ScoreAtt t) => AMut (TimeSig t) Attributes
-setTimeSig Attributes{..} ts = spec (Attributes title tempo ts keySignature)
+setTimeSig :: (Primitive t', ScoreAtt t') => AConv (TimeSig t') (Attributes t k r) (Attributes t' k r)
+setTimeSig Attributes{..} ts = spec (Attributes title tempo ts keySignature ruleSet)
 
 -- | Sets the key signature of the composition.
-setKeySig :: (Primitive k, ScoreAtt k) => AMut (KeyS k) Attributes
-setKeySig Attributes{..} ks = spec (Attributes title tempo timeSignature ks)
+setKeySig :: (Primitive k', ScoreAtt k') => AConv (KeyS k') (Attributes t k r) (Attributes t k' r)
+setKeySig Attributes{..} ks = spec (Attributes title tempo timeSignature ks ruleSet)
+
+-- | Sets the key signature of the composition.
+setRuleSet :: AConv (RuleS r') (Attributes t k r) (Attributes t k r')
+setRuleSet Attributes{..} rs = spec (Attributes title tempo timeSignature keySignature rs)
 
 -- | Sets the music content of the score.
-withMusic :: ATerm (Music m) Attributes Score
+withMusic :: ATerm (Music (Sig :: Signature t k r) m) (Attributes t k r) Score
 withMusic = Score
 
 -- | Get the time signature MIDI message.
-getTimeSig :: Attributes -> Message
+getTimeSig :: Attributes t k r -> Message
 getTimeSig Attributes{timeSignature = t} = getAtt t
 
 -- | Get the key signature MIDI message.
-getKeySig :: Attributes -> Message
+getKeySig :: Attributes t k r -> Message
 getKeySig Attributes{keySignature = k} = getAtt k
+
+-------------------------------------------------------------------------------
+-- Rule sets
+-------------------------------------------------------------------------------
+
+-- | No enforced rules.
+free :: RuleS Free
+free = RuleS
+
+-- | Classical rules.
+classical :: RuleS Classical
+classical = RuleS
+
+-- | Strict rules
+strict :: RuleS Strict
+strict = RuleS
+
+
 
 -- | Class for types that can be converted into score attribute MIDI messages.
 class ScoreAtt a where

@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -80,7 +81,7 @@ m1 >< m2 = removeTrackEnds $ m1 `merge` m2
 -------------------------------------------------------------------------------
 
 -- | A basic skeleton of a MIDI file.
-midiSkeleton :: MidiTrack -> Attributes -> Midi
+midiSkeleton :: MidiTrack -> (Attributes t k r) -> Midi
 midiSkeleton mel atts = Midi
     { fileType = SingleTrack
     , timeDiv = TicksPerBeat 480
@@ -98,27 +99,27 @@ midiSkeleton mel atts = Midi
     }
 
 -- | Convert a 'Music' piece into a 'MidiTrack'.
-musicToMidi :: Music m -> MidiTrack
+musicToMidi :: forall t k m r. Music (Sig :: Signature t k r) m -> MidiTrack
 musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
 musicToMidi (m1 :-: m2) = musicToMidi m1 >< musicToMidi m2
 musicToMidi (Note root dur) = playNote (prim root) (prim dur)
 musicToMidi (Rest dur) = playRest (prim dur)
 musicToMidi (Chord c d) = foldr1 (><) notes
     where notes = map (`playNote` prim d) $ prim c
-musicToMidi (Progression ts p) = foldr1 (++) chords
+musicToMidi (Progression p) = foldr1 (++) chords
     where chords = (toChords <$> init (prim p)) ++ [cadence (last (prim p))]
           toChords :: [Int] -> MidiTrack
-          toChords = concat . replicate (prim ts) . foldr1 (><) . map (`playNote` prim _qu)
+          toChords = concat . replicate (prim (TimeSig @t)) . foldr1 (><) . map (`playNote` prim _qu)
           cadence :: [Int] -> MidiTrack
           cadence = foldr1 (><) . map (`playNote` prim _wh)
 musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
 
 -- | Create a MIDI file with the specified name and track.
-createMidi :: FilePath -> MidiTrack -> Attributes -> IO ()
+createMidi :: FilePath -> MidiTrack -> Attributes t k r -> IO ()
 createMidi f notes atts = exportFile f $ midiSkeleton notes atts
 
 -- | Create a MIDI file with the specified path and composition.
-renderMusic :: FilePath -> Music m -> IO ()
+renderMusic :: FilePath -> Music Sig m -> IO ()
 renderMusic f m = createMidi f (musicToMidi m) defAttributes
 
 -- | Create a MIDI file with the specified path and score.

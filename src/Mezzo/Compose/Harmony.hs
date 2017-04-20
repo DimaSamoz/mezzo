@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, ScopedTypeVariables #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -32,16 +32,14 @@ infixr 5 :+
 -- | Type of harmonic terms in some key.
 type InKey k v = KeyS k -> v
 
--- | Specify the key of a progression.
-inKey :: KeyS k -> InKey k (PhraseList p) -> Prog p
-inKey k p = Prog
-
+toProg :: InKey k (PhraseList p) -> InKey k (Prog p)
+toProg _ = const Prog
 
 -- ** Progressions
 
 -- | Create a new musical progression from the given time signature and progression schema.
-prog :: ValidProg t p => TimeSig t -> Prog p -> Music (FromProg p t)
-prog = Progression
+prog :: ValidProg r t p => InKey k (PhraseList p) -> Music (Sig :: Signature t k r) (FromProg p t)
+prog ik = Progression ((toProg ik) KeyS)
 
 -- ** Phrases
 

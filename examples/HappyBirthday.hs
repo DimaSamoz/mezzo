@@ -9,4 +9,4 @@ mel = melody :~| r :~| r :<. g :<< g :^ a :| g :| c' :> b
 chords = ph_IVI (ton_T_T ton ton) (dom_D_D dom_V dom_V) (ton_T_T ton ton) :+ cadence (full subdom_ii auth_V)
 
 -- comp = (g en' :|: g sn :|: (play rh)) :-: (pad3 (r qr) :|: (prog triple $ inKey c_maj chords))
-comp = melAccomp c_maj triple mel chords
+comp = score setKeySig c_maj setTimeSig triple withMusic (melAccomp mel chords)
