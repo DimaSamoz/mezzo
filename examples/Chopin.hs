@@ -34,10 +34,21 @@ lh9 = c_ fifth wc
 rh_p1 = rh1 :|: rh2 :|: rh3 :|: rh4
 lh_p1 = lh1 :|: lh2 :|: lh3 :|: lh4
 
+sect1 = section "1" $ score setKeySig c_min
+                            setTempo 30
+                            withMusic (hom rh_p1 lh_p1)
+
 rh_p2 = pad (rh5 :|: rh6 :|: rh7) :|: rh8
 lh_p2 = lh5 :|: lh6 :|: lh7 :|: lh8
 
-rh = rh_p1 :|: rh_p2 :|: rh9
-lh = lh_p1 :|: lh_p2 :|: lh9
+sect2 = section "2" $ score setKeySig c_min
+                            setTempo 30
+                            withMusic (hom rh_p2 lh_p2)
 
--- comp = hom rh lh
+end = section "end" $ score setKeySig c_min
+                            setTempo 30
+                            withMusic (hom rh9 lh9)
+
+comp = renderSections "examples/Chopin.mid"
+        "Frederic Chopin - Prelude in C Minor" 
+        [sect1, sect2, sect2, end]
