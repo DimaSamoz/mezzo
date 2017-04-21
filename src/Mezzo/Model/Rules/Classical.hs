@@ -39,8 +39,8 @@ import Data.Kind
 --
 --  * any seventh interval.
 class ValidMelInterval (e :: PitchPair) (i :: IntervalType)
-instance {-# OVERLAPPING #-} PitchPairError "Seventh intervals are not permitted in melody: " e
-                                => ValidMelInterval e (Interval a Seventh)
+instance {-# OVERLAPPING #-} PitchPairError "Major seventh intervals are not permitted in melody: " e
+                                => ValidMelInterval e (Interval Maj Seventh)
 instance {-# OVERLAPPABLE #-}      ValidMelInterval e i
 
 -- | Ensures that two pitches form valid melodic leaps.
