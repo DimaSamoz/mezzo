@@ -17,7 +17,7 @@
 -----------------------------------------------------------------------------
 
 module Mezzo.Render.MIDI
-    ( renderMusic, renderScore )
+    ( section, renderScore, renderSections )
     where
 
 import Mezzo.Model
@@ -80,23 +80,8 @@ m1 >< m2 = removeTrackEnds $ m1 `merge` m2
 -- Rendering
 -------------------------------------------------------------------------------
 
--- | A basic skeleton of a MIDI file.
-midiSkeleton :: MidiTrack -> (Attributes t k r) -> Midi
-midiSkeleton mel atts = Midi
-    { fileType = SingleTrack
-    , timeDiv = TicksPerBeat 480
-    , tracks =
-        [ [ (0, ChannelPrefix 0)
-          , (0, TrackName $ title atts)
-          , (0, InstrumentName "GM Device  1")
-          , (0, getTimeSig atts)
-          , (0, getKeySig atts)
-          , (0, TempoChange (60000000 `div` tempo atts))
-          ]
-        ++ mel
-        ++ [ (0, TrackEnd) ]
-        ]
-    }
+-- | Title of a composition
+type Title = String
 
 -- | Convert a 'Music' piece into a 'MidiTrack'.
 musicToMidi :: forall t k m r. Music (Sig :: Signature t k r) m -> MidiTrack
@@ -114,14 +99,38 @@ musicToMidi (Progression p) = foldr1 (++) chords
           cadence = foldr1 (><) . map (`playNote` prim _wh)
 musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
 
--- | Create a MIDI file with the specified name and track.
-createMidi :: FilePath -> MidiTrack -> Attributes t k r -> IO ()
-createMidi f notes atts = exportFile f $ midiSkeleton notes atts
+-- | Pre-render one section of a long composition. The first argument is only
+-- for documentation purposes.
+section :: String -> Score -> MidiTrack
+section _ (Score atts m) =
+    [ (0, getTimeSig atts)
+    , (0, getKeySig atts)
+    , (0, TempoChange (60000000 `div` tempo atts))
+    ] ++ musicToMidi m
 
--- | Create a MIDI file with the specified path and composition.
-renderMusic :: FilePath -> Music Sig m -> IO ()
-renderMusic f m = createMidi f (musicToMidi m) defAttributes
+-- | A basic skeleton of a MIDI file.
+midiSkeleton :: Title -> MidiTrack -> Midi
+midiSkeleton trName mel = Midi
+    { fileType = SingleTrack
+    , timeDiv = TicksPerBeat 480
+    , tracks =
+        [ [ (0, ChannelPrefix 0)
+          , (0, TrackName trName)
+          , (0, InstrumentName "GM Device  1")
+          ]
+        ++ mel
+        ++ [ (0, TrackEnd) ]
+        ]
+    }
+
+-- | Create a MIDI file with the specified name and track.
+exportMidi :: FilePath -> Title -> MidiTrack -> IO ()
+exportMidi f trName notes = exportFile f $ midiSkeleton trName notes
 
 -- | Create a MIDI file with the specified path and score.
 renderScore :: FilePath -> Score -> IO ()
-renderScore f (Score atts m) = createMidi f (musicToMidi m) atts
+renderScore f (Score atts m) = exportMidi f (title atts) (musicToMidi m)
+
+-- | Render a list of baked scores into a MIDI file with the given title.
+renderSections :: FilePath -> Title -> [MidiTrack] -> IO ()
+renderSections f compTitle ts = exportMidi f compTitle (concat ts)
