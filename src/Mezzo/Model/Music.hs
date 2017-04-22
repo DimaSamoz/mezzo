@@ -27,6 +27,7 @@ module Mezzo.Model.Music
     , ValidHom
     , ValidMel
     , ValidHarm
+    , ValidTripl
     ) where
 
 import Data.Kind
@@ -77,6 +78,8 @@ data Music :: forall n l t k r. Signature t k r -> Partiture n l -> Type where
     Progression :: ValidProg r t p => Prog p -> Music (Sig :: Signature t k r) (FromProg p t)
     -- | A homophonic composition with a melody line and an accompaniment.
     Homophony :: ValidHom s m a => Music s m -> Music s a -> Music s (m +-+ a)
+    -- | A triplet with a nominal duration and three pitches.
+    Triplet :: ValidTripl s d r1 r2 r3 => Dur d -> Root r1 -> Root r2 -> Root r3 -> Music s (FromTriplet d r1 r2 r3)
 
 -------------------------------------------------------------------------------
 -- Musical constraints
@@ -113,6 +116,12 @@ type ValidProg r t p =
 -- | Ensures that a homophonic composition is valid.
 type ValidHom (s :: Signature t k r) m a =
     HomConstraints r m a
+
+-- | Ensures that a triplet is valid.
+type ValidTripl (s :: Signature t k r) d r1 r2 r3 =
+    ( TriplConstraints r d r1 r2 r3, IntRep r1, IntRep r2, IntRep r3, Primitive d
+    , Primitive (HalfOf d), NoteConstraints r r1 d, NoteConstraints r r2 (HalfOf d)
+    , NoteConstraints r r3 (HalfOf d))
 
 -------------------------------------------------------------------------------
 -- Pretty-printing

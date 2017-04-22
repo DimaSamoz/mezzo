@@ -33,6 +33,13 @@ module Mezzo.Compose.Combine
     -- * Textures
     , hom
     , melAccomp
+    -- * Triplets
+    , _triplet
+    , tripletW
+    , tripletH
+    , tripletQ
+    , tripletE
+    , tripletS
     ) where
 
 import Mezzo.Model
@@ -167,3 +174,31 @@ hom = Homophony
 
 melAccomp :: (s ~ (Sig :: Signature t k r), ValidProg r t p, pm ~ FromProg p t, ValidHom s m pm, Primitive d) => Melody s m d -> InKey k (PhraseList p) -> Music s (m +-+ pm)
 melAccomp m p = Homophony (play m) (prog p)
+
+-------------------------------------------------------------------------------
+-- Triplets
+-------------------------------------------------------------------------------
+
+-- | Create a new triplet with three notes, with 2/3 of the specified duration each.
+_triplet :: ValidTripl s d r1 r2 r3 => Dur d -> Root r1 -> Root r2 -> Root r3 -> Music s (FromTriplet d r1 r2 r3)
+_triplet = Triplet
+
+-- | Create a new triplet lasting a whole note.
+tripletW :: ValidTripl s Half r1 r2 r3 => RootS r1 -> RootS r2 -> RootS r3 -> Music s (FromTriplet Half r1 r2 r3)
+tripletW r1 r2 r3 = Triplet _ha (r1 id) (r2 id) (r3 id)
+
+-- | Create a new triplet lasting a half note.
+tripletH :: ValidTripl s Quarter r1 r2 r3 => RootS r1 -> RootS r2 -> RootS r3 -> Music s (FromTriplet Quarter r1 r2 r3)
+tripletH r1 r2 r3 = Triplet _qu (r1 id) (r2 id) (r3 id)
+
+-- | Create a new triplet lasting a quarter note.
+tripletQ :: ValidTripl s Eighth r1 r2 r3 => RootS r1 -> RootS r2 -> RootS r3 -> Music s (FromTriplet Eighth r1 r2 r3)
+tripletQ r1 r2 r3 = Triplet _ei (r1 id) (r2 id) (r3 id)
+
+-- | Create a new triplet lasting an eighth note.
+tripletE :: ValidTripl s Sixteenth r1 r2 r3 => RootS r1 -> RootS r2 -> RootS r3 -> Music s (FromTriplet Sixteenth r1 r2 r3)
+tripletE r1 r2 r3 = Triplet _si (r1 id) (r2 id) (r3 id)
+
+-- | Create a new triplet lasting a sixteenth note.
+tripletS :: ValidTripl s ThirtySecond r1 r2 r3 => RootS r1 -> RootS r2 -> RootS r3 -> Music s (FromTriplet ThirtySecond r1 r2 r3)
+tripletS r1 r2 r3 = Triplet _th (r1 id) (r2 id) (r3 id)

@@ -65,12 +65,17 @@ keyUp :: MidiNote -> MidiEvent
 keyUp n = (start n + noteDur n, NoteOn {channel = 0, CM.key = noteNum n, velocity = 0})
 
 -- | Play the specified 'MidiNote'.
-playNote :: Int -> Int -> MidiTrack
+playNote :: Int -> Ticks -> MidiTrack
 playNote root dur = map ($ midiNote root (dur * 60)) [keyDown, keyUp]
 
 -- | Play a rest of the specified duration.
 playRest :: Ticks -> MidiTrack
 playRest dur = map ($ midiRest (dur * 60)) [keyDown, keyUp]
+
+-- | Play the specified 'MidiNote'.
+playTriplet :: [Int] -> Ticks -> MidiTrack
+playTriplet ts dur = concatMap playShortNote ts
+    where playShortNote root = map ($ midiNote root (dur * 40)) [keyDown, keyUp]
 
 -- | Merge two parallel MIDI tracks.
 (><) :: MidiTrack -> MidiTrack -> MidiTrack
@@ -98,6 +103,7 @@ musicToMidi (Progression p) = foldr1 (++) chords
           cadence :: [Int] -> MidiTrack
           cadence = foldr1 (><) . map (`playNote` prim _wh)
 musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
+musicToMidi (Triplet d r1 r2 r3) = playTriplet [prim r1, prim r2, prim r3] (prim d)
 
 -- | Pre-render one section of a long composition. The first argument is only
 -- for documentation purposes.
@@ -129,7 +135,7 @@ exportMidi f trName notes = exportFile f $ midiSkeleton trName notes
 
 -- | Create a MIDI file with the specified path and score.
 renderScore :: FilePath -> Score -> IO ()
-renderScore f (Score atts m) = exportMidi f (title atts) (musicToMidi m)
+renderScore f s@(Score atts m) = exportMidi f (title atts) (section "" s)
 
 -- | Render a list of baked scores into a MIDI file with the given title.
 renderSections :: FilePath -> Title -> [MidiTrack] -> IO ()

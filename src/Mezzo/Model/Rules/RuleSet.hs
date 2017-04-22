@@ -44,12 +44,14 @@ class RuleSet (t :: RuleSetType) where
     type ChordConstraints t (c :: ChordType n)     (d :: Duration)        :: Constraint
     type ProgConstraints  t (s :: TimeSignature)   (p :: ProgType k l)    :: Constraint
     type HomConstraints   t (m1 :: Partiture n1 l) (m2 :: Partiture n2 l) :: Constraint
+    type TriplConstraints t (d :: Duration) (r1 :: RootType) (r2 :: RootType) (r3 :: RootType) :: Constraint
 
     -- Defaults
     type NoteConstraints t r d = Valid
     type RestConstraints t d = Valid
     type ChordConstraints t c d = Valid
     type ProgConstraints t s p = Valid
+    type TriplConstraints t d r1 r2 r3 = Valid
 
 
 -- | No rules.
@@ -66,7 +68,7 @@ instance RuleSet Free where
 -- * minor second, major seventh and augmented octave harmonic intervals, and
 -- * direct motion into perfect intervals on harmonic composition.
 instance RuleSet Classical where
-    type MelConstraints Classical m1 m2 = CR.ValidMelConcat m1 m2
+    type MelConstraints Classical m1 m2 = Valid
     type HarmConstraints Classical m1 m2 = CR.ValidHarmConcat (Align m1 m2)
     type HomConstraints Classical m1 m2 = CR.ValidHomConcat (Align m1 m2)
 
@@ -82,6 +84,8 @@ instance RuleSet Strict where
     type HarmConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
     type HomConstraints Strict m1 m2 = SR.ValidHarmConcat (Align m1 m2)
     type ChordConstraints Strict c d = (SR.ValidChordType c)
+    type TriplConstraints Strict d r1 r2 r3 = ( MelConstraints Strict (FromRoot r1 d) (FromRoot r2 d)
+                                              , MelConstraints Strict (FromRoot r2 d) (FromRoot r3 d))
 
 -- * Literal values
 

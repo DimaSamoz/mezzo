@@ -49,8 +49,10 @@ module Mezzo.Model.Types
     , Sharpen
     , Flatten
     , Dot
+    , HalfOf
     , FromRoot
     , FromSilence
+    , FromTriplet
     -- * Specialised musical vector types
     , Voice
     , Partiture
@@ -234,6 +236,11 @@ type family FromRoot (r :: RootType) (d :: Nat) :: Partiture 1 d where
 -- | Create a new partiture with one voice of silence.
 type family FromSilence (d :: Nat) :: Partiture 1 d where
     FromSilence d = (Silence +*+ d) :-- None
+
+-- | Create a new partiture with a triplet of three notes.
+type family FromTriplet (d :: Nat) (r1 :: RootType) (r2 :: RootType) (r3 :: RootType)
+            :: Partiture 1 (d + HalfOf d + HalfOf d) where
+    FromTriplet d r1 r2 r3 = FromRoot r1 d +|+ FromRoot r2 (HalfOf d) +|+ FromRoot r3 (HalfOf d)
 
 -------------------------------------------------------------------------------
 -- Type specialisations
