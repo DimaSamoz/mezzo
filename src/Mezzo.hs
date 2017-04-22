@@ -14,7 +14,7 @@
 --
 -----------------------------------------------------------------------------
 
-module Mezzo (module X, ($)) where
+module Mezzo (module X, ($), (++), concat) where
 
 -- Uses import/export shortcut as suggested by HLint.
 
