@@ -62,3 +62,12 @@ executable chopin
   ghc-options:         -dsuppress-all
   build-depends:       base >= 4.7 && < 5
                      , mezzo
+
+executable bach
+  hs-source-dirs:      other
+  main-is:             Bach.hs
+  default-language:    Haskell2010
+  default-extensions:  TypeInType
+  ghc-options:         -dsuppress-all
+  build-depends:       base >= 4.7 && < 5
+                     , mezzo
