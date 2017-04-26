@@ -1,6 +1,8 @@
 
 -- Based on http://decipheringmusictheory.com/?page_id=46
 
+module Main where
+
 import Mezzo
 
 v1 = d qn :|: g qn :|: fs qn :|: g en :|: a en :|: bf qn :|: a qn :|: g hn
@@ -12,4 +14,4 @@ sco = score setTitle "2-voice contrapuntal composition"
             setRuleSet strict
             withMusic (v1 :-: v2)
 
-comp = renderScore "examples/Counterpoint.mid" sco
+main = renderScore "rendered/Counterpoint.mid" sco

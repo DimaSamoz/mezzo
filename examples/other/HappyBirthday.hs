@@ -1,4 +1,6 @@
 
+module Main where
+
 import Mezzo
 
 mel = melody :~| r :~| r :<. g :<< g :^ a :| g :| c' :> b
@@ -14,4 +16,4 @@ sco = score setKeySig c_maj
             setTitle "Happy Birthday Song"
             withMusic (melAccomp mel chords)
 
-comp = renderScore "examples/HappyBirthday.mid" sco
+main = renderScore "rendered/HappyBirthday.mid" sco

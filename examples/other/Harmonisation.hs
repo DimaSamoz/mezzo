@@ -1,6 +1,8 @@
 
 -- From http://decipheringmusictheory.com/?page_id=46
 
+module Main where
+
 import Mezzo
 
 v1 = play $ melody :| d   :| g  :| fs :< g    :| a   :^ bf  :| a   :| a   :| a   :| d'   :| c' :| bf :| a :>> g
@@ -18,4 +20,4 @@ sco = score setTitle "4-voice chorale"
             setRuleSet strict
             withMusic (v1 :-: v2 :-: v3 :-: v4)
 
-comp = renderScore "examples/Harmonisation.mid" sco
+main = renderScore "rendered/Harmonisation.mid" sco

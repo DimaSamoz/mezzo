@@ -131,12 +131,21 @@ midiSkeleton trName mel = Midi
 
 -- | Create a MIDI file with the specified name and track.
 exportMidi :: FilePath -> Title -> MidiTrack -> IO ()
-exportMidi f trName notes = exportFile f $ midiSkeleton trName notes
+exportMidi f trName notes = do
+    exportFile f $ midiSkeleton trName notes
+    putStrLn $ "Composition rendered to " ++ f ++ "."
+
 
 -- | Create a MIDI file with the specified path and score.
 renderScore :: FilePath -> Score -> IO ()
-renderScore f s@(Score atts m) = exportMidi f (title atts) (section "" s)
+renderScore f s@(Score atts m) = do
+    exportMidi f (title atts) (section "" s)
+    putStrLn $ "Composition rendered to " ++ f ++ "."
+
 
 -- | Render a list of baked scores into a MIDI file with the given title.
 renderSections :: FilePath -> Title -> [MidiTrack] -> IO ()
-renderSections f compTitle ts = exportMidi f compTitle (concat ts)
+renderSections f compTitle ts = do
+    exportMidi f compTitle (concat ts)
+    putStrLn $ "Composition rendered to " ++ f ++ "."
+    
