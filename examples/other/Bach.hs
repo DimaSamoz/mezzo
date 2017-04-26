@@ -30,9 +30,9 @@ bars =
     [ bar c e g c' e',    bar c d a d' f'
     , bar b_ d g d' f',   bar c e g c' e',     bar c e a e' a'
     , bar c d fs a d',    bar b_ d g d' g',    bar b_ c e g c'
-    , bar a_ c e g c',    bar d_ a_ d fs c',   bar b_ d g d' f'
+    , bar a_ c e g c',    bar d_ a_ d fs c',   bar g_ b_ d g b
     , bar g_ bf_ e g cs', bar f_ a_ d a d',    bar f_ af_ d f b
-    , bar e_ a_ c g c',   bar e_ f_ a_ c f,    bar d_ f_ a_ c f
+    , bar e_ g_ c g c',   bar e_ f_ a_ c f,    bar d_ f_ a_ c f
     , bar g__ d_ g_ b_ f, bar c_ e_ g_ c e,    bar c_ g_ bf_ c e
     , bar f__ f_ a_ c e,  bar fs__ c_ a_ c ef, bar af__ f_ b_ c d
     , bar g__ f_ g_ b_ d, bar g__ e_ g_ c e,   bar g__ d_ g_ c f
