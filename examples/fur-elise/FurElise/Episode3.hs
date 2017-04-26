@@ -1,4 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
+{-# LANGUAGE NoImplicitPrelude, GADTs #-}
 
 module FurElise.Episode3 (episode3) where
 
@@ -7,6 +7,9 @@ import Mezzo
 -------------------------------------------------------------------------------
 -- Third episode
 -------------------------------------------------------------------------------
+
+-- Repeat a composition 6 times.
+repeat6 n = n :|: n :|: n :|: n :|: n :|: n
 
 ep3Rh1 = pad3 (a en :|: r qr)
      :|:       cs dim7 inv qc'
@@ -17,8 +20,8 @@ ep3Rh1 = pad3 (a en :|: r qr)
      :|:       d dim' i2 ec
      :|:       a min qc')
 
-ep3Lh1 = notes :|: notes :|: notes :|: notes :|: notes
-    where notes = play $ melody :<< a__ :| a__ :| a__ :| a__ :| a__ :| a__
+ep3Lh1 = rep :|: rep :|: rep :|: rep :|: rep
+    where rep = repeat6 (a__ sn)
 
 ep3Rh2 = pad2 (d min3 inv qc
      :|:       c maj3 inv sc
@@ -30,10 +33,8 @@ ep3Rh2 = pad2 (d min3 inv qc
      :|:       b_ min3 inv ec
      :|:       a_ min3 inv qc')
 
-ep3Lh2 = d__ fifth sc :|: d__ fifth sc :|: d__ fifth sc
-     :|: d__ fifth sc :|: d__ fifth sc :|: d__ fifth sc
-     :|: ds__ sn :-: a__ sn :|: ds__ sn :-: a__ sn :|: ds__ sn :-: a__ sn
-     :|: ds__ sn :-: a__ sn :|: ds__ sn :-: a__ sn :|: ds__ sn :-: a__ sn
+ep3Lh2 = repeat6 (d__ fifth sc)
+     :|: repeat6 (ds__ sn :-: a__ sn)
      :|: e__ fourth sc :|: e__ fourth sc :|: e__ fourth sc
      :|: e__ fourth sc :|: e__ maj3 sc :|: e__ maj3 sc
      :|: a_3 oct sc :|: pad (play $ melody :<< a__ :| a__ :| a__ :| a__ :| a__)
@@ -59,9 +60,9 @@ ep3Rh3 =       cs dim7 inv qc'
 
 ep3Lh3 = aNotes :|: aNotes :|: aNotes :|: bfNotes :|: bfNotes :|: bfNotes :|: bNotes
      :|: c_ qn :|: r er :|: e_ en :|: r qr
-    where aNotes = play $ melody :<< a__ :| a__ :| a__ :| a__ :| a__ :| a__
-          bfNotes = play $ melody :<< bf__ :| bf__ :| bf__ :| bf__ :| bf__ :| bf__
-          bNotes = play $ melody :<< b__ :| b__ :| b__ :| b__ :| b__ :| b__
+    where aNotes = repeat6 (a__ sn)
+          bfNotes = repeat6 (bf__ sn)
+          bNotes = repeat6 (b__ sn)
 
 ep3part = score setTempo 90
                 setKeySig d_min
