@@ -23,6 +23,7 @@ executable fur-elise
                      , FurElise.Episode4
   default-language:    Haskell2010
   default-extensions:  TypeInType
+  ghc-options:         -dsuppress-all
   build-depends:       base >= 4.7 && < 5
                      , mezzo
 
@@ -39,6 +40,7 @@ executable harmonisation
   main-is:             Harmonisation.hs
   default-language:    Haskell2010
   default-extensions:  TypeInType
+  ghc-options:         -dsuppress-all
   build-depends:       base >= 4.7 && < 5
                      , mezzo
 
@@ -57,5 +59,6 @@ executable chopin
                      , Chopin.Part2
   default-language:    Haskell2010
   default-extensions:  TypeInType
+  ghc-options:         -dsuppress-all
   build-depends:       base >= 4.7 && < 5
                      , mezzo
