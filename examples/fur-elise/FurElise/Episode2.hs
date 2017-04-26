@@ -25,7 +25,7 @@ ep2Rh2 = play $ melody
 
 ep2Lh2 = gs_ min3 ec :|: pad (r qr :|: r wr)
 
-ep2part = score setTempo 70
+ep2part = score setTempo 90
                 setKeySig c_maj
                 withMusic
 

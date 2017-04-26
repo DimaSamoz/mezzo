@@ -35,7 +35,7 @@ ep1Lh4 = pad (play $ melody :<< f_ :| a_ :| c :| a_ :| c :| a_
      :|: d_ oct sc
      :|: pad (play $ melody :<< f_ :| g_ :| e :| g_ :| e :| g_ :| f)
 
-ep1part = score setTempo 70
+ep1part = score setTempo 90
                 setKeySig c_maj
                 withMusic
 
