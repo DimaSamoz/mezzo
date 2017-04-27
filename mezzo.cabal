@@ -75,7 +75,7 @@ test-suite mezzo-test
   other-modules:       Main
                      , PrimSpec
                      , TypeSpec
-                     , ShouldTypecheck
+                     , TestUtils
   build-depends:       base
                      , mezzo
                      , hspec
