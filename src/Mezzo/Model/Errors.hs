@@ -81,7 +81,7 @@ type family PpDyadPair (dp :: DyadPair) :: ErrorMessage where
     PpDyadPair (DyP d1 d2) = PpPitchPair d1 :<>: Text ", then " :<>: PpPitchPair d2
 
 -- | Create an error message with a given text and pitch.
-type family PitchError (t :: Symbol) (p :: PitchType) :: ErrorMessage where
+type family PitchError (t :: Symbol) (p :: PitchType) where
     PitchError t p = TypeError (Text t :<>: PpPitch p)
 
 -- | Create an error message with a given text and pair of pitches.
