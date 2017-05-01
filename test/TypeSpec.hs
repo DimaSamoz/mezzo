@@ -9,7 +9,7 @@ import GHC.TypeLits
 import Control.Exception (evaluate)
 import Data.Proxy
 import Test.ShouldNotTypecheck (shouldNotTypecheck)
-import ShouldTypecheck (shouldTypecheck)
+import TestUtils
 
 import Mezzo.Model.Types
 import Mezzo.Model.Prim

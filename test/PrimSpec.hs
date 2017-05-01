@@ -1,5 +1,5 @@
-{-# OPTIONS_GHC -fdefer-type-errors #-}
--- {-# OPTIONS_GHC -w #-}
+{-# OPTIONS_GHC -fdefer-type-errors  #-}
+{-# OPTIONS_GHC -Wno-deferred-type-errors #-}
 {-# LANGUAGE TypeInType, TypeOperators, GADTs, MultiParamTypeClasses, FlexibleInstances #-}
 
 module PrimSpec where
@@ -8,47 +8,86 @@ import Test.Hspec
 import GHC.TypeLits
 import Control.Exception (evaluate)
 import Test.ShouldNotTypecheck (shouldNotTypecheck)
-import ShouldTypecheck (shouldTypecheck)
+import TestUtils
 
 import Mezzo.Model.Prim
+
 
 primSpec :: Spec
 primSpec =
     describe "Mezzo.Model.Prim" $ do
         describe "Vector operations" $ do
-            it "should replicate elements" $
+            it "should replicate elements" $ do
                 shouldTypecheck timesReplicate
-            it "should get the head of an optimised vector" $
+                shouldNotTypecheck timesReplicate'
+                shouldNotTypecheck timesReplicate''
+
+            it "should get the head of an optimised vector" $ do
                 shouldTypecheck optVectorHead
-            it "should get the head of a vector" $
+                shouldNotTypecheck optVectorHead'
+
+            it "should get the head of a vector" $ do
                 shouldTypecheck vectorHead
-            it "should get the last element of an optimised vector" $
+                shouldNotTypecheck vectorHead'
+
+            it "should get the last element of an optimised vector" $ do
                 shouldTypecheck optVectorLast
-            it "should get the tail of a vector" $
+                shouldNotTypecheck optVectorLast'
+
+            it "should get the tail of a vector" $ do
                 shouldTypecheck vectorTail
-            it "should get the initial elements of a vector" $
+                shouldNotTypecheck vectorTail'
+                shouldNotTypecheck vectorTail''
+
+            it "should get the initial elements of a vector" $ do
                 shouldTypecheck vectorInit
-            it "should get the length of an optimised vector" $
+                shouldNotTypecheck vectorInit'
+                shouldNotTypecheck vectorInit'
+
+            it "should get the length of an optimised vector" $ do
                 shouldTypecheck optVectorLength
-            it "should get the length of a vector" $
+                shouldNotTypecheck optVectorLength'
+
+            it "should get the length of a vector" $ do
                 shouldTypecheck vectorLength
-            it "should append optimised vectors" $
+                shouldNotTypecheck vectorLength'
+
+            it "should append optimised vectors" $ do
                 shouldTypecheck optVectorAppend
-            it "should append vectors" $
+                shouldNotTypecheck optVectorAppend'
+                shouldNotTypecheck optVectorAppend''
+
+            it "should append vectors" $ do
                 shouldTypecheck vectorAppend
-            it "should add an element to the end of a vector" $
+                shouldNotTypecheck vectorAppend'
+                shouldNotTypecheck vectorAppend''
+
+            it "should add an element to the end of a vector" $ do
                 shouldTypecheck snoc
-            it "should repeat an element to an optimised vector" $
+                shouldNotTypecheck snoc'
+                shouldNotTypecheck snoc''
+
+            it "should repeat an element to an optimised vector" $ do
                 shouldTypecheck repeatVec
+                shouldNotTypecheck repeatVec'
+                shouldNotTypecheck repeatVec''
 
         describe "Matrix operations" $ do
-            it "should vertically align matrices" $
-                shouldTypecheck align
-            it "should horizontally concatenate matrices" $
-                shouldTypecheck matHConcat
-            it "should vertically concatenate matrices" $
+            it "should horizontally concatenate matrices" $ do
+                shouldTypecheck matHConcatNorm
+                shouldNotTypecheck matHConcatNorm'
+                shouldNotTypecheck matHConcatNorm''
+                shouldTypecheck matHConcatRE
+                shouldNotTypecheck matHConcatRE'
+                shouldTypecheck matHConcatLE
+                shouldNotTypecheck matHConcatLE'
+                -- shouldTypecheck matHConcatBE
+
+            it "should vertically concatenate matrices" $ do
                 shouldTypecheck matVConcat
-            it "should convert vectors to column matrices" $
+            it "should vertically align matrices" $ do
+                shouldTypecheck align
+            it "should convert vectors to column matrices" $ do
                 shouldTypecheck vecToColMatrix
 
         describe "Arithmetic operations" $ do
@@ -74,62 +113,159 @@ primSpec =
                 shouldTypecheck allSatisfyAll
                 -- shouldNotTypecheck allSatisfyAllInv
 
+---------------------
+-- Vector operations
+---------------------
 
-timesReplicate :: (True ** 23) ~ (True :* (T :: Times 23)) => Bool
-timesReplicate = True
+timesReplicate :: (True ** 23) :~: (True :* (T :: Times 23))
+timesReplicate = Refl
+timesReplicate' :: (True ** 23) :~: (False :* (T :: Times 23))
+timesReplicate' = Refl
+timesReplicate'' :: (True ** 23) :~: (True :* (T :: Times 13))
+timesReplicate'' = Refl
 
-optVectorHead :: (Head (True ** 4 :- End)) ~ True => Bool
-optVectorHead = True
+optVectorHead :: (Head (True ** 4 :- End)) :~: True
+optVectorHead = Refl
+optVectorHead' :: (Head (True ** 4 :- End)) :~: False
+optVectorHead' = Refl
 
-vectorHead :: (Head' (True :-- None)) ~ True => Bool
-vectorHead = True
+vectorHead :: (Head' (True :-- None)) :~: True
+vectorHead = Refl
+vectorHead' :: (Head' (True :-- None)) :~: False
+vectorHead' = Refl
 
-optVectorLast :: (Last (True ** 4 :- False ** 9 :- End)) ~ False => Bool
-optVectorLast = True
+optVectorLast :: (Last (True ** 4 :- False ** 9 :- End)) :~: False
+optVectorLast = Refl
+optVectorLast' :: (Last (True ** 4 :- False ** 9 :- End)) :~: True
+optVectorLast' = Refl
 
-vectorTail :: (Tail' (True :-- False :-- None)) ~ (False :-- None) => Bool
-vectorTail = True
+vectorTail :: (Tail' (True :-- False  :-- True :-- None)) :~: (False :-- True :-- None)
+vectorTail = Refl
+vectorTail' :: (Tail' (True :-- False  :-- True :-- None)) :~: (False :-- False :-- None)
+vectorTail' = Refl
+vectorTail'' :: (Tail' (True :-- False  :-- True :-- None)) :~: (False :-- None)
+vectorTail'' = Refl
 
-vectorInit :: (Init' (True :-- False :-- None)) ~ (True :-- None) => Bool
-vectorInit = True
+vectorInit :: (Init' (True :-- False  :-- True :-- None)) :~: (True :-- False :-- None)
+vectorInit = Refl
+vectorInit' :: (Init' (True :-- False  :-- True :-- None)) :~: (False :-- False :-- None)
+vectorInit' = Refl
+vectorInit'' :: (Init' (True :-- False  :-- True :-- None)) :~: (False :-- None)
+vectorInit'' = Refl
 
-optVectorLength :: (Length (True ** 4 :- False ** 9 :- End)) ~ 13 => Bool
-optVectorLength = True
+optVectorLength :: (Length (True ** 4 :- False ** 9 :- End)) :~: 13
+optVectorLength = Refl
+optVectorLength' :: (Length (True ** 4 :- False ** 9 :- End)) :~: 6
+optVectorLength' = Refl
 
-vectorLength :: (Length' (True :-- False :-- None)) ~ 2 => Bool
-vectorLength = True
+vectorLength :: (Length' (True :-- False :-- None)) :~: 2
+vectorLength = Refl
+vectorLength' :: (Length' (True :-- False :-- None)) :~: 5
+vectorLength' = Refl
 
 optVectorAppend :: ((True ** 5 :- False ** 2 :- End) ++ End ++ (False ** 9 :- End))
-                  ~ (True ** 5 :- False ** 2 :- False ** 9 :- End) => Bool
-optVectorAppend = True
+                :~: (True ** 5 :- False ** 2 :- False ** 9 :- End)
+optVectorAppend = Refl
+optVectorAppend' :: ((True ** 5 :- False ** 2 :- End) ++ End ++ (False ** 9 :- End))
+                 :~: (True ** 5 :- True ** 2 :- False ** 9 :- End)
+optVectorAppend' = Refl
+optVectorAppend'' :: ((True ** 5 :- False ** 2 :- End) ++ End ++ (False ** 9 :- End))
+                  :~: (True ** 5 :- False ** 1 :- False ** 9 :- End)
+optVectorAppend'' = Refl
+optVectorAppend''' :: ((True ** 5 :- False ** 2 :- End) ++ End ++ (False ** 9 :- End))
+                   :~: (True ** 5 :- False ** 11 :- End)
+optVectorAppend''' = Refl
 
 vectorAppend :: ((2 :-- 43 :-- None) ++. None ++. (6 :-- None))
-                  ~ (2 :-- 43 :-- 6 :-- None) => Bool
-vectorAppend = True
+             :~: (2 :-- 43 :-- 6 :-- None)
+vectorAppend = Refl
+vectorAppend' :: ((2 :-- 43 :-- None) ++. None ++. (6 :-- None))
+              :~: (2 :-- 43 :-- 1 :-- None)
+vectorAppend' = Refl
+vectorAppend'' :: ((2 :-- 43 :-- None) ++. None ++. (6 :-- None))
+               :~: (2 :-- 1 :-- None)
+vectorAppend'' = Refl
 
-snoc :: ((2 :-- 5 :-- None) :-| 6) ~ (2 :-- 5 :-- 6 :-- None) => Bool
-snoc = True
+snoc :: ((2 :-- 5 :-- None) :-| 6) :~: (2 :-- 5 :-- 6 :-- None)
+snoc = Refl
+snoc' :: ((2 :-- 5 :-- None) :-| 2) :~: (2 :-- 5 :-- 6 :-- None)
+snoc' = Refl
+snoc'' :: ((2 :-- 5 :-- None) :-| 2) :~: (2 :-- 4 :-- 5 :-- 6 :-- None)
+snoc'' = Refl
 
-repeatVec :: (True +*+ 3) ~ (True ** 3 :- End) => Bool
-repeatVec = True
+repeatVec :: (True +*+ 3) :~: (True ** 3 :- End)
+repeatVec = Refl
+repeatVec' :: (True +*+ 3) :~: (False ** 3 :- End)
+repeatVec' = Refl
+repeatVec'' :: (True +*+ 3) :~: (True ** 2 :- End)
+repeatVec'' = Refl
 
-matHConcat ::
-          -- Normal matrices
-        ( ((True ** 2 :- End :-- False ** 2 :- End :-- None)
-           +|+ (False ** 5 :- End :-- True ** 5 :- End :-- None))
-          ~ ((True ** 2 :- False ** 5 :- End :-- False ** 2 :- True ** 5 :- End :-- None))
-          -- Right empty
-        , ((True ** 2 :- End :-- False ** 2 :- End :-- None)
-           +|+ (End :-- End :-- None))
-          ~ (True ** 2 :- End :-- False ** 2 :- End :-- None)
-          -- Left empty
-        , ((End :-- End :-- None)
-           +|+ (True ** 2 :- End :-- False ** 2 :- End :-- None))
-          ~ (True ** 2 :- End :-- False ** 2 :- End :-- None)
-          -- Both empty
-        , (None +|+ None) ~ None
-        ) => Bool
-matHConcat = True
+---------------------
+-- Matrix operations
+---------------------
+-- Harmonic concatenation
+
+matHConcatNorm :: ((True ** 2 :- End :-- False ** 2 :- End :-- None)
+              +|+ (False ** 5 :- End :-- True ** 5 :- End :-- None))
+            :~: ((True ** 2 :- False ** 5 :- End :-- False ** 2 :- True ** 5 :- End :-- None))
+matHConcatNorm = Refl
+matHConcatNorm' :: ((True ** 2 :- End :-- False ** 2 :- End :-- None)
+               +|+ (False ** 5 :- End :-- False ** 5 :- End :-- None))
+            :~: ((True ** 2 :- False ** 5 :- End :-- False ** 2 :- True ** 5 :- End :-- None))
+matHConcatNorm' = Refl
+matHConcatNorm'' :: ((True ** 2 :- End :-- False ** 2 :- End :-- None)
+              +|+ (False ** 5 :- End :-- True ** 5 :- End :-- None))
+            :~: ((True ** 5 :- False ** 2 :- End :-- False ** 2 :- True ** 5 :- End :-- None))
+matHConcatNorm'' = Refl
+
+matHConcatRE :: ((True ** 2 :- End :-- False ** 2 :- End :-- None)
+             +|+ (End :-- End :-- None))
+            :~: (True ** 2 :- End :-- False ** 2 :- End :-- None)
+matHConcatRE = Refl
+matHConcatRE' :: ((True ** 2 :- End :-- False ** 2 :- End :-- None)
+              +|+ (End :-- End :-- None))
+            :~: (True ** 2 :- End :-- True ** 2 :- End :-- None)
+matHConcatRE' = Refl
+
+matHConcatLE :: ((True ** 2 :- End :-- False ** 2 :- End :-- None)
+             +|+ (End :-- End :-- None))
+            :~: (True ** 2 :- End :-- False ** 2 :- End :-- None)
+matHConcatLE = Refl
+matHConcatLE' :: ((True ** 2 :- End :-- False ** 2 :- End :-- None)
+              +|+ (End :-- End :-- None))
+            :~: (True ** 2 :- End :-- True ** 2 :- End :-- None)
+matHConcatLE' = Refl
+
+matHConcatBE :: ((None :: Matrix t 0 0) +|+ None) :~: None
+matHConcatBE = Refl
+
+-- Vertical concatenation
+matVConcatNF :: ((True ** 3 :- False ** 6 :- End :-- None)
+             +-+ (False ** 3 :- True ** 6 :- End :-- None))
+        :~: (True ** 3 :- False ** 6 :- End :-- False ** 3 :- True ** 6 :- End :-- None)
+matVConcatNF = Refl
+matVConcatNF' :: ((True ** 3 :- False ** 6 :- End :-- None)
+              +-+ (False ** 3 :- True ** 6 :- End :-- None))
+        :~: (True ** 3 :- False ** 6 :- End :-- True ** 3 :- True ** 6 :- End :-- None)
+matVConcatNF' = Refl
+matVConcatNF'' :: ((True ** 3 :- False ** 6 :- End :-- None)
+             +-+ (False ** 3 :- True ** 6 :- End :-- None))
+        :~: (True ** 2 :- False ** 7 :- End :-- False ** 3 :- True ** 6 :- End :-- None)
+matVConcatNF'' = Refl
+
+matVConcatTF :: ((True ** 9 :- End :-- None)
+             +-+ (False ** 3 :- True ** 6 :- End :-- None))
+        :~: (True ** 3 :- True ** 6 :- End :-- False ** 3 :- True ** 6 :- End :-- None)
+matVConcatTF = Refl
+matVConcatTF' :: ((True ** 9 :- End :-- None)
+             +-+ (False ** 3 :- True ** 6 :- End :-- None))
+        :~: (True ** 3 :- True ** 6 :- End :-- True ** 3 :- True ** 6 :- End :-- None)
+matVConcatTF' = Refl
+matVConcatTF'' :: ((True ** 9 :- End :-- None)
+             +-+ (False ** 3 :- True ** 6 :- End :-- None))
+        :~: (True ** 3 :- True ** 6 :- End :-- False ** 2 :- True ** 7 :- End :-- None)
+matVConcatTF'' = Refl
+
 
 align ::
           -- Right fragment
