@@ -47,7 +47,7 @@ class RuleSet (t :: RuleSetType) where
     type TriplConstraints t (d :: Duration) (r1 :: RootType) (r2 :: RootType) (r3 :: RootType) :: Constraint
 
     -- Defaults
-    type NoteConstraints t r d = Valid
+    type NoteConstraints t r d = CR.ValidPitch (RootToPitch r)
     type RestConstraints t d = Valid
     type ChordConstraints t c d = Valid
     type ProgConstraints t s p = Valid

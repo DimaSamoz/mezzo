@@ -18,6 +18,7 @@ module Mezzo.Model.Rules.Classical
     ( ValidMelConcat
     , ValidHarmConcat
     , ValidHomConcat
+    , ValidPitch
     , ValidMotion
     ) where
 
@@ -186,3 +187,14 @@ instance {-# OVERLAPPING #-} ValidHarmMotionInVectors (p :* d1 :- End) (q :* d2 
 instance {-# OVERLAPPABLE #-} ( ValidMotion p q (Head ps) (Head qs)
                               , ValidHarmMotionInVectors ps qs)
                                 => ValidHarmMotionInVectors (p :* d1 :- ps) (q :* d2 :- qs)
+
+-------------------------------------------------------------------------------
+-- Note constraints
+-------------------------------------------------------------------------------
+
+class ValidPitch (p :: PitchType)
+instance PitchError "Note can't be lower than C natural of octave -1: " (Pitch C Flat Oct_1)
+                                => ValidPitch (Pitch C Flat Oct_1)
+instance PitchError "Note can't be higher than B natural of octave 8: " (Pitch B Sharp Oct8)
+                                => ValidPitch (Pitch B Sharp Oct8)
+instance {-# OVERLAPPABLE #-} ValidPitch p
