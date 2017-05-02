@@ -77,14 +77,25 @@ makeInterval ::
             , (MakeInterval (Pitch E Natural Oct3) (Pitch C Natural Oct3)) ~ (Interval Maj Third)
             , (MakeInterval (Pitch C Natural Oct3) (Pitch B Flat Oct3)) ~ (Interval Min Seventh)
             , (MakeInterval (Pitch E Sharp Oct3) (Pitch E Sharp Oct3)) ~ (Interval Perf Unison)
-            , (MakeInterval (Pitch E Natural Oct3) (Pitch F Flat Oct3)) ~ (Interval Perf Unison)
+            , (MakeInterval (Pitch E Natural Oct3) (Pitch F Flat Oct3)) ~ (Interval Dim Second)
             , (MakeInterval (Pitch E Sharp Oct3) (Pitch F Flat Oct3)) ~ (Interval Min Second)
-            , (MakeInterval (Pitch F Sharp Oct3) (Pitch G Flat Oct3)) ~ (Interval Perf Unison)
+            , (MakeInterval (Pitch F Sharp Oct3) (Pitch G Flat Oct3)) ~ (Interval Dim Second)
             , (MakeInterval (Pitch C Natural Oct3) (Pitch C Natural Oct4)) ~ (Interval Perf Octave)
             , (MakeInterval (Pitch E Flat Oct3) (Pitch F Flat Oct4)) ~ Compound
             , (MakeInterval (Pitch E Sharp Oct3) (Pitch F Flat Oct4)) ~ (Interval Maj Seventh)
             , (MakeInterval (Pitch C Natural Oct3) (Pitch F Sharp Oct3)) ~ (Interval Aug Fourth)
             , (MakeInterval (Pitch C Natural Oct3) (Pitch G Flat Oct3)) ~ (Interval Dim Fifth)
+            , (MakeInterval (Pitch D Natural Oct3) (Pitch B Flat Oct3)) ~ (Interval Min Sixth)
+            -- , (MakeInterval (Pitch D Natural Oct3) (Pitch A Sharp Oct3)) ~ (Interval Aug Fifth)
+            , (MakeInterval (Pitch F Sharp Oct3) (Pitch A Natural Oct3)) ~ (Interval Min Third)
+            -- , (MakeInterval (Pitch G Flat Oct3) (Pitch A Natural Oct3)) ~ (Interval Aug Second)
+            , (MakeInterval (Pitch C Sharp Oct3) (Pitch B Natural Oct3)) ~ (Interval Min Seventh)
+            -- , (MakeInterval (Pitch D Flat Oct3) (Pitch B Natural Oct3)) ~ (Interval Aug Sixth)
+            -- , (MakeInterval (Pitch B Natural Oct3) (Pitch D Flat Oct3)) ~ (Interval Aug Sixth)
+            -- , (MakeInterval (Pitch C Sharp Oct3) (Pitch C Flat Oct4)) ~ (Interval Dim Octave)
+            , (MakeInterval (Pitch G Sharp Oct3) (Pitch E Natural Oct4)) ~ (Interval Min Sixth)
+            -- , (MakeInterval (Pitch A Flat Oct3) (Pitch E Natural Oct4)) ~ (Interval Aug Fifth)
+            , (MakeInterval (Pitch A Flat Oct3) (Pitch F Flat Oct4)) ~ (Interval Min Sixth)
             ) => Bool
 makeInterval = True
 

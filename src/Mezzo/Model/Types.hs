@@ -299,6 +299,8 @@ type family MakeInterval (p1 :: PitchType) (p2 :: PitchType) :: IntervalType whe
 type family MakeIntervalOrd (p1 :: PitchType) (p2 :: PitchType) :: IntervalType where
     -- Handling base cases.
     MakeIntervalOrd p p = Interval Perf Unison
+    ---- Base cases from C.
+    MakeIntervalOrd (Pitch C Flat o) (Pitch C Natural o) = Interval Aug Unison
     MakeIntervalOrd (Pitch C Natural o) (Pitch C Sharp o) = Interval Aug Unison
     MakeIntervalOrd (Pitch C Natural o) (Pitch D Flat o) = Interval Min Second
     MakeIntervalOrd (Pitch C acc o)     (Pitch D acc o)   = Interval Maj Second
@@ -307,26 +309,87 @@ type family MakeIntervalOrd (p1 :: PitchType) (p2 :: PitchType) :: IntervalType 
     MakeIntervalOrd (Pitch C acc o)     (Pitch G acc o)   = Interval Perf Fifth
     MakeIntervalOrd (Pitch C acc o)     (Pitch A acc o)   = Interval Maj Sixth
     MakeIntervalOrd (Pitch C acc o)     (Pitch B acc o)   = Interval Maj Seventh
+    ---- Base cases from F.
+    MakeIntervalOrd (Pitch F Flat o) (Pitch F Natural o) = Interval Aug Unison
+    MakeIntervalOrd (Pitch F Natural o) (Pitch F Sharp o) = Interval Aug Unison
+    MakeIntervalOrd (Pitch F Natural o) (Pitch G Flat o) = Interval Min Second
+    MakeIntervalOrd (Pitch F acc o)     (Pitch G acc o)   = Interval Maj Second
+    MakeIntervalOrd (Pitch F acc o)     (Pitch A acc o)   = Interval Maj Third
+    MakeIntervalOrd (Pitch F acc o)     (Pitch B acc o)   = Interval Aug Fourth
+    MakeIntervalOrd (Pitch F acc o1)     (Pitch C acc o2)   =
+            IntervalOrCompound o1 o2 (Interval Perf Fifth)
+    MakeIntervalOrd (Pitch F acc o1)     (Pitch D acc o2)   =
+            IntervalOrCompound o1 o2 (Interval Maj Sixth)
+    MakeIntervalOrd (Pitch F acc o1)     (Pitch E acc o2)   =
+            IntervalOrCompound o1 o2 (Interval Maj Seventh)
+    ---- Base cases from A.
+    MakeIntervalOrd (Pitch A Flat o) (Pitch A Natural o) = Interval Aug Unison
+    MakeIntervalOrd (Pitch A Natural o) (Pitch A Sharp o) = Interval Aug Unison
+    MakeIntervalOrd (Pitch A Natural o) (Pitch B Flat o) = Interval Min Second
+    MakeIntervalOrd (Pitch A acc o)     (Pitch B acc o)   = Interval Maj Second
+    MakeIntervalOrd (Pitch A acc o1)     (Pitch C acc o2)   =
+            IntervalOrCompound o1 o2 (Interval Min Third)
+    MakeIntervalOrd (Pitch A acc o1)     (Pitch D acc o2)   =
+            IntervalOrCompound o1 o2 (Interval Perf Fourth)
+    MakeIntervalOrd (Pitch A acc o1)     (Pitch E acc o2)   =
+            IntervalOrCompound o1 o2 (Interval Perf Fifth)
+    MakeIntervalOrd (Pitch A acc o1)     (Pitch F acc o2)   =
+        IntervalOrCompound o1 o2 (Interval Min Sixth)
+    MakeIntervalOrd (Pitch A acc o1)     (Pitch G acc o2)   =
+        IntervalOrCompound o1 o2 (Interval Min Seventh)
     -- Handling perfect and augmented octaves.
     MakeIntervalOrd (Pitch C acc o1) (Pitch C acc o2) =
-            If (OctSucc o1 .~. o2) (Interval Perf Octave) Compound
+            IntervalOrCompound o1 o2 (Interval Perf Octave)
     MakeIntervalOrd (Pitch C Natural o1) (Pitch C Sharp o2) =
-            If (OctSucc o1 .~. o2) (Interval Aug Octave) Compound
+            IntervalOrCompound o1 o2 (Interval Aug Octave)
     MakeIntervalOrd (Pitch C Flat o1) (Pitch C Natural o2) =
-            If (OctSucc o1 .~. o2) (Interval Aug Octave) Compound
+            IntervalOrCompound o1 o2 (Interval Aug Octave)
+    MakeIntervalOrd (Pitch F acc o1) (Pitch F acc o2) =
+            IntervalOrCompound o1 o2 (Interval Perf Octave)
+    MakeIntervalOrd (Pitch F Natural o1) (Pitch F Sharp o2) =
+            IntervalOrCompound o1 o2 (Interval Aug Octave)
+    MakeIntervalOrd (Pitch F Flat o1) (Pitch F Natural o2) =
+            IntervalOrCompound o1 o2 (Interval Aug Octave)
+    MakeIntervalOrd (Pitch A acc o1) (Pitch A acc o2) =
+            IntervalOrCompound o1 o2 (Interval Perf Octave)
+    MakeIntervalOrd (Pitch A Natural o1) (Pitch A Sharp o2) =
+            IntervalOrCompound o1 o2 (Interval Aug Octave)
+    MakeIntervalOrd (Pitch A Flat o1) (Pitch A Natural o2) =
+            IntervalOrCompound o1 o2 (Interval Aug Octave)
     -- Handling accidental first pitch.
     MakeIntervalOrd (Pitch C Flat o) (Pitch pc2 acc o) =
             Expand (MakeIntervalOrd (Pitch C Natural o) (Pitch pc2 acc o))
     MakeIntervalOrd (Pitch C Sharp o) (Pitch pc2 acc o) =
             Shrink (MakeIntervalOrd (Pitch C Natural o) (Pitch pc2 acc o))
+    MakeIntervalOrd (Pitch F Flat o) (Pitch E Sharp o) = Interval Min Second
+    MakeIntervalOrd (Pitch F Flat o) (Pitch E Natural o) = Interval Dim Second
+    MakeIntervalOrd (Pitch E Natural o) (Pitch F Flat o) = Interval Dim Second
+    MakeIntervalOrd (Pitch F Flat o) (Pitch pc2 acc o) =
+            Expand (MakeIntervalOrd (Pitch F Natural o) (Pitch pc2 acc o))
+    MakeIntervalOrd (Pitch F Sharp o) (Pitch pc2 acc o) =
+            Shrink (MakeIntervalOrd (Pitch F Natural o) (Pitch pc2 acc o))
+    MakeIntervalOrd (Pitch A Flat o) (Pitch pc2 acc o) =
+            Expand (MakeIntervalOrd (Pitch A Natural o) (Pitch pc2 acc o))
+    MakeIntervalOrd (Pitch A Sharp o) (Pitch pc2 acc o) =
+            Shrink (MakeIntervalOrd (Pitch A Natural o) (Pitch pc2 acc o))
     -- Handling accidental second pitch.
     MakeIntervalOrd (Pitch C Natural o) (Pitch pc2 Sharp o) =
             Expand (MakeIntervalOrd (Pitch C Natural o) (Pitch pc2 Natural o))
     MakeIntervalOrd (Pitch C Natural o) (Pitch pc2 Flat o) =
             Shrink (MakeIntervalOrd (Pitch C Natural o) (Pitch pc2 Natural o))
+    MakeIntervalOrd (Pitch F Natural o) (Pitch pc2 Sharp o) =
+            Expand (MakeIntervalOrd (Pitch F Natural o) (Pitch pc2 Natural o))
+    MakeIntervalOrd (Pitch F Natural o) (Pitch pc2 Flat o) =
+            Shrink (MakeIntervalOrd (Pitch F Natural o) (Pitch pc2 Natural o))
+    MakeIntervalOrd (Pitch A Natural o) (Pitch pc2 Sharp o) =
+            Expand (MakeIntervalOrd (Pitch A Natural o) (Pitch pc2 Natural o))
+    MakeIntervalOrd (Pitch A Natural o) (Pitch pc2 Flat o) =
+            Shrink (MakeIntervalOrd (Pitch A Natural o) (Pitch pc2 Natural o))
     -- Handling the general case.
+    MakeIntervalOrd (Pitch pc1 acc1 o) (Pitch pc2 acc2 o) =
+            MakeIntervalOrd (HalfStepDown (Pitch pc1 acc1 o)) (HalfStepDown (Pitch pc2 acc2 o))
     MakeIntervalOrd (Pitch pc1 acc1 o1) (Pitch pc2 acc2 o2) =
-            If  (o1 .~. o2 .||. OctSucc o1 .~. o2)
+            If  (NextOct o1 o2)
                 (MakeIntervalOrd (HalfStepDown (Pitch pc1 acc1 o1)) (HalfStepDown (Pitch pc2 acc2 o2)))
                 Compound
     -- Handling erroneous construction (shouldn't happen).
@@ -334,7 +397,7 @@ type family MakeIntervalOrd (p1 :: PitchType) (p2 :: PitchType) :: IntervalType 
 
 -- | Shrink an interval.
 type family Shrink (i :: IntervalType) :: IntervalType where
-    Shrink (Interval Perf Unison) = TypeError (Text "Can't diminish unisons.")
+    Shrink (Interval Perf Unison) = TypeError (Text "Can't diminish unisons.1")
     Shrink (Interval Perf is)     = Interval Dim is
     Shrink (Interval Min  is)     = Interval Dim is
     Shrink (Interval Maj  is)     = Interval Min is
@@ -343,8 +406,8 @@ type family Shrink (i :: IntervalType) :: IntervalType where
     Shrink (Interval Aug  Fifth)  = Interval Perf Fifth
     Shrink (Interval Aug  Octave) = Interval Perf Octave
     Shrink (Interval Aug  is)     = Interval Maj is
-    Shrink (Interval Dim  Unison) = TypeError (Text "Can't diminish unisons.")
-    Shrink (Interval Dim  Second) = TypeError (Text "Can't diminish unisons.")
+    Shrink (Interval Dim  Unison) = TypeError (Text "Can't diminish unisons.2")
+    Shrink (Interval Dim  Second) = TypeError (Text "Can't diminish unisons.3")
     Shrink (Interval Dim  Fifth)  = Interval Perf Fourth
     Shrink (Interval Dim  Sixth)  = Interval Dim Fifth
     Shrink (Interval Dim  is)     = Interval Min (IntSizePred is)
@@ -356,7 +419,7 @@ type family Expand (i :: IntervalType) :: IntervalType where
     Expand (Interval Perf is)      = Interval Aug is
     Expand (Interval Maj  is)      = Interval Aug is
     Expand (Interval Min  is)      = Interval Maj is
-    Expand (Interval Dim  Unison)  = TypeError (Text "Can't diminish unisons.")
+    Expand (Interval Dim  Unison)  = TypeError (Text "Can't diminish unisons.4")
     Expand (Interval Dim  Fourth)  = Interval Perf Fourth
     Expand (Interval Dim  Fifth)   = Interval Perf Fifth
     Expand (Interval Dim  Octave)  = Interval Perf Octave
@@ -395,12 +458,27 @@ type family NatToPitch (n :: Nat) where
     NatToPitch n = HalfStepUp (NatToPitch (n - 1))
 
 -- | Greater than or equal to for pitches.
-type family (p1 :: PitchType) <<=? (p2 :: PitchType) where
+type family (p1 :: PitchType) <<=? (p2 :: PitchType) :: Bool where
+    p <<=? p = True
+    (Pitch pc1 acc oct) <<=? (Pitch pc2 acc oct) = ClassToNat pc1 <=? ClassToNat pc2
+    (Pitch pc acc oct) <<=? (Pitch pc Sharp oct) = True
+    (Pitch pc Sharp oct) <<=? (Pitch pc acc oct) = False
+    (Pitch pc Flat oct) <<=? (Pitch pc acc oct) = True
+    (Pitch pc acc oct) <<=? (Pitch pc Flat oct) = False
+    (Pitch E Sharp oct) <<=? (Pitch F Flat oct) = False
+    (Pitch F Flat oct) <<=? (Pitch E Sharp oct) = True
+    (Pitch B Sharp oct) <<=? (Pitch C Flat oct') =
+            If (NextOct oct oct') False ((Pitch B Natural oct) <<=? (Pitch C Flat oct'))
+    (Pitch C Flat oct) <<=? (Pitch B Sharp oct') =
+            If (NextOct oct' oct) True ((Pitch C Natural oct) <<=? (Pitch B Sharp oct'))
+    (Pitch pc1 acc1 oct) <<=? (Pitch pc2 acc2 oct) = ClassToNat pc1 <=? ClassToNat pc2
+    (Pitch pc1 acc1 oct1) <<=? (Pitch pc2 acc2 oct2) = OctToNat oct1 <=? OctToNat oct2
     p1 <<=? p2 = PitchToNat p1 <=? PitchToNat p2
 
 -- | Greater than for pitches.
 type family (p1 :: PitchType) <<? (p2 :: PitchType) where
-    p1 <<? p2 = (p1 <<=? p2) .&&. Not (p1 .~. p2)
+    p <<? p = False
+    p1 <<? p2 = (p1 <<=? p2)
 
 -- | Enharmonic equality of pitches.
 type family (p :: PitchType) =?= (q :: PitchType) :: Bool where
@@ -462,6 +540,24 @@ type family OctSucc (o :: OctaveNum) :: OctaveNum where
 -- | Decrement an octave.
 type family OctPred (o :: OctaveNum) :: OctaveNum where
     OctPred o = DecreaseOctave o 1
+
+-- | Returns True if the successor of o1 is o2.
+type family NextOct (o1 :: OctaveNum) (o2 :: OctaveNum) :: Bool where
+    NextOct Oct_1 Oct0 = True
+    NextOct Oct0 Oct1 = True
+    NextOct Oct1 Oct2 = True
+    NextOct Oct2 Oct3 = True
+    NextOct Oct3 Oct4 = True
+    NextOct Oct4 Oct5 = True
+    NextOct Oct5 Oct6 = True
+    NextOct Oct6 Oct7 = True
+    NextOct Oct7 Oct8 = True
+    NextOct _    _    = False
+
+-- | Returns i if o2 is after o2, otherwise returns Compound.
+type family IntervalOrCompound (o1 :: OctaveNum) (o2 :: OctaveNum) (i :: IntervalType)
+            :: IntervalType where
+    IntervalOrCompound o1 o2 int = If (NextOct o1 o2) int Compound
 
 -- | Convert a pitch class to a natural number.
 type family ClassToNat (pc :: PitchClass) :: Nat where

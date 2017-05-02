@@ -16,7 +16,6 @@ v4 = play $ melody :| g__ :| c_ :| c_ :< bf__ :| a__ :^ g__ :| f__ :| a__ :| d__
 
 sco = score setTitle "4-voice chorale"
             setKeySig g_min
-            setKeySig g_min
             setRuleSet strict
             withMusic (v1 :-: v2 :-: v3 :-: v4)
 
