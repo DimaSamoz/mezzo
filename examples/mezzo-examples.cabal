@@ -13,61 +13,25 @@ build-type:          Simple
 extra-source-files:  README.md
 cabal-version:       >=1.10
 
-executable fur-elise
-  hs-source-dirs:      fur-elise
-  main-is:             FurElise.hs
-  other-modules:       FurElise.Theme
+library
+  hs-source-dirs:      src
+  exposed-modules:     Other.Bach
+                     , Other.Counterpoint
+                     , Other.HappyBirthday
+                     , Other.Harmonisation
+
+                     , FurElise
+                     , FurElise.Theme
                      , FurElise.Episode1
                      , FurElise.Episode2
                      , FurElise.Episode3
                      , FurElise.Episode4
-  default-language:    Haskell2010
-  default-extensions:  TypeInType
-  ghc-options:         -dsuppress-all
-  build-depends:       base >= 4.7 && < 5
-                     , mezzo
 
-executable happy-birthday
-  hs-source-dirs:      other
-  main-is:             HappyBirthday.hs
-  default-language:    Haskell2010
-  default-extensions:  TypeInType
-  build-depends:       base >= 4.7 && < 5
-                     , mezzo
-
-executable harmonisation
-  hs-source-dirs:      other
-  main-is:             Harmonisation.hs
-  default-language:    Haskell2010
-  default-extensions:  TypeInType
-  ghc-options:         -dsuppress-all
-  build-depends:       base >= 4.7 && < 5
-                     , mezzo
-
-executable counterpoint
-  hs-source-dirs:      other
-  main-is:             Counterpoint.hs
-  default-language:    Haskell2010
-  default-extensions:  TypeInType
-  build-depends:       base >= 4.7 && < 5
-                     , mezzo
-
-executable chopin
-  hs-source-dirs:      chopin
-  main-is:             Chopin.hs
-  other-modules:       Chopin.Part1
+                     , Chopin
+                     , Chopin.Part1
                      , Chopin.Part2
-  default-language:    Haskell2010
-  default-extensions:  TypeInType
-  ghc-options:         -dsuppress-all
-  build-depends:       base >= 4.7 && < 5
-                     , mezzo
 
-executable bach
-  hs-source-dirs:      other
-  main-is:             Bach.hs
-  default-language:    Haskell2010
-  default-extensions:  TypeInType
-  ghc-options:         -dsuppress-all
   build-depends:       base >= 4.7 && < 5
                      , mezzo
+  default-language:    Haskell2010
+  default-extensions:  TypeInType

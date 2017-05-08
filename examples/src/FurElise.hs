@@ -1,6 +1,6 @@
 {-# LANGUAGE NoImplicitPrelude #-}
 
-module Main where
+module FurElise where
 
 import Mezzo
 

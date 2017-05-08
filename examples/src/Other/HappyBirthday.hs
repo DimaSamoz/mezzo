@@ -1,5 +1,5 @@
 
-module Main where
+module Other.HappyBirthday where
 
 import Mezzo
 

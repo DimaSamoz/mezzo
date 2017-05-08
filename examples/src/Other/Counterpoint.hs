@@ -1,7 +1,7 @@
 
 -- Based on http://decipheringmusictheory.com/?page_id=46
 
-module Main where
+module Other.Counterpoint where
 
 import Mezzo
 

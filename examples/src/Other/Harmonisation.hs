@@ -1,7 +1,7 @@
 
 -- From http://decipheringmusictheory.com/?page_id=46
 
-module Main where
+module Other.Harmonisation where
 
 import Mezzo
 

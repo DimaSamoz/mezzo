@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs, FlexibleContexts #-}
 
-module Main where
+module Other.Bach where
 
 import Mezzo
 

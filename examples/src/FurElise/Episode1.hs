@@ -49,6 +49,9 @@ ep1p3 = section "1st episode, part 3" $
             ep1part (hom ep1Rh3 ep1Lh3)
 
 ep1p4 = section "1st episode, part 4" $
-            ep1part (hom ep1Rh4 ep1Lh4)
+            score setTempo 90
+                  setRuleSet free
+                  setKeySig c_maj
+                  withMusic (hom ep1Rh4 ep1Lh4)
 
 episode1 = ep1p1 ++ ep1p2 ++ ep1p3 ++ ep1p4
