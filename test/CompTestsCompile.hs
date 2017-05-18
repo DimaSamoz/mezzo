@@ -22,11 +22,6 @@ scMax = test $ b_4 qn
 scR1 = test $ r qr
 scR2 = test $ r sr'
 
-notes = renderSections
-        "demos/noteTests.mid"
-        "Note and rest tests" $
-        map (section "")[scC, scFf, scGs'', scBff_2, scAsfsf'4, scMin, scMax, scR1, scR2]
-
 ---- Chords
 scCmaj3 = test $ c maj3 qc
 scDfmin3D = test $ df min3D ec
@@ -42,10 +37,47 @@ scAsfsdom7 = test $ as_ flat sharp dom7 ec
 scDssdim7inv = test $ ds sharp dim7 inv hc
 scEs'hdim7i2 = test $ es' hdim7' i2 wc'
 
-chords = renderSections
-        "demos/chords.mid"
-        "Chord tests" $
+---- Progressions
+scMajSubdomII = test $ prog $ cadence (full subdom_ii auth_V)
+scMajSubdomIII_IV = test $ prog $ cadence (full subdom_iii_IV auth_V)
+
+
+---- Melodic intervals
+scMCF = test $ c qn :|: f en'
+scMBfD' = test $ bf hn :|: d' qn
+scMAAs = test $ a_ sn :|: as_ qn'
+scMEE = test $ e'' en :|: e'' en
+scMF__Ds'' = test $ f__ tn :|: d'' wn
+scMel = test $ play $ melody :< c :| d :| e :| f :| g :| a :| b :| c' :| bf
+                             :| af :| fs sharp :| e :| cs :| c :| b_ :| fs :| a
+                             :| d' :| e' :| g' :| c'' :| cs'' :| cs'' sharp
+
+---- Harmonic intervals
+
+scHCF = test $ f en :-: c en
+scHBG = test $ b__ en :-: g__ en
+scHFfEss = test $ ff qn' :-: es sharp qn'
+scHAGf = test $ gf sn :-: a sn
+scHGsE = test $ gs' qn :-: e qn
+
+---- Motion
+scMoCCFG = test $ f qn :-: c qn :|: g qn :-: c qn
+scMoCCFG' = test $ (f qn :|: g qn) :-: (c qn :|: c qn)
+scMoCDCB = test $ c' en :-: c en :|: b qn :-: d qn
+scMoCDCB' = test $ (c' en :|: b qn) :-: (c en :|: d qn)
+scMoEfEFFs = test $ f hn :-: ef hn :|: fs en :-: e en
+scMoEfEFFs' = test $ (f hn :|: fs en) :-: (ef hn :|: e en)
+
+allcomps = renderSections
+        "demos/testing.mid"
+        "All tests" $
         map (section "")
-            [ scCmaj3, scDfmin3D, scEs'fourth, scFsf__fifthDI
+            [ scC, scFf, scGs'', scBff_2, scAsfsf'4, scMin, scMax, scR1, scR2
+            , scCmaj3, scDfmin3D, scEs'fourth, scFsf__fifthDI
             , scGs'3octII, scAfmaji2, scBsaugD, scCf_dim, scGf'minD
-            , scFf_3min7i3, scAsfsdom7, scDssdim7inv, scEs'hdim7i2]
+            , scFf_3min7i3, scAsfsdom7, scDssdim7inv, scEs'hdim7i2
+            , scMajSubdomII, scMajSubdomIII_IV
+            , scMCF, scMBfD', scMAAs, scMEE, scMF__Ds'', scMel
+            , scHCF, scHBG, scHFfEss, scHAGf, scHGsE
+            , scMoCCFG, scMoCCFG', scMoCDCB, scMoCDCB', scMoEfEFFs, scMoEfEFFs'
+            ]

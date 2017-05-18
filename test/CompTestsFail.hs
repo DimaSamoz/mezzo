@@ -35,11 +35,29 @@ sfSubdomiii = const "no iii-IV subdominant in minor key"
 -- -}
 
 ---- Melodic composition
-sfCFf = test  "diminished melodic C-Ff" $ c qn :|: ff qn
-sfGf = test  "diminished melodic G-Gf" $ g qn :|: gf' qn
-sfEAs = test  "augmented melodic E-As" $ e qn :|: a sharp qn
-sfCCs = test  "augmented melodic C-Cs" $ c qn :|: cs' qn
-sfCB = test "major seventh C-B" $ c qn :|: b qn
-sfCBf = test "minor seventh C-B" $ c qn :|: bf qn
-sfFB = test "tritone" $ f qn :|: b qn
-sfMelody = test "melody" $ play $ melody :| c :| gs :| df' :| b :| c
+sfMCFf = test  "diminished melodic C-Ff" $ c qn :|: ff qn
+sfMGf = test  "diminished melodic G-Gf" $ g qn :|: gf' qn
+sfMEAs = test  "augmented melodic E-As" $ e qn :|: a sharp qn
+sfMCCs = test  "augmented melodic C-Cs" $ c qn :|: cs' qn
+sfMCB = test "major seventh C-B" $ c qn :|: b qn
+sfMCBf = test "minor seventh C-B" $ c qn :|: bf qn
+sfMFB = test "tritone" $ f qn :|: b qn
+sfMMelody = test "melody" $ play $ melody :| c :| gs :| df' :| b :| c
+
+---- Harmonic composition
+sfHCB = test "major seventh C-B" $ b qn :-: c qn
+sfHGGs = test "major seventh G-Gs" $ gf' qn :-: g qn
+sfHCCs = test "augmented octave C-Cs" $ cs' en :-: c en
+sfHCfC = test "augmented octave Cf-C" $ c hn :-: cf hn
+sfHAAs = test "minor second A-As" $ as qn :-: a qn
+sfHEF = test "minor second E-F" $ f'' en :-: e'' en
+
+---- Harmonic motion
+sfMoCDGA = test "parallel fifth GC-AD" $ g qn :-: c qn :|: a qn :-: d qn
+sfMoCDGA' = test "parallel fifth GC-AD" $ (g qn :|: a qn) :-: (c qn :|: d qn)
+sfMoDED'E' = test "parallel octave D'D-E'E" $ d' en :-: d en :|: e' qn :-: e qn
+sfMoDED'E'' = test "parallel octave D'D-E'E" $ (d' en :|: e' qn) :-: (d en :|: e qn)
+sfMoGGsBEf = test "concealed fifth GGs-BEf" $ b qn :-: g qn :|: ef' qn :-: gs qn
+sfMoGGsBEf' = test "concealed fifth GGs-BEf" $ (b qn :|: ef' qn) :-: (g qn :|: gs qn)
+sfMoCDEE = test "concealed octave CD-EE'" $ d wn :-: c wn :|: e' qn :-: e qn
+sfMoCDEE' = test "concealed octave CD-EE'" $ (d wn :|: e' hn) :-: (c wn :|: e hn)
