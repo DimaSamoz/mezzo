@@ -50,7 +50,7 @@ infixl 4 :-:
 -------------------------------------------------------------------------------
 
 -- | Properties of a musical piece: the time signature, the key signature and rule set.
-data Signature (t :: TimeSignature) (k :: KeyType) (r :: RuleSetType) = Sig
+data Signature (t :: TimeSignature) (k :: KeyType) (ruleset :: Type) = Sig
 
 -- | A piece of music consisting of parallel and sequential composition of notes
 -- and rests, subject to constraints.

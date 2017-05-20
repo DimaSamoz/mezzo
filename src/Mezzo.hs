@@ -24,4 +24,5 @@ import Mezzo.Model as X
     ( Music (..)
     , Voice (..)
     , Partiture (..)
+    , RuleSet (..)
     )

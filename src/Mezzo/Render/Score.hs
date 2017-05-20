@@ -58,7 +58,7 @@ data Attributes t k r =
     , tempo :: Tempo                -- ^ The tempo of the composition in BPM.
     , timeSignature :: TimeSig t    -- ^ The time signature of the composition.
     , keySignature :: KeyS k        -- ^ The key signature of the composition.
-    , ruleSet :: RuleS r
+    , ruleSet :: r
     }
 
 -- | Default attributes: "Composition" in C major in common time, with tempo 120 BPM.
@@ -102,7 +102,7 @@ setKeySig :: (Primitive k', ScoreAtt k') => AConv (KeyS k') (Attributes t k r) (
 setKeySig Attributes{..} ks = spec (Attributes title tempo timeSignature ks ruleSet)
 
 -- | Sets the key signature of the composition.
-setRuleSet :: AConv (RuleS r') (Attributes t k r) (Attributes t k r')
+setRuleSet :: AConv (r') (Attributes t k r) (Attributes t k r')
 setRuleSet Attributes{..} rs = spec (Attributes title tempo timeSignature keySignature rs)
 
 -- | Sets the music content of the score.
@@ -126,16 +126,16 @@ getKeySig Attributes{keySignature = k} = getAtt k
 -------------------------------------------------------------------------------
 
 -- | No enforced rules.
-free :: RuleS Free
-free = RuleS
+free :: Free
+free = Free
 
 -- | Classical rules.
-classical :: RuleS Classical
-classical = RuleS
+classical :: Classical
+classical = Classical
 
 -- | Strict rules
-strict :: RuleS Strict
-strict = RuleS
+strict :: Strict
+strict = Strict
 
 
 

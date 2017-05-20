@@ -30,13 +30,17 @@ import GHC.TypeLits
 -- * Rule sets
 
 -- | The types of rule sets implemented.
-data RuleSetType =
-      Free          -- ^ No composition rules.
-    | Classical     -- ^ Classical rules.
-    | Strict        -- ^ Strict rules.
+-- data RuleSetType =
+--       Free          -- ^ No composition rules.
+--     | Classical     -- ^ Classical rules.
+--     | Strict        -- ^ Strict rules.
+
+data Free = Free
+data Classical = Classical
+data Strict = Strict
 
 -- | Class of rule sets for a given rule type.
-class RuleSet (t :: RuleSetType) where
+class RuleSet t where
     type MelConstraints   t (m1 :: Partiture n l1) (m2 :: Partiture n l2) :: Constraint
     type HarmConstraints  t (m1 :: Partiture n1 l) (m2 :: Partiture n2 l) :: Constraint
     type NoteConstraints  t (r :: RootType)        (d :: Duration)        :: Constraint
@@ -90,4 +94,4 @@ instance RuleSet Strict where
 -- * Literal values
 
 -- | The proxy type for 'RuleSetType'.
-data RuleS (r :: RuleSetType) = RuleS
+-- data RuleS (r :: RuleSetType) = RuleS
