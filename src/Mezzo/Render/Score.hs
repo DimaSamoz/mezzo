@@ -109,6 +109,10 @@ setRuleSet Attributes{..} rs = spec (Attributes title tempo timeSignature keySig
 withMusic :: ATerm (Music (Sig :: Signature t k r) m) (Attributes t k r) Score
 withMusic = Score
 
+-- | Shorthand for quickly creating a score with the default attributes.
+sco :: Music (Sig :: Signature 4 (Key C Natural MajorMode) Classical) m -> Score
+sco = score withMusic
+
 -- | Get the time signature MIDI message.
 getTimeSig :: Attributes t k r -> Message
 getTimeSig Attributes{timeSignature = t} = getAtt t
