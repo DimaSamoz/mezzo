@@ -74,6 +74,9 @@ defAttributes = Attributes
 -- | A type encapsulating every 'Music' composition with their MIDI attributes.
 data Score = forall m t k r. Score (Attributes t k r) (Music (Sig :: Signature t k r) m)
 
+instance Show Score where
+    show (Score atts m) = show m
+
 -------------------------------------------------------------------------------
 -- Builders
 -------------------------------------------------------------------------------
