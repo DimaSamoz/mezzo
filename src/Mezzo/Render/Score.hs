@@ -31,6 +31,7 @@ module Mezzo.Render.Score
     , setKeySig
     , setRuleSet
     , withMusic
+    , defScore
       -- * Rule sets
     , free
     , classical
@@ -110,8 +111,8 @@ withMusic :: ATerm (Music (Sig :: Signature t k r) m) (Attributes t k r) Score
 withMusic = Score
 
 -- | Shorthand for quickly creating a score with the default attributes.
-sco :: Music (Sig :: Signature 4 (Key C Natural MajorMode) Classical) m -> Score
-sco = score withMusic
+defScore :: Music (Sig :: Signature 4 (Key C Natural MajorMode) Classical) m -> Score
+defScore = score withMusic
 
 -- | Get the time signature MIDI message.
 getTimeSig :: Attributes t k r -> Message
