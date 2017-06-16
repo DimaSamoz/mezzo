@@ -234,7 +234,7 @@ Below is a table summarising the melody construction operators.
 | Whole         | `:>>`   | `:~>>`  | `:>>.`        | `:~>>.`       |
 
 
-#### Examples:
+#### Examples
 
 * Frère Jacques:
 
