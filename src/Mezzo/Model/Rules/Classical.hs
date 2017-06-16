@@ -40,8 +40,10 @@ import Data.Kind
 --
 --  * any seventh interval.
 class ValidMelInterval (e :: PitchPair) (i :: IntervalType)
-instance {-# OVERLAPPING #-} PitchPairError "Major seventh intervals are not permitted in melody: " e
+instance {-# OVERLAPPING #-} PitchPairError "Major sevenths are not permitted in melody: " e
                                 => ValidMelInterval e (Interval Maj Seventh)
+instance {-# OVERLAPPING #-} PitchPairError "Compound intervals are not permitted in melody: " e
+                                => ValidMelInterval e Compound
 instance {-# OVERLAPPABLE #-}      ValidMelInterval e i
 
 -- | Ensures that two pitches form valid melodic leaps.
@@ -92,15 +94,15 @@ instance {-# OVERLAPPABLE #-} (ValidMelAppend v1 v2, ValidMelConcat vs1 vs2)
 --  * a major seventh or
 --  * an augmented octave.
 class ValidHarmInterval (e :: PitchPair) (i :: IntervalType)
-instance {-# OVERLAPPING #-} PitchPairError "Can't have minor seconds in chords: " e
+instance {-# OVERLAPPING #-} PitchPairError "Minor seconds are not permitted in harmony: " e
                                 => ValidHarmInterval e (Interval Aug Unison)
-instance {-# OVERLAPPING #-} PitchPairError "Can't have minor seconds in chords: " e
+instance {-# OVERLAPPING #-} PitchPairError "Minor seconds are not permitted in harmony: " e
                                 => ValidHarmInterval e (Interval Min Second)
-instance {-# OVERLAPPING #-} PitchPairError "Can't have major sevenths in chords: " e
+instance {-# OVERLAPPING #-} PitchPairError "Major sevenths are not permitted in harmony: " e
                                 => ValidHarmInterval e (Interval Maj Seventh)
-instance {-# OVERLAPPING #-} PitchPairError "Can't have major sevenths in chords: " e
+instance {-# OVERLAPPING #-} PitchPairError "Major sevenths are not permitted in harmony: " e
                                 => ValidHarmInterval e (Interval Dim Octave)
-instance {-# OVERLAPPING #-} PitchPairError "Can't have augmented octaves in chords: " e
+instance {-# OVERLAPPING #-} PitchPairError "Augmented octaves are not permitted in harmony: " e
                                 => ValidHarmInterval e (Interval Aug Octave)
 instance {-# OVERLAPPABLE #-}      ValidHarmInterval e i
 

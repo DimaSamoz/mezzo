@@ -48,6 +48,8 @@ instance {-# OVERLAPS #-} PitchPairError "Diminished melodic intervals are not p
                                 => ValidMelIntervalStrict e (Interval Dim a)
 instance {-# OVERLAPPING #-} PitchPairError "Seventh intervals are not permitted in melody: " e
                                 => ValidMelIntervalStrict e (Interval a Seventh)
+instance {-# OVERLAPPING #-} PitchPairError "Compound intervals are not permitted in melody: " e
+                                => ValidMelIntervalStrict e Compound
 instance {-# OVERLAPPABLE #-}      ValidMelIntervalStrict e i
 
 
@@ -124,6 +126,6 @@ instance {-# OVERLAPPABLE #-} ( ValidMelMatrixMotion vs1 vs2
 class ValidChordType (c :: ChordType n)
 instance ValidChordType (Dyad r t i)
 instance ValidChordType (Triad r t i)
-instance {-# OVERLAPPING #-} ChordError "Can't have major seventh chords: " r " Maj7"
+instance {-# OVERLAPPING #-} ChordError "Major seventh chords are not permitted: " r " Maj7"
                                 => ValidChordType (Tetrad r MajSeventh i)
 instance {-# OVERLAPPABLE #-} ValidChordType (Tetrad r t i)

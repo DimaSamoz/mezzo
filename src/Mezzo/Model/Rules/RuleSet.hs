@@ -72,7 +72,7 @@ instance RuleSet Free where
 -- * minor second, major seventh and augmented octave harmonic intervals, and
 -- * direct motion into perfect intervals on harmonic composition.
 instance RuleSet Classical where
-    type MelConstraints Classical m1 m2 = Valid
+    type MelConstraints Classical m1 m2 = CR.ValidMelConcat m1 m2
     type HarmConstraints Classical m1 m2 = CR.ValidHarmConcat (Align m1 m2)
     type HomConstraints Classical m1 m2 = CR.ValidHomConcat (Align m1 m2)
 
