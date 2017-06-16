@@ -27,8 +27,8 @@ refrBh = hom refrRh refrLh
      :|: hom (a qn) (a__ sn :|: e_ sn :|: a_ sn :|: r sr)
      :|: hom refrRh refrLh
 
-refrain = section "refrain" $
-            score setTempo 90
+refrain = score section "refrain"
+                setTempo 90
                 setKeySig a_min
                 withMusic refrBh
 
@@ -50,10 +50,10 @@ varLh = play $ melody
     :<< a__ :| e_ :| a_ :~<. r
     :<< e__ :| e_ :~>. r :~< r
 
-variation = section "variation" $
-                score setTempo 90
-                    setKeySig a_min
-                    setRuleSet free
-                    withMusic (hom varRh varLh)
+variation = score section "variation"
+                  setTempo 90
+                  setKeySig a_min
+                  setRuleSet free
+                  withMusic (hom varRh varLh)
 
 theme = refrain ++ variation ++ refrain

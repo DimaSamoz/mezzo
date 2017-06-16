@@ -14,13 +14,12 @@ import FurElise.Episode4
 -- End theme
 -------------------------------------------------------------------------------
 
-endChord = section "end chord" $
-            score
-                setTempo 90
-                setKeySig a_min
-                withMusic (hom (a qn) (a_3 oct qc))
+endChord = score section "end chord"
+                 setTempo 90
+                 setKeySig a_min
+                 withMusic (hom (a qn) (a_3 oct qc))
 
-main = renderSections "rendered/FurElise.mid"
+main = renderScores "rendered/FurElise.mid"
         "Ludwig van Beethoven - Fur Elise"
         [ theme
         , episode1, episode2

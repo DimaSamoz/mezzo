@@ -21,15 +21,15 @@ ep4Lh1 = pad2 (a_3 en)
 ep4Rh2 = tripletE g'' fs'' f'' :|: tripletE e'' ds'' d''
      :|: tripletE cs'' c'' b' :|: tripletE bf' a' gs' :|: tripletE g' fs' f'
 
-ep4p1 = section "4th episode, part 1" $
-            score setTempo 90
-                  setKeySig a_min
-                  setRuleSet free
-                  withMusic (hom ep4Rh1 ep4Lh1)
+ep4p1 =  score section "4th episode, part 1"
+               setTempo 90
+               setKeySig a_min
+               setRuleSet free
+               withMusic (hom ep4Rh1 ep4Lh1)
 
-ep4p2 = section "4th episode, part 2" $
-            score setTempo 90
-                  setKeySig a_min
-                  withMusic ep4Rh2
+ep4p2 = score section "4th episode, part 2"
+              setTempo 90
+              setKeySig a_min
+              withMusic ep4Rh2
 
 episode4 = ep4p1 ++ ep4p2

@@ -19,19 +19,16 @@
 module Mezzo.Render.Score
     ( -- * Scores and attributes
       Attributes (..)
-    , Score (..)
     , defAttributes
     , getTimeSig
     , getKeySig
       -- * Score builders
     , score
-    , setTitle
+    , section
     , setTempo
     , setTimeSig
     , setKeySig
     , setRuleSet
-    , withMusic
-    , defScore
       -- * Rule sets
     , free
     , classical
@@ -72,12 +69,6 @@ defAttributes = Attributes
     , ruleSet = classical
     }
 
--- | A type encapsulating every 'Music' composition with their MIDI attributes.
-data Score = forall m t k r. Score (Attributes t k r) (Music (Sig :: Signature t k r) m)
-
-instance Show Score where
-    show (Score atts m) = show m
-
 -------------------------------------------------------------------------------
 -- Builders
 -------------------------------------------------------------------------------
@@ -87,8 +78,8 @@ score :: Spec (Attributes 4 (Key C Natural MajorMode) Classical)
 score = spec defAttributes
 
 -- | Sets the title of the composition.
-setTitle :: AMut String (Attributes t k r)
-setTitle atts titl = spec (atts {title = titl})
+section :: AMut String (Attributes t k r)
+section atts titl = spec (atts {title = titl})
 
 -- | Sets the tempo of the composition.
 setTempo :: AMut Tempo (Attributes t k r)
@@ -103,16 +94,9 @@ setKeySig :: (Primitive k', ScoreAtt k') => AConv (KeyS k') (Attributes t k r) (
 setKeySig Attributes{..} ks = spec (Attributes title tempo timeSignature ks ruleSet)
 
 -- | Sets the key signature of the composition.
-setRuleSet :: AConv (r') (Attributes t k r) (Attributes t k r')
+setRuleSet :: AConv r' (Attributes t k r) (Attributes t k r')
 setRuleSet Attributes{..} rs = spec (Attributes title tempo timeSignature keySignature rs)
 
--- | Sets the music content of the score.
-withMusic :: ATerm (Music (Sig :: Signature t k r) m) (Attributes t k r) Score
-withMusic = Score
-
--- | Shorthand for quickly creating a score with the default attributes.
-defScore :: Music (Sig :: Signature 4 (Key C Natural MajorMode) Classical) m -> Score
-defScore = score withMusic
 
 -- | Get the time signature MIDI message.
 getTimeSig :: Attributes t k r -> Message

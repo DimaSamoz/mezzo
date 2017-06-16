@@ -64,17 +64,15 @@ ep3Lh3 = aNotes :|: aNotes :|: aNotes :|: bfNotes :|: bfNotes :|: bfNotes :|: bN
           bfNotes = repeat6 (bf__ sn)
           bNotes = repeat6 (b__ sn)
 
-ep3part = score setTempo 90
+ep3part sname = score section sname
+                setTempo 90
                 setKeySig d_min
                 withMusic
 
-ep3p1 = section "3rd episode, part 1" $
-            ep3part (hom ep3Rh1 ep3Lh1)
+ep3p1 = ep3part "3rd episode, part 1" (hom ep3Rh1 ep3Lh1)
 
-ep3p2 = section "3rd episode, part 2" $
-            ep3part (hom ep3Rh2 ep3Lh2)
+ep3p2 = ep3part "3rd episode, part 2" (hom ep3Rh2 ep3Lh2)
 
-ep3p3 = section "3rd episode, part 3" $
-            ep3part (hom ep3Rh3 ep3Lh3)
+ep3p3 = ep3part "3rd episode, part 3" (hom ep3Rh3 ep3Lh3)
 
 episode3 = ep3p1 ++ ep3p2 ++ ep3p3

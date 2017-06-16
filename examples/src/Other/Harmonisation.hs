@@ -14,9 +14,10 @@ v3 = play $ melody :| bf_ :| g_ :| a_ :< g_   :| fs_ :^ g_  :| a_  :| a_  :| fs_
 v4 = play $ melody :| g__ :| c_ :| c_ :< bf__ :| a__ :^ g__ :| f__ :| a__ :| d__ :| bf__ :| c_ :| d_ :| d_  :>> g__
 --                                                                           ^ The above tutorial used 'd_' which gave a concealed octave
 
-sco = score setTitle "4-voice chorale"
-            setKeySig g_min
+sco = score setKeySig g_min
             setRuleSet strict
             withMusic (v1 :-: v2 :-: v3 :-: v4)
 
-main = renderScore "rendered/Harmonisation.mid" sco
+main = renderScore "rendered/Harmonisation.mid"
+                   "4-voice chorale"
+                   sco

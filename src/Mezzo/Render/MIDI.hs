@@ -17,15 +17,17 @@
 -----------------------------------------------------------------------------
 
 module Mezzo.Render.MIDI
-    ( section, renderScore, renderSections )
+    (renderScore, renderScores, withMusic, defScore )
     where
 
 import Mezzo.Model
 import Mezzo.Compose (_th, _si, _ei, _qu, _ha, _wh)
 import Mezzo.Render.Score
+import Mezzo.Compose.Builder
 
-import Codec.Midi hiding (key)
-import qualified Codec.Midi as CM (key)
+
+import Codec.Midi hiding (key, Key)
+import qualified Codec.Midi as CM (key, Key)
 
 -------------------------------------------------------------------------------
 -- Types
@@ -44,6 +46,9 @@ type MidiEvent = (Ticks, Message)
 
 -- | A sequence of MIDI events.
 type MidiTrack = Track Ticks
+
+-- | A musical score.
+type Score = MidiTrack
 
 -------------------------------------------------------------------------------
 -- Operations
@@ -89,7 +94,7 @@ m1 >< m2 = removeTrackEnds $ m1 `merge` m2
 type Title = String
 
 -- | Convert a 'Music' piece into a 'MidiTrack'.
-musicToMidi :: forall t k m r. Music (Sig :: Signature t k r) m -> MidiTrack
+musicToMidi :: forall t k m r. Music (Sig :: Signature t k r) m -> Score
 musicToMidi (m1 :|: m2) = musicToMidi m1 ++ musicToMidi m2
 musicToMidi (m1 :-: m2) = musicToMidi m1 >< musicToMidi m2
 musicToMidi (Note root dur) = playNote (prim root) (prim dur)
@@ -98,24 +103,26 @@ musicToMidi (Chord c d) = foldr1 (><) notes
     where notes = map (`playNote` prim d) $ prim c
 musicToMidi (Progression p) = foldr1 (++) chords
     where chords = (toChords <$> init (prim p)) ++ [cadence (last (prim p))]
-          toChords :: [Int] -> MidiTrack
+          toChords :: [Int] -> Score
           toChords = concat . replicate (prim (TimeSig @t)) . foldr1 (><) . map (`playNote` prim _qu)
-          cadence :: [Int] -> MidiTrack
+          cadence :: [Int] -> Score
           cadence = foldr1 (><) . map (`playNote` prim _wh)
 musicToMidi (Homophony m a) = musicToMidi m >< musicToMidi a
 musicToMidi (Triplet d r1 r2 r3) = playTriplet [prim r1, prim r2, prim r3] (prim d)
 
--- | Pre-render one section of a long composition. The first argument is only
--- for documentation purposes.
-section :: String -> Score -> MidiTrack
-section _ (Score atts m) =
-    [ (0, getTimeSig atts)
-    , (0, getKeySig atts)
-    , (0, TempoChange (60000000 `div` tempo atts))
-    ] ++ musicToMidi m
+-- | Sets the music content of the score.
+withMusic :: ATerm (Music (Sig :: Signature t k r) m) (Attributes t k r) Score
+withMusic atts m = [ (0, getTimeSig atts)
+                    , (0, getKeySig atts)
+                    , (0, TempoChange (60000000 `div` tempo atts))
+                    ] ++ musicToMidi m
+
+-- | Shorthand for quickly creating a score with the default attributes.
+defScore :: Music (Sig :: Signature 4 (Key C Natural MajorMode) Classical) m -> Score
+defScore = score withMusic
 
 -- | A basic skeleton of a MIDI file.
-midiSkeleton :: Title -> MidiTrack -> Midi
+midiSkeleton :: Title -> Score -> Midi
 midiSkeleton trName mel = Midi
     { fileType = SingleTrack
     , timeDiv = TicksPerBeat 480
@@ -130,22 +137,17 @@ midiSkeleton trName mel = Midi
     }
 
 -- | Create a MIDI file with the specified name and track.
-exportMidi :: FilePath -> Title -> MidiTrack -> IO ()
+exportMidi :: FilePath -> Title -> Score -> IO ()
 exportMidi f trName notes = do
     exportFile f $ midiSkeleton trName notes
     putStrLn $ "Composition rendered to " ++ f ++ "."
 
 
--- | Create a MIDI file with the specified path and score.
-renderScore :: FilePath -> Score -> IO ()
-renderScore f s@(Score atts m) = do
-    exportMidi f (title atts) (section "" s)
-    putStrLn $ "Composition rendered to " ++ f ++ "."
+-- | Create a MIDI file with the specified path, title and score.
+renderScore :: FilePath -> Title -> Score -> IO ()
+renderScore f compTitle sc = exportMidi f compTitle sc
 
 
--- | Render a list of baked scores into a MIDI file with the given title.
-renderSections :: FilePath -> Title -> [MidiTrack] -> IO ()
-renderSections f compTitle ts = do
-    exportMidi f compTitle (concat ts)
-    putStrLn $ "Composition rendered to " ++ f ++ "."
-    
+-- | Create a MIDI file with the specified path, title and list of scores.
+renderScores :: FilePath -> Title -> [Score] -> IO ()
+renderScores f compTitle ts = renderScore f compTitle (concat ts)
