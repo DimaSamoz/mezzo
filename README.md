@@ -349,6 +349,88 @@ Enforces most of the rules of strict contrapuntal compositions, which are often 
 A caveat is that Mezzo internally only has three accidentals so it interprets `a flat flat qn` as a G natural. This means that the interval `c qn :|: a flat flat qn` is allowed, even though it is technically a diminished sixth interval.
 * Harmonic motion constraints are enforced for harmonic *and* melodic composition (`(:-:)` and `(:|:)`), as well as homophonic composition (`hom`). Symbolic chord progressions are still allowed, even if they violate harmonic motion rules – however, motion rules between a progression accompaniment and a melodic line are enforced.
 
+### Custom rule sets
+Users of Mezzo can define their own custom rule sets, albeit adding complex rules can require a closer understanding of the Mezzo internals and type-level computation. Rule sets are a collection of constraints (i.e. Haskell type class constraints), one for all of the ways a `Music` value can be constructed: harmonic composition, melodic composition, homophonic composition, rests, notes, chords, progressions.
+
+Any value can be used as a rule set, as long as its type is an instance of the `RuleSet` type class:
+
+```haskell
+class RuleSet t where
+    type MelConstraints   t (m1 :: Partiture n l1) (m2 :: Partiture n l2) :: Constraint
+    type HarmConstraints  t (m1 :: Partiture n1 l) (m2 :: Partiture n2 l) :: Constraint
+    type NoteConstraints  t (r :: RootType)        (d :: Duration)        :: Constraint
+    type RestConstraints  t                        (d :: Duration)        :: Constraint
+    type ChordConstraints t (c :: ChordType n)     (d :: Duration)        :: Constraint
+    type ProgConstraints  t (s :: TimeSignature)   (p :: ProgType k l)    :: Constraint
+    type HomConstraints   t (m1 :: Partiture n1 l) (m2 :: Partiture n2 l) :: Constraint
+```
+
+The various constraints take as input the arguments of the corresponding `Music` constructor: for example, `HarmConstraints` takes the two type-level composed musical pieces (of type `Partiture`) as arguments, and returns a `Constraint` (see ConstraintKinds extension) expressing whether the pieces can be harmonically composed.
+
+Custom rule sets can be useful even if the exact details of Mezzo's type-level model are not understood. For example, suppose that we want to create a very restrictive rule set for first-species counterpoint: this species only allows for melodic lines containing whole notes and enforces most of the classic rules of harmony, melody and motion. To implement this rule set, we can restrict the constructors that are allowed and delegate the complex rule-checking to the existing Mezzo implementation. To start, we define a new type for our rule set:
+
+```haskell
+data FirstSpecies = FirstSpecies
+```
+
+Now, we make `FirstSpecies` an instance of the `RuleSet` type class by defining the associated constraint synonyms. In this case, we want to:
+
+* Use the same musical rule-checking methods as the `strict` rule set
+* Only allow whole note and rest durations
+* Disallow chords and progressions.
+
+To achieve this, we declare the following instance of the `RuleSet` class for `FirstSpecies`:
+
+```haskell
+instance RuleSet FirstSpecies where
+    type MelConstraints   FirstSpecies m1 m2 = MelConstraints Strict m1 m2
+    type HarmConstraints  FirstSpecies m1 m2 = HarmConstraints Strict m1 m2
+    type HomConstraints   FirstSpecies m1 m2 = HomConstraints Strict m1 m2
+    type NoteConstraints  FirstSpecies r d   = ValidDur d
+    type RestConstraints  FirstSpecies d     = ValidDur d
+    type ChordConstraints FirstSpecies c d   = InvalidChord
+    type ProgConstraints  FirstSpecies t p   = InvalidProg
+```
+
+* `MelConstraints`, `HarmConstraints` and `HomConstraints` simply delegate rule-checking to the constraints of the `Strict` rule set.
+* `NoteConstraints` and `RestConstraints` are defined using the `ValidDur` class, defined as follows:
+```haskell
+class ValidDur (d :: Duration)
+instance ValidDur Whole
+instance {-# OVERLAPPABLE #-}
+        TypeError (Text "First species counterpoint only have whole durations.")
+        => ValidDur d
+```
+  This makes use of GHC's [custom type errors](https://ghc.haskell.org/trac/ghc/wiki/Proposal/CustomTypeErrors) feature, with the correspoinding types available in the GHC.TypeLits module. We define the `ValidDur` type class (restricting its argument to a type of kind `Duration`) without any methods. The `Whole` duration is made an instance of `ValidDur`, expressing our intention to make whole durations valid. The overlappable instance for `ValidDur d` is selected only if the previous instance does not fit (i.e. the duration is not `Whole`): in this case, a custom type error is encountered and type-checking fails, displaying our custom error message.
+* `ChordConstraints` and `ProgConstraints` are simply equal to the "constant" (nullary) type classes `InvalidChord` and `InvalidProg`, which are defined in a similar manner to `ValidDur`:
+
+```haskell
+class InvalidChord
+instance TypeError (Text "Chords are not allowed in counterpoint.")
+         => InvalidChord
+
+class InvalidProg
+instance TypeError (Text "Progressions are not allowed in counterpoint.")
+         => InvalidProg
+```
+  In this case, the constraints always fail (since they have no arguments), displaying the corresponding error message.
+
+Having defined this instance, we can expect to see our custom constraints any time we use the `FirstSpecies` rule set. For example, the following composition fails to compile:
+
+```haskell
+comp = score setRuleSet FirstSpecies
+             withMusic (c maj qc :-: b qn)
+```
+
+The type error messages explain what the problem is, just as we defined them:
+
+```
+• Can't have major sevenths in chords: C and B
+• Chords are not allowed in counterpoint.
+• First species counterpoint only have whole durations.
+```
+
+The full file (with the necessary language extensions and module imports needed) can be found in the [examples folder](https://github.com/DimaSamoz/mezzo/blob/master/examples/src/Other/FirstSpecies.hs).
 
 ### Other constraints
 
