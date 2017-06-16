@@ -472,7 +472,9 @@ Mezzo "implicitly" enforces other rules, but these are only required to make the
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+
+Note that this project is different from [Mezzo](http://protz.github.io/mezzo/), a research language for effectful concurrent programming.
 
 ## Acknowledgments
 
