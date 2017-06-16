@@ -4,7 +4,41 @@
 
 *Mezzo* is a Haskell library and embedded domain-specific language for music description. Its novelty is in the fact that it can enforce various rules of music composition *statically*, that is, at compile-time. This effectively means that if you write "bad" music, your composition will not compile – think of it as a **very** strict spell-checker for music.
 
-Note: the project is still very much work-in-progress.
+<!-- TOC depthFrom:1 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
+
+- [Mezzo](#mezzo)
+	- [Getting started](#getting-started)
+		- [Prerequisites](#prerequisites)
+		- [Installation](#installation)
+		- [First composition](#first-composition)
+	- [Composing in Mezzo](#composing-in-mezzo)
+		- [Basic concepts](#basic-concepts)
+		- [Literal vs. builder style](#literal-vs-builder-style)
+		- [Primitives](#primitives)
+			- [Notes](#notes)
+			- [Rests](#rests)
+			- [Chords](#chords)
+		- [Composition](#composition)
+			- [Harmonic composition](#harmonic-composition)
+			- [Melodic composition](#melodic-composition)
+		- [Melodies](#melodies)
+			- [Examples:](#examples)
+		- [Chord progressions](#chord-progressions)
+			- [Harmonic regions](#harmonic-regions)
+			- [Phrases](#phrases)
+	- [Scores](#scores)
+		- [Score building](#score-building)
+	- [Rendering and exporting](#rendering-and-exporting)
+	- [Rule sets](#rule-sets)
+		- [The `free` rule set](#the-free-rule-set)
+		- [The `classical` rule set](#the-classical-rule-set)
+		- [The `strict` rule set](#the-strict-rule-set)
+		- [Custom rule sets](#custom-rule-sets)
+		- [Other constraints](#other-constraints)
+	- [License](#license)
+	- [Acknowledgments](#acknowledgments)
+
+<!-- /TOC -->
 
 ## Getting started
 
