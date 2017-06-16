@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## 0.3.0 - 2017-06-10
+## [0.3.0 - 2017-06-16](https://github.com/DimaSamoz/mezzo/releases/tag/v0.3.0)
 ### Added
 - Chord progressions: create chord progressions following the conventions of functional harmony.
 - Dyads: 2-note chords (thirds, fourths, fifths and octaves), together with their doubled versions.
