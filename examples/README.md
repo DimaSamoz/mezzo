@@ -15,3 +15,6 @@ Chopin's piece consists of a sequence of chords of various sizes, types and dura
 
 ## [Ludwig van Beethoven – *Für Elise*](https://github.com/DimaSamoz/mezzo/blob/master/examples/src/FurElise.hs)
 A structurally diverse piano piece with thematic episodes and variations, complex melody, rhythm and harmony, showcasing most of the composition features implemented in Mezzo. Again, the composition is written in separate modules which speeds up compilation (the whole piece doesn't need to be recompiled if a small change is made in a module), and lets us repeat the `theme` several times in the composition.
+
+## [First species counterpoint rule set](https://github.com/DimaSamoz/mezzo/blob/master/examples/src/Other/FirstSpecies.hs)
+An example of a custom rule set for first species counterpoint. Mezzo's flexible rule sets allow users to change type-checking behaviour with term-level function arguments (score attributes), and even define custom rules which can be fully integrated with the type-level model of music.
