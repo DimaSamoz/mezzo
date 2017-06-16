@@ -4,8 +4,6 @@
 
 *Mezzo* is a Haskell library and embedded domain-specific language for music description. Its novelty is in the fact that it can enforce various rules of music composition *statically*, that is, at compile-time. This effectively means that if you write "bad" music, your composition will not compile – think of it as a **very** strict spell-checker for music.
 
-<!-- TOC depthFrom:2 depthTo:6 withLinks:1 updateOnSave:1 orderedList:0 -->
-
 - [Getting started](#getting-started)
 	- [Prerequisites](#prerequisites)
 	- [Installation](#installation)
@@ -36,8 +34,6 @@
 	- [Other constraints](#other-constraints)
 - [License](#license)
 - [Acknowledgments](#acknowledgments)
-
-<!-- /TOC -->
 
 ## Getting started
 
