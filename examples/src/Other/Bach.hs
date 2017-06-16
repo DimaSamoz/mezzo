@@ -56,6 +56,7 @@ concV3 = c__ wn :|: c__ wn
 
 conc = score section "conclusion"
              setTempo 100
+             setRuleSet free
              setKeySig c_maj
              withMusic (concV1 `hom` concV2 `hom` concV3)
 

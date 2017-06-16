@@ -55,6 +55,10 @@ cadence :: InKey k (Cad c) -> InKey k (PhraseList (CadPhrase c))
 cadence c = \k -> Cdza (c k) k
 
 -- | Dominant-tonic phrase.
+ph_I :: InKey k (Ton (t :: Tonic k l)) -> InKey k (Phr (PhraseI t :: Phrase k l))
+ph_I _ = const Phr
+
+-- | Dominant-tonic phrase.
 ph_VI :: InKey k (Dom (d :: Dominant k l1)) -> InKey k (Ton (t :: Tonic k (l - l1))) -> InKey k (Phr (PhraseVI d t :: Phrase k l))
 ph_VI _ _ = const Phr
 
@@ -65,24 +69,24 @@ ph_IVI _ _ _ = const Phr
 -- ** Cadences
 
 -- | Authentic V-I dominant cadence.
-auth_V :: InKey k (Cad (AuthCad (DegChord :: DegreeC V MajQ k Inv1 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
-auth_V = const Cad
+auth_V_I :: InKey k (Cad (AuthCad (DegChord :: DegreeC V MajQ k Inv1 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
+auth_V_I = const Cad
 
 -- | Authentic V7-I dominant seventh cadence.
-auth_V7 :: InKey k (Cad (AuthCad7 (DegChord :: DegreeC V DomQ k Inv2 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
-auth_V7 = const Cad
+auth_V7_I :: InKey k (Cad (AuthCad7 (DegChord :: DegreeC V DomQ k Inv2 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
+auth_V7_I = const Cad
 
 -- | Authentic vii-I leading tone cadence.
-auth_vii :: InKey k (Cad (AuthCadVii (DegChord :: DegreeC VII DimQ k Inv1 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
-auth_vii = const Cad
+auth_vii_I :: InKey k (Cad (AuthCadVii (DegChord :: DegreeC VII DimQ k Inv1 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
+auth_vii_I = const Cad
 
 -- | Authentic cadential 6-4 cadence.
-auth_64 :: InKey k (Cad (AuthCad64 (DegChord :: DegreeC I (KeyToQual k) k Inv2 Oct3) (DegChord :: DegreeC V DomQ k Inv3 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv1 Oct3)))
-auth_64 = const Cad
+auth_64_V7_I :: InKey k (Cad (AuthCad64 (DegChord :: DegreeC I (KeyToQual k) k Inv2 Oct3) (DegChord :: DegreeC V DomQ k Inv3 Oct2) (DegChord :: DegreeC I (KeyToQual k) k Inv1 Oct3)))
+auth_64_V7_I = const Cad
 
 -- | Deceptive V-iv cadence.
-decept :: InKey k (Cad (DeceptCad (DegChord :: DegreeC V DomQ k Inv2 Oct2) (DegChord :: DegreeC VI (KeyToOtherQual k) k Inv1 Oct2)))
-decept = const Cad
+decept_V_iv :: InKey k (Cad (DeceptCad (DegChord :: DegreeC V DomQ k Inv2 Oct2) (DegChord :: DegreeC VI (KeyToOtherQual k) k Inv1 Oct2)))
+decept_V_iv = const Cad
 
 -- | Full cadence, starting with a subdominant.
 full :: InKey k (Sub s) -> InKey k (Cad c) -> InKey k (Cad (FullCad s c))
@@ -90,7 +94,7 @@ full _ _ = const Cad
 
 -- ** Tonic chords
 
--- | Major tonic chord.
+-- | Tonic chord.
 ton :: InKey k (Ton (TonT (DegChord :: DegreeC I (KeyToQual k) k Inv0 Oct3)))
 ton = const Ton
 
@@ -114,8 +118,8 @@ dom_vii0 :: InKey k (Dom (DomVii0 (DegChord :: DegreeC VII DimQ k Inv1 Oct2)))
 dom_vii0 = const Dom
 
 -- | Secondary dominant - dominant (V/V-V7) chord.
-dom_ii_V7 :: InKey k (Dom (DomSecD (DegChord :: DegreeC II DomQ k Inv0 Oct3) (DegChord :: DegreeC V DomQ k Inv2 Oct2)))
-dom_ii_V7 = const Dom
+dom_II_V7 :: InKey k (Dom (DomSecD (DegChord :: DegreeC II DomQ k Inv0 Oct3) (DegChord :: DegreeC V DomQ k Inv2 Oct2)))
+dom_II_V7 = const Dom
 
 -- | Subdominant followed by a dominant.
 dom_S_D :: InKey k (Sub subdom) -> InKey k (Dom dom) -> InKey k (Dom (DomSD subdom dom))

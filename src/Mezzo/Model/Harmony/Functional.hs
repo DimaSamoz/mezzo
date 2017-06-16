@@ -116,10 +116,12 @@ data ProgType (k :: KeyType) (l :: Nat) where
 
 -- | A phrase matching a specific functional progression.
 data Phrase (k :: KeyType) (l :: Nat) where
-    -- | A tonic-dominant-tonic progression.
+    -- | A tonic-dominant-tonic phrase.
     PhraseIVI :: Tonic k (l2 - l1) -> Dominant k l1 -> Tonic k (l - l2) -> Phrase k l
-    -- | A dominant-tonic progression.
+    -- | A dominant-tonic phrase.
     PhraseVI  :: Dominant k l1 -> Tonic k (l - l1) -> Phrase k l
+    -- | A tonic phrase.
+    PhraseI  :: Tonic k l -> Phrase k l
 
 -- | A cadence in a specific key with a specific length.
 data Cadence (k :: KeyType) (l :: Nat) where
@@ -212,6 +214,8 @@ type family PhraseToChords (l :: Nat) (p :: Phrase k l) :: Vector (ChordType 4) 
         TonToChords (l2 - dl) t1 ++. DomToChords dl d ++. TonToChords (l - l2) t2
     PhraseToChords l (PhraseVI (d :: Dominant k dl) t) =
         DomToChords dl d ++. TonToChords (l - dl) t
+    PhraseToChords l (PhraseI t) =
+        TonToChords l t
 
 -- | Convert a piece to chords.
 type family ProgTypeToChords (l :: Nat) (p :: ProgType k l) :: Vector (ChordType 4) l where
@@ -325,7 +329,7 @@ instance (IntLListRep s1, IntLListRep s2) => Primitive (SubSS (s1 :: Subdominant
 instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (AuthCad d1 d2) where
     type Rep (AuthCad d1 d2) = [[Int]]
     prim _ = [prim (Cho @4 @ch1), prim (Cho @4 @ch2)]
-    pretty _ = "AuthCad"
+    pretty _ = "AuthCad V"
 
 instance (ch1 ~ DegToChord d1, IntListRep ch1, ch2 ~ DegToChord d2, IntListRep ch2) => Primitive (AuthCad7 d1 d2) where
     type Rep (AuthCad7 d1 d2) = [[Int]]
@@ -363,6 +367,11 @@ instance (IntLListRep d, IntLListRep t) => Primitive (PhraseVI (d :: Dominant k 
     type Rep (PhraseVI d t) = [[Int]]
     prim _ = prim (Dom @k @l1 @d) ++ prim (Ton @k @(l - l1) @t)
     pretty _ = pretty (Dom @k @l1 @d) ++ " | " ++ pretty (Ton @k @(l - l1) @t)
+
+instance (IntLListRep t) => Primitive (PhraseI (t :: Tonic k l) :: Phrase k l) where
+    type Rep (PhraseI t) = [[Int]]
+    prim _ = prim (Ton @k @l @t)
+    pretty _ = pretty (Ton @k @l @t)
 
 -- Progressions
 

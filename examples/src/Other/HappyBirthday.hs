@@ -9,7 +9,7 @@ mel = melody :~| r :~| r :<. g :<< g :^ a :| g :| c' :> b
              :<. f' :<< f' :^ e' :| c' :| d' :>. c'
 
 chords = ph_IVI (ton_T_T ton ton) (dom_D_D dom_V dom_V) (ton_T_T ton ton)
-      :+ cadence (full subdom_ii auth_V)
+      :+ cadence (full subdom_ii auth_V_I)
 
 sco = score setKeySig c_maj
             setTimeSig triple
