@@ -350,7 +350,7 @@ The function takes a file path (specified as a `String`), the title of the MIDI 
 If a piece is broken up into smaller scores (sections), all of them can be concatenated and rendered using the `renderScores` function:
 
 ```haskell
-renderScore :: FilePath -> Title -> [Score] -> IO ()
+renderScores :: FilePath -> Title -> [Score] -> IO ()
 ```
 
 This is similar to `renderScore`, but takes a list of `Score`s (in the desired order). Note that this allows for reuse of sections: for example, a refrain (or repeated section) only has to be described once, and the score created from it can be reused without any additional rule-checking. See the Für Elise example for a demonstration.
