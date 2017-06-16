@@ -1,5 +1,5 @@
 name:                mezzo
-version:             0.2.0.2
+version:             0.3.0.0
 synopsis:            Typesafe music composition
 description:         A Haskell music composition library that enforces common
                      musical rules in the type system.
@@ -12,6 +12,7 @@ copyright:           2016 Dima Samozvancev
 category:            Music
 build-type:          Simple
 extra-source-files:  README.md
+                   , CHANGELOG.md
                    , docs/*.png
 cabal-version:       >=1.10
 
