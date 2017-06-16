@@ -26,19 +26,19 @@ instance RuleSet FirstSpecies where
 class ValidDur (d :: Duration)
 instance ValidDur Whole
 instance {-# OVERLAPPABLE #-}
-            TypeError (Text "First species counterpoint only have whole durations.")
+            TypeError (Text "First species counterpoint can only have whole durations.")
             => ValidDur d
 
 class InvalidChord
-instance TypeError (Text "Chords are not allowed in counterpoint.")
+instance TypeError (Text "Chords are not allowed in first species counterpoint.")
          => InvalidChord
 
 class InvalidProg
-instance TypeError (Text "Progressions are not allowed in counterpoint.")
+instance TypeError (Text "Progressions are not allowed in first species counterpoint.")
          => InvalidProg
 
 class InvalidTripl
-instance TypeError (Text "Triplets are not allowed in counterpoint.")
+instance TypeError (Text "Triplets are not allowed in first species counterpoint.")
          => InvalidTripl
 
 comp = score setRuleSet FirstSpecies withMusic (c maj qc :-: b qn)
