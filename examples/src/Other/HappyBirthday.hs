@@ -13,7 +13,8 @@ chords = ph_IVI (ton_T_T ton ton) (dom_D_D dom_V dom_V) (ton_T_T ton ton)
 
 sco = score setKeySig c_maj
             setTimeSig triple
-            setTitle "Happy Birthday Song"
             withMusic (melAccomp mel chords)
 
-main = renderScore "rendered/HappyBirthday.mid" sco
+main = renderScore "rendered/HappyBirthday.mid"
+                   "Happy Birthday Song"
+                   sco

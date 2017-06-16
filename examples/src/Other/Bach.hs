@@ -19,11 +19,11 @@ v2b p = r sr :|: p qn' :|: r er :|: p qn' :|: r sr
 v3b p = p hn :|: p hn
 
 -- Render out a single bar given five pitches
-bar p1 p2 p3 p4 p5 = section "bar" $
-                        score setTempo 100
-                            setKeySig c_maj
-                            setRuleSet free
-                            withMusic music
+bar p1 p2 p3 p4 p5 = score section "bar"
+                           setTempo 100
+                           setKeySig c_maj
+                           setRuleSet free
+                           withMusic music
     where music = v1b p3 p4 p5 `hom` v2b p2 `hom` v3b p1
 
 bars =
@@ -54,16 +54,16 @@ concV2 = r sr :|: c_ wn :|: b_ hn' :|: r er'
 
 concV3 = c__ wn :|: c__ wn
 
-conc = section "Conclusion" $
-            score setTempo 100
-                  setKeySig c_maj
-                  withMusic (concV1 `hom` concV2 `hom` concV3)
+conc = score section "conclusion"
+             setTempo 100
+             setKeySig c_maj
+             withMusic (concV1 `hom` concV2 `hom` concV3)
 
-endChord = section "End chord" $
-            score setTempo 100
-                  setKeySig c_maj
-                  withMusic (c maj inv wc `hom` c__ oct wc)
+endChord = score section "end chord"
+                 setTempo 100
+                 setKeySig c_maj
+                 withMusic (c maj inv wc `hom` c__ oct wc)
 
-main = renderSections "rendered/Bach.mid"
+main = renderScores "rendered/Bach.mid"
         "Johann Sebastian Bach - Prelude in C Major" $
         bars ++ [conc, endChord]

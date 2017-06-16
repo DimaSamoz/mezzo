@@ -19,7 +19,7 @@ part2Lh4 = af_3 oct qc :|: df_3 oct qc :|: g_3 oct qc :|: c_3 oct qc
 part2Rh = pad (part2Rh1 :|: part2Rh2 :|: part2Rh3) :|: part2Rh4
 part2Lh = part2Lh1 :|: part2Lh2 :|: part2Lh3 :|: part2Lh4
 
-part2 = section "Second part" $
-            score setKeySig c_min
-                  setTempo 30
-                  withMusic (hom part2Rh part2Lh)
+part2 =  score section "second part"
+               setKeySig c_min
+               setTempo 30
+               withMusic (hom part2Rh part2Lh)

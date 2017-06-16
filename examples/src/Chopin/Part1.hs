@@ -19,7 +19,7 @@ part1Lh4 = d__ oct qc :|: g_3 oct qc :|: d_3 oct qc :|: g_3 oct qc
 part1Rh = part1Rh1 :|: part1Rh2 :|: part1Rh3 :|: part1Rh4
 part1Lh = part1Lh1 :|: part1Lh2 :|: part1Lh3 :|: part1Lh4
 
-part1 = section "First part" $
-            score setKeySig c_min
-                  setTempo 30
-                  withMusic (hom part1Rh part1Lh)
+part1 = score section "first part"
+              setKeySig c_min
+              setTempo 30
+              withMusic (hom part1Rh part1Lh)

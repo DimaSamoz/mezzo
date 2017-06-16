@@ -25,14 +25,13 @@ ep2Rh2 = play $ melody
 
 ep2Lh2 = gs_ min3 ec :|: pad (r qr :|: r wr)
 
-ep2part = score setTempo 90
-                setKeySig c_maj
-                withMusic
+ep2part sname = score section sname
+                      setTempo 90
+                      setKeySig c_maj
+                      withMusic
 
-ep2p1 = section "2nd episode, part 1" $
-            ep2part (hom ep2Rh1 ep2Lh1)
+ep2p1 = ep2part "2nd episode, part 1" (hom ep2Rh1 ep2Lh1)
 
-ep2p2 = section "2nd episode, part 2" $
-            ep2part (hom ep2Rh2 ep2Lh2)
+ep2p2 = ep2part "2nd episode, part 2" (hom ep2Rh2 ep2Lh2)
 
 episode2 = ep2p1 ++ ep2p1 ++ ep2p2
