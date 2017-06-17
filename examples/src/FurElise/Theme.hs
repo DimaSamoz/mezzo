@@ -30,6 +30,7 @@ refrBh = hom refrRh refrLh
 refrain = score section "refrain"
                 setTempo 90
                 setKeySig a_min
+                setRuleSet free
                 withMusic refrBh
 
 -- Variation

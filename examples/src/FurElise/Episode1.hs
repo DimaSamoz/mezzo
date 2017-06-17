@@ -38,6 +38,7 @@ ep1Lh4 = pad (play $ melody :<< f_ :| a_ :| c :| a_ :| c :| a_
 ep1part sname = score section sname
                       setTempo 90
                       setKeySig c_maj
+                      setRuleSet free
                       withMusic
 
 ep1p1 = ep1part "1st episode, part 1" (hom ep1Rh1 ep1Lh1)

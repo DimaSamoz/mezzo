@@ -1,6 +1,8 @@
 # Mezzo example compositions
 This folder contains some example compositions written in the Mezzo EDSL. The pieces have different musical styles and showcase the various composition techniques that Mezzo supports. Smaller (single-file) pieces are in the Other folder, while larger (multi-file) compositions have folders of their own.
 
+> Note: running `stack build` on this directory will take a long time and produce very large log files. Therefore it is recommended to launch a GHCi session without building the project with `stack ghci --no-build`, then manually loading the desired composition and calling `main` to render out the file.
+
 ## [Four-part contrapuntal chorale](https://github.com/DimaSamoz/mezzo/blob/master/examples/src/Other/Harmonisation.hs)
 A simple four-part chorale in strict counterpoint. First, the individual voices are written using the melody construction syntax, which are then harmonically composed together into a score. The maximum musical strictness is selected by switching to the `strict` rule set.
 

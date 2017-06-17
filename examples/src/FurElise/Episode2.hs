@@ -28,6 +28,7 @@ ep2Lh2 = gs_ min3 ec :|: pad (r qr :|: r wr)
 ep2part sname = score section sname
                       setTempo 90
                       setKeySig c_maj
+                      setRuleSet free
                       withMusic
 
 ep2p1 = ep2part "2nd episode, part 1" (hom ep2Rh1 ep2Lh1)
