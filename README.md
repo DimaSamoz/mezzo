@@ -75,7 +75,7 @@ import Mezzo
 comp = defScore $ play $ melody :| c :| d :| e :| f :>> g
 
 main :: IO ()
-main = renderMusic "comp.mid" comp
+main = renderScore "comp.mid" "First composition" comp
 ```
 
 Save, build and execute (e.g. with `stack exec <project_name>`). You should get a `.mid` file in the project directory which looks something like this:
