@@ -53,8 +53,7 @@ library
                      , HCodecs
                      , boxes
                      , ghc-prim
-                     , Euterpea >= 2.0.3
-                     , stm
+                     , Euterpea
   ghc-options:         -fplugin GHC.TypeLits.Normalise
   default-language:    Haskell2010
   default-extensions:  TypeInType

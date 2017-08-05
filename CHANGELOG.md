@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased]
+## [Unreleased](https://github.com/DimaSamoz/mezzo/compare/v0.3.0...HEAD)
 ### Added
 - Live playback on the terminal: Mezzo compositions can now be played back live from the terminal using an external midi synthesiser (e.g. [SimpleSynth](http://notahat.com/simplesynth/)) and [Euterpea](http://www.euterpea.com/).
 

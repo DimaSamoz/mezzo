@@ -355,6 +355,13 @@ renderScores :: FilePath -> Title -> [Score] -> IO ()
 
 This is similar to `renderScore`, but takes a list of `Score`s (in the desired order). Note that this allows for reuse of sections: for example, a refrain (or repeated section) only has to be described once, and the score created from it can be reused without any additional rule-checking. See the Für Elise example for a demonstration.
 
+Mezzo compositions can be played live, from the terminal, using the function
+
+```haskell
+playLive' :: Score -> IO ()
+```
+You can also use `playLive = playLive' . defScore` to play a `Music` value right away. Note that in order to play Mezzo compositions from the terminal, you need to have an appropriate MIDI device (e.g. synthesiser) configured. As the implementation uses Euterpea's playback features, you should set up the configuration following [these](http://www.euterpea.com/euterpea/setting-up-midi/) instructions.
+
 ## Rule sets
 As different musical genres enforce different kinds of rules, Mezzo lets users select different levels of strictness (called *rule sets*) or even completely customise the musical rules that are checked. In particular, one rule set turns off correctness checking completely, allowing for complete creative freedom.
 
