@@ -17,7 +17,7 @@
 -----------------------------------------------------------------------------
 
 module Mezzo.Render.MIDI
-    (renderScore, renderScores, withMusic, defScore )
+    (renderScore, renderScores, withMusic, defScore, playLive, playLive' )
     where
 
 import Mezzo.Model
@@ -28,6 +28,8 @@ import Mezzo.Compose.Builder
 
 import Codec.Midi hiding (key, Key)
 import qualified Codec.Midi as CM (key, Key)
+import Euterpea.IO.MIDI.Play (playM')
+import Euterpea.IO.MIDI.MidiIO (unsafeOutputID)
 
 -------------------------------------------------------------------------------
 -- Types
@@ -151,3 +153,12 @@ renderScore f compTitle sc = exportMidi f compTitle sc
 -- | Create a MIDI file with the specified path, title and list of scores.
 renderScores :: FilePath -> Title -> [Score] -> IO ()
 renderScores f compTitle ts = renderScore f compTitle (concat ts)
+
+-- | Live playback of a Mezzo score.
+playLive' :: Score -> IO ()
+playLive' s = playM' (Just $ unsafeOutputID 0) $ midiSkeleton "Live playback" s
+
+-- | Live playback of a Mezzo piece with default score attributes.
+playLive :: Music (Sig :: Signature 4 (Key C Natural MajorMode) Classical) m
+         -> IO ()
+playLive m = playLive' (defScore m)

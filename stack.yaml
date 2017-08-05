@@ -42,7 +42,12 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - should-not-typecheck-2.1.0
-
+- Euterpea-2.0.3
+- PortMidi-0.1.5.2
+- Stream-0.4.7.2
+- arrows-0.4.4.1
+- lazysmallcheck-0.6
+- stm-2.4.2
 
 # Override default flag values for local packages and extra-deps
 flags: {}
