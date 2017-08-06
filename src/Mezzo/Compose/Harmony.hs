@@ -92,6 +92,10 @@ decept_V_iv = const Cad
 full :: InKey k (Sub s) -> InKey k (Cad c) -> InKey k (Cad (FullCad s c))
 full _ _ = const Cad
 
+-- | End progression without an explicit cadence.
+end :: InKey k (PhraseList (CadPhrase NoCad))
+end = cadence $ const Cad
+
 -- ** Tonic chords
 
 -- | Tonic chord.

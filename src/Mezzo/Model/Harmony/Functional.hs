@@ -137,6 +137,8 @@ data Cadence (k :: KeyType) (l :: Nat) where
     DeceptCad  :: DegreeC V DomQ k Inv2 o -> DegreeC VI q k Inv1 o -> Cadence k 2
     -- | Full cadence from subdominant to dominant to tonic.
     FullCad    :: Subdominant k l1 -> Cadence k (l - l1) -> Cadence k l
+    -- | No cadence.
+    NoCad      :: Cadence k 0
 
 -- | A tonic chord.
 data Tonic (k :: KeyType) (l :: Nat) where
@@ -182,6 +184,7 @@ type family CadToChords (l :: Nat) (c :: Cadence k l) :: Vector (ChordType 4) l 
     CadToChords 2 (DeceptCad d1 d2)    = DegToChord d1 :-- DegToChord d2 :-- None
     CadToChords 3 (AuthCad64 d1 d2 d3) = DegToChord d1 :-- DegToChord d2 :-- DegToChord d3 :-- None
     CadToChords l (FullCad (s :: Subdominant k l1) c) = SubdomToChords l1 s ++. CadToChords (l - l1) c
+    CadToChords 0 NoCad                = None
 
 -- | Convert a tonic to chords.
 type family TonToChords (l :: Nat) (t :: Tonic k l) :: Vector (ChordType 4) l where
@@ -355,6 +358,11 @@ instance (IntLListRep sd, IntLListRep c) => Primitive (FullCad (sd :: Subdominan
     type Rep (FullCad sd c) = [[Int]]
     prim _ = prim (Sub @k @sdur @sd) ++ prim (Cad @k @(l - sdur) @c)
     pretty _ = pretty (Sub @k @sdur @sd) ++ " | " ++ pretty (Cad @k @(l - sdur) @c)
+
+instance Primitive NoCad where
+    type Rep NoCad = [[Int]]
+    prim _ = []
+    pretty _ = "NoCad"
 
 -- Phrases
 
