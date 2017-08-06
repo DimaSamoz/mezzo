@@ -1,4 +1,4 @@
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RecordWildCards, NoImplicitPrelude #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -43,6 +43,7 @@ import Mezzo.Compose.Builder
 import Codec.Midi hiding (key, Key)
 import qualified Codec.Midi as CM (key, Key)
 import qualified GHC.TypeLits as GT
+import Prelude hiding (min)
 
 -------------------------------------------------------------------------------
 -- Attributes

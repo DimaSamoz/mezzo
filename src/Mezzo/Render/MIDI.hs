@@ -30,6 +30,7 @@ import Codec.Midi hiding (key, Key)
 import qualified Codec.Midi as CM (key, Key)
 import Euterpea.IO.MIDI.Play (playM')
 import Euterpea.IO.MIDI.MidiIO (unsafeOutputID)
+import Prelude hiding (min)
 
 -------------------------------------------------------------------------------
 -- Types

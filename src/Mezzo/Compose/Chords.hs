@@ -1,4 +1,4 @@
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell, NoImplicitPrelude #-}
 
 -----------------------------------------------------------------------------
 -- |

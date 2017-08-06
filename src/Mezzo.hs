@@ -1,4 +1,4 @@
-
+{-# LANGUAGE NoImplicitPrelude #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Mezzo
@@ -15,6 +15,7 @@
 -----------------------------------------------------------------------------
 
 module Mezzo (module X, ($), (++), concat) where
+import Prelude (($), (++), concat)
 
 -- Uses import/export shortcut as suggested by HLint.
 
