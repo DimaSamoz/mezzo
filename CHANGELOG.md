@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [Unreleased](https://github.com/DimaSamoz/mezzo/compare/v0.3.0...HEAD)
 ### Added
 - Live playback on the terminal: Mezzo compositions can now be played back live from the terminal using an external midi synthesiser (e.g. [SimpleSynth](http://notahat.com/simplesynth/)) and [Euterpea](http://www.euterpea.com/).
+- Empty cadences: you can use `end` as a cadential phrase to compose a chord progression without a cadence.
+
+### Changed
+- The melody constructor `play` has been renamed to `start`.
 
 ### Fixed
 - Readme typos and rule set changes in examples.
+- Clashes with Prelude's `min` function.
 
 ## [0.3.0 - 2017-06-16](https://github.com/DimaSamoz/mezzo/releases/tag/v0.3.0)
 ### Added
