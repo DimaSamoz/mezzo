@@ -42,7 +42,7 @@ sfMCCs = test  "augmented melodic C-Cs" $ c qn :|: cs' qn
 sfMCB = test "major seventh C-B" $ c qn :|: b qn
 sfMCBf = test "minor seventh C-B" $ c qn :|: bf qn
 sfMFB = test "tritone" $ f qn :|: b qn
-sfMMelody = test "melody" $ play $ melody :| c :| gs :| df' :| b :| c
+sfMMelody = test "melody" $ start $ melody :| c :| gs :| df' :| b :| c
 
 ---- Harmonic composition
 sfHCB = test "major seventh C-B" $ b qn :-: c qn

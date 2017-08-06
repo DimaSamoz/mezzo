@@ -37,7 +37,7 @@ ep3Lh2 = repeat6 (d__ fifth sc)
      :|: repeat6 (ds__ sn :-: a__ sn)
      :|: e__ fourth sc :|: e__ fourth sc :|: e__ fourth sc
      :|: e__ fourth sc :|: e__ maj3 sc :|: e__ maj3 sc
-     :|: a_3 oct sc :|: pad (play $ melody :<< a__ :| a__ :| a__ :| a__ :| a__)
+     :|: a_3 oct sc :|: pad (start $ melody :<< a__ :| a__ :| a__ :| a__ :| a__)
 
 ep3Rh3 =       cs dim7 inv qc'
      :|: pad  (d min inv qc)

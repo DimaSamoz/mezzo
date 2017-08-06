@@ -48,7 +48,7 @@ scMBfD' = test $ bf hn :|: d' qn
 scMAAs = test $ a_ sn :|: as_ qn'
 scMEE = test $ e'' en :|: e'' en
 scMF__Ds'' = test $ f__ tn :|: d'' wn
-scMel = test $ play $ melody :< c :| d :| e :| f :| g :| a :| b :| c' :| bf
+scMel = test $ start $ melody :< c :| d :| e :| f :| g :| a :| b :| c' :| bf
                              :| af :| fs sharp :| e :| cs :| c :| b_ :| fs :| a
                              :| d' :| e' :| g' :| c'' :| cs'' :| cs'' sharp
 

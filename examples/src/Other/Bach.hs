@@ -44,7 +44,7 @@ bars =
 -- Conclusion and end chord
 -----------------------------------------------------------------------
 
-concV1 = play $ melody :~< r
+concV1 = start $ melody :~< r
             :<< f_ :| a_ :| c :| f :| c :| a_ :| c
             :| a_ :| f_ :| a_ :| f_ :| d_ :| f_ :| d_ :~< r
             :<< g :| b :| d' :| f' :| d' :| b :| d'

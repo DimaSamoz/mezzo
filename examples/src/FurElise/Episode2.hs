@@ -7,7 +7,7 @@ import Mezzo
 -- Second episode
 -------------------------------------------------------------------------------
 
-ep2Rh1 = play $ melody
+ep2Rh1 = start $ melody
             :<<< c' :| g' :| g :| g' :| a :| g' :| b :| g' :| c' :| g' :| d' :| g'
             :| e' :| g' :| c'' :| b' :| a' :| g' :| f' :| e' :| d' :| g' :| f' :| d'
 
@@ -19,7 +19,7 @@ ep2Lh1 = pad (c maj3 ec :|: pad (r sr)
      :|: pad (f_ maj3 ec
      :|:      g_ maj3 ec)
 
-ep2Rh2 = play $ melody
+ep2Rh2 = start $ melody
             :<<< e' :| f' :| e :| ds' :| e' :| b :| e' :| ds' :| e' :| b :| e' :| ds'
             :<. e' :<< b :| e' :| ds' :<. e' :<< b :| e' :| ds' :| e' :| ds' :| e' :| ds'
 

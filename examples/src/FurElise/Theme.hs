@@ -10,15 +10,15 @@ import Mezzo
 
 -- Refrain
 
-refrCoreRh = play $ melody :<< e' :| ds' :| e' :| ds' :| e'
+refrCoreRh = start $ melody :<< e' :| ds' :| e' :| ds' :| e'
                            :| b :| d' :| c' :^ a :~< r :< b :~<< r
 
-refrCoreLh = play $ melody :~> r
+refrCoreLh = start $ melody :~> r
             :<< a__ :| e_ :| a_ :| c :| e :| a
             :<< e__ :| e_ :| gs_ :~<. r
 
-refrRh = refrCoreRh :|: play (melody :<< e :| gs :| b :< c' :~<< r :<< e)
-     :|: refrCoreRh :|: play (melody :<< e :| c' :| b)
+refrRh = refrCoreRh :|: start (melody :<< e :| gs :| b :< c' :~<< r :<< e)
+     :|: refrCoreRh :|: start (melody :<< e :| c' :| b)
 
 refrLh = refrCoreLh :|: (a__ sn :|: e_ sn :|: a_ sn :|: r sr)
      :|: refrCoreLh
@@ -35,7 +35,7 @@ refrain = score section "refrain"
 
 -- Variation
 
-varRh = play $ melody
+varRh = start $ melody
     :< a :~<< r
     :<< b :| c' :| d' :<. e'
     :<< g :| f' :| e' :<. d'
@@ -44,7 +44,7 @@ varRh = play $ melody
     :<< e :| e :| e' :| e :| e' :| e' :| e''
     :<< ds' :| e' :| ds' :| e' :| ds' :| e' :| ds'
 
-varLh = play $ melody
+varLh = start $ melody
     :<< a__ :| e_ :| a_ :~<. r
     :<< c_ :| g_ :| c :~<. r
     :<< g__ :| g_ :| b_ :~<. r

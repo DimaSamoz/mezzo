@@ -72,7 +72,7 @@ Create a new project (e.g. with `stack new`) with a `Main` module. Type:
 ```haskell
 import Mezzo
 
-comp = defScore $ play $ melody :| c :| d :| e :| f :>> g
+comp = defScore $ start $ melody :| c :| d :| e :| f :>> g
 
 main :: IO ()
 main = renderScore "comp.mid" "First composition" comp
@@ -206,10 +206,10 @@ c qn :|: c en :|: d en :|: ef en :|: d en :|: c en :|: b_ en :|: c hn :|: c hn
 Mezzo provides a more concise way of melody input, where only the duration changes are explicit:
 
 ```haskell
-play $ melody :| c :< c :| d :| ef :| d :| c :| b_ :> c :| c
+start $ melody :| c :< c :| d :| ef :| d :| c :| b_ :> c :| c
 ```
 
-Melodies are effectively lists of pitches with the constructors specifying the duration of the next pitch. All melodies have to start with the `melody` keyword – which initialises the melody and set the "default" duration to a quarter note – and a melody can be converted into a playable `Music` value with the `play` function. The constructors can be used as follows:
+Melodies are effectively lists of pitches with the constructors specifying the duration of the next pitch. All melodies have to start with the `melody` keyword – which initialises the melody and set the "default" duration to a quarter note – and a melody can be converted into a playable `Music` value with the `start` function. The constructors can be used as follows:
 
 * `(:|)`: the next note has the same duration as the previous one. For example, `melody :| c :| d :| e` creates a melody of 3 quarter notes (since `melody` initialises the duration to a quarter note).
 * `(:<<<)`, `(:<<)`, `(:<)`, `(:^)`, `(:>)` and `(:>>)`: the next note is a thirty-second, sixteenth, eighth, quarter, half or whole note, respectively.
@@ -235,10 +235,10 @@ Below is a table summarising the melody construction operators.
 * Frère Jacques:
 
 ```haskell
-fj1 = play $ melody :| g :| a :| b :| g
-fj2 = play $ melody :| b :| c' :> d'
-fj3 = play $ melody :< d' :| e' :| d' :| c' :^ b :| g
-fj4 = play $ melody :| g :| d :> g
+fj1 = start $ melody :| g :| a :| b :| g
+fj2 = start $ melody :| b :| c' :> d'
+fj3 = start $ melody :< d' :| e' :| d' :| c' :^ b :| g
+fj4 = start $ melody :| g :| d :> g
 
 fj = defScore $ fj1 :|: fj1 :|: fj2 :|: fj2 :|: fj3 :|: fj3 :|: fj4 :|: fj4
 ```
@@ -246,8 +246,8 @@ fj = defScore $ fj1 :|: fj1 :|: fj2 :|: fj2 :|: fj3 :|: fj3 :|: fj4 :|: fj4
 * Jingle Bells:
 
 ```haskell
-p1 = play $ melody :< e :| e :^ e :< e :| e :^ e :< e :| g :<. c :<< d :>> e
-p2 = play $ melody :< f :| f :<. f :<< f :< f :| e :<. e :<< e :< e :| d :| d :| e :^ d :| g
+p1 = start $ melody :< e :| e :^ e :< e :| e :^ e :< e :| g :<. c :<< d :>> e
+p2 = start $ melody :< f :| f :<. f :<< f :< f :| e :<. e :<< e :< e :| d :| d :| e :^ d :| g
 
 jb = defScore $ p1 :|: p2
 ```
