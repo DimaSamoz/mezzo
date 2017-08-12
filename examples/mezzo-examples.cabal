@@ -19,6 +19,8 @@ library
                      , Other.Counterpoint
                      , Other.HappyBirthday
                      , Other.Harmonisation
+                     , Other.Bumblebee
+                     , Other.ClappingMusic
 
                      , FurElise
                      , FurElise.Theme

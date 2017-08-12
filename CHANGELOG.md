@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Added
 - Live playback on the terminal: Mezzo compositions can now be played back live from the terminal using an external midi synthesiser (e.g. [SimpleSynth](http://notahat.com/simplesynth/)) and [Euterpea](http://www.euterpea.com/).
 - Empty cadences: you can use `end` as a cadential phrase to compose a chord progression without a cadence.
+- Score transformation: you can use the functions such as `delay` and `transpose` to manipulate music at the MIDI track level. While this allows for more flexibility, composition of `Score`s is not rule-checked, so there is no static guarantee that the resulting music will sound good.
 
 ### Changed
 - The melody constructor `play` has been renamed to `start`.

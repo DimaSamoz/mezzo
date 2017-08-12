@@ -17,7 +17,8 @@
 -----------------------------------------------------------------------------
 
 module Mezzo.Render.MIDI
-    (renderScore, renderScores, withMusic, defScore, playLive, playLive' )
+    ( MidiNote (..), Score, (><)
+    , renderScore, renderScores, withMusic, defScore, playLive, playLive' )
     where
 
 import Mezzo.Model
@@ -40,7 +41,7 @@ import Prelude hiding (min)
 data MidiNote = MidiNote
     { noteNum :: Int        -- ^ MIDI number of a note (middle C is 60).
     , vel     :: Velocity   -- ^ Performance velocity of the note.
-    , start   :: Ticks      -- ^ Relative start time of the note.
+    , startT  :: Ticks      -- ^ Relative start time of the note.
     , noteDur :: Ticks      -- ^ Duration of the note.
     } deriving Show
 
@@ -59,18 +60,18 @@ type Score = MidiTrack
 
 -- | Play a MIDI note with the specified duration and default velocity.
 midiNote :: Int -> Ticks -> MidiNote
-midiNote root dur = MidiNote {noteNum = root, vel = 100, start = 0, noteDur = dur}
+midiNote root dur = MidiNote {noteNum = root, vel = 100, startT = 0, noteDur = dur}
 
 midiRest :: Ticks -> MidiNote
-midiRest dur = MidiNote {noteNum = 60, vel = 0, start = 0, noteDur = dur}
+midiRest dur = MidiNote {noteNum = 0, vel = 0, startT = 0, noteDur = dur}
 
 -- | Start playing the specified 'MidiNote'.
 keyDown :: MidiNote -> MidiEvent
-keyDown n = (start n, NoteOn {channel = 0, CM.key = noteNum n, velocity = vel n})
+keyDown n = (startT n, NoteOn {channel = 0, CM.key = noteNum n, velocity = vel n})
 
 -- | Stop playing the specified 'MidiNote'.
 keyUp :: MidiNote -> MidiEvent
-keyUp n = (start n + noteDur n, NoteOn {channel = 0, CM.key = noteNum n, velocity = 0})
+keyUp n = (startT n + noteDur n, NoteOn {channel = 0, CM.key = noteNum n, velocity = 0})
 
 -- | Play the specified 'MidiNote'.
 playNote :: Int -> Ticks -> MidiTrack

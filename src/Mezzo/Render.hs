@@ -20,3 +20,4 @@ module Mezzo.Render (module X) where
 
 import Mezzo.Render.MIDI as X
 import Mezzo.Render.Score as X
+import Mezzo.Render.Transform as X
