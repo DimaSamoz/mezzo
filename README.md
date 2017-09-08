@@ -72,10 +72,10 @@ Create a new project (e.g. with `stack new`) with a `Main` module. Type:
 ```haskell
 import Mezzo
 
-comp = defScore $ start $ melody :| c :| d :| e :| f :>> g
+comp = defScore $ play $ melody :| c :| d :| e :| f :>> g
 
 main :: IO ()
-main = renderScore "comp.mid" "First composition" comp
+main = renderScore "comp.mid" "test" comp
 ```
 
 Save, build and execute (e.g. with `stack exec <project_name>`). You should get a `.mid` file in the project directory which looks something like this:
