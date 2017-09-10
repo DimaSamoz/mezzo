@@ -33,7 +33,7 @@ matrix:
   include:
   - env: BUILD=cabal GHCVER=8.0.2 CABALVER=1.24
     compiler: ": #GHC 8.0.2"
-    addons: {apt: {packages: [cabal-install-1.24,ghc-8.0.2], sources: [hvr-ghc]}}
+    addons: {apt: {packages: [libasound2-dev,cabal-install-1.24,ghc-8.0.2], sources: [hvr-ghc]}}
 
 
 before_install:
