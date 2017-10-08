@@ -1,5 +1,5 @@
 name:                mezzo-examples
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            Mezzo example compositions
 description:         Compositions implemented in the Mezzo EDSL.
 homepage:            https://github.com/DimaSamoz/mezzo

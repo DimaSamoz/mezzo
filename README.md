@@ -56,7 +56,7 @@ cabal install mezzo
 If using Stack, you will need to add the package to your `extra-deps` in your `stack.yaml` (as Mezzo is not part of Stackage yet), and then add it normally to your `.cabal` file dependencies:
 
 ```cabal
-extra-deps: [ mezzo-0.3.0.0 ]
+extra-deps: [ mezzo-0.3.1.0 ]
 
 build-depends: base >= 4.7 && < 5
              , mezzo
@@ -119,7 +119,7 @@ Notes are given by their pitch and duration. In builder style, every pitch has a
 * **Accidental**: a suffix of the pitch class, one of `f` (flat, e.g. `bf qn`) or `s` (sharp, e.g. `fs qn`). Natural accidentals are not specified, so `c` means C natural. Accidentals can also be written out as a separate attribute (`c sharp qn`), or even repeated (for example, double sharps: `c sharp sharp qn` or `cs sharp qn`).
 * **Octave**: the last component of the value. The default octave is 4, this is unmarked. Lower octaves are marked with `_`, `__`, `_3`, `_4` and `_5`. Higher octaves are marked with `'`, `''`, `'3` and `'4`. A C natural in octave 2 is therefore `c__ qn`, a B flat in octave 7 is `bf'3 qn`.
 
-Durations are written after the pitch. For notes, the value is the first letter of the duration name (eighth, quarter, etc.) followed by `n` for note, e.g., `qn` for quarter note. A dotted duration is specified by following the name with a `'`: `hn'` is a dotted half note, with the length of three quarters.
+Durations are written after the pitch. For notes, the value is the first letter of the duration name (eighth, quarter, etc.) followed by `n` for note, e.g., `qn` for quarter note. A dotted duration is specified by following the name with a `'` (single quote):  `hn'` is a dotted half note, with the length of three quarters.
 
 #### Rests
 
@@ -218,6 +218,7 @@ Melodies are effectively lists of pitches with the constructors specifying the d
 * All constructors that change the duration (except `(:<<<)` and `(:~<<<)`) can be followed by a `.` to make the duration dotted. For example, `melody :^ c :^. d :> e` specifies a melody of a quarter note, a dotted quarter note and a half note.
 
 Below is a table summarising the melody construction operators.
+(See the [https://github.com/DimaSamoz/mezzo/blob/master/README.md](GitHub README) if the table is not formatted.)
 
 | Duration      | Note  | Rest  | Dotted note | Dotted rest |
 |---------------|-------|-------|-------------|-------------|
@@ -294,6 +295,7 @@ A chord progression is broken up into *phrases*, composed using the `:+` operato
     * `auth_64_V7_I`: an authentic dominant cadence with a cadential 6-4.
     * `decept_V_iv`: a deceptive V-iv cadence.
     * `full sd c`: a full cadence, consisting of a subdominant region and a cadence.
+    * `end`: empty cadence.
 
 The example above therefore has a tonic-dominant-tonic region, followed by a full cadence with a fourth degree subdominant and authentic dominant cadence. The `prog` keyword converts a schema into a `Music` value.
 

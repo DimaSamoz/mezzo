@@ -4,7 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [Unreleased](https://github.com/DimaSamoz/mezzo/compare/v0.3.0...HEAD)
+<!-- ## [Unreleased](https://github.com/DimaSamoz/mezzo/compare/v0.3.1...HEAD) -->
+
+## [0.3.1 - 2017-10-07](https://github.com/DimaSamoz/mezzo/releases/tag/v0.3.1)
 ### Added
 - Live playback on the terminal: Mezzo compositions can now be played back live from the terminal using an external midi synthesiser (e.g. [SimpleSynth](http://notahat.com/simplesynth/)) and [Euterpea](http://www.euterpea.com/).
 - Empty cadences: you can use `end` as a cadential phrase to compose a chord progression without a cadence.

@@ -1,5 +1,5 @@
 name:                mezzo
-version:             0.3.0.0
+version:             0.3.1.0
 synopsis:            Typesafe music composition
 description:         A Haskell music composition library that enforces common
                      musical rules in the type system.
@@ -46,7 +46,8 @@ library
                      , Mezzo.Render
                      , Mezzo.Render.MIDI
                      , Mezzo.Render.Score
-
+                     , Mezzo.Render.Transform
+                     
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
                      , template-haskell
