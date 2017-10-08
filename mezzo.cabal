@@ -47,7 +47,7 @@ library
                      , Mezzo.Render.MIDI
                      , Mezzo.Render.Score
                      , Mezzo.Render.Transform
-                     
+
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
                      , template-haskell
