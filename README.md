@@ -218,7 +218,7 @@ Melodies are effectively lists of pitches with the constructors specifying the d
 * All constructors that change the duration (except `(:<<<)` and `(:~<<<)`) can be followed by a `.` to make the duration dotted. For example, `melody :^ c :^. d :> e` specifies a melody of a quarter note, a dotted quarter note and a half note.
 
 Below is a table summarising the melody construction operators.
-(See the [https://github.com/DimaSamoz/mezzo/blob/master/README.md](GitHub README) if the table is not formatted.)
+(See the [GitHub README](https://github.com/DimaSamoz/mezzo/blob/master/README.md) if the table is not formatted.)
 
 | Duration      | Note  | Rest  | Dotted note | Dotted rest |
 |---------------|-------|-------|-------------|-------------|
