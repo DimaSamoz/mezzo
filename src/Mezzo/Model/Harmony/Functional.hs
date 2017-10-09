@@ -242,7 +242,7 @@ type family FromProg (p :: ProgType k l) (t :: TimeSignature) :: Partiture 4 (l 
 data Ton (t :: Tonic k d) = Ton
 
 -- | The singleton type for 'Tonic'.
-data Dom (d :: Dominant k d) = Dom
+data Dom (d :: Dominant k d') = Dom
 
 -- | The singleton type for 'Tonic'.
 data Sub (s :: Subdominant k d) = Sub

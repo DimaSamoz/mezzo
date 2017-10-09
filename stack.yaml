@@ -16,7 +16,7 @@
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
 # resolver: lts-7.6
-resolver: lts-8.12
+resolver: lts-9.6
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -42,7 +42,7 @@ packages:
 # (e.g., acme-missiles-0.3)
 extra-deps:
 - should-not-typecheck-2.1.0
-- Euterpea-2.0.3
+- Euterpea-2.0.4
 - PortMidi-0.1.5.2
 - Stream-0.4.7.2
 - arrows-0.4.4.1

@@ -1,5 +1,5 @@
 
-module Bumblebee where
+module Other.Bumblebee where
 
 import Mezzo
 
