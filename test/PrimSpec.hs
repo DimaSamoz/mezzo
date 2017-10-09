@@ -314,9 +314,9 @@ matVConcat ::
 matVConcat = True
 
 vecToColMatrix ::
-        ( (VectorToColMatrix (True :-- False :-- None) 24)
+        ( (VectorToColMatrix 2 (True :-- False :-- None) 24)
           ~ (False ** 24 :- End :-- True ** 24 :- End :-- None)
-        , (VectorToColMatrix None 11) ~ None
+        , (VectorToColMatrix 0 None 11) ~ None
         ) => Bool
 vecToColMatrix = True
 
