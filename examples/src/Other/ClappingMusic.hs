@@ -1,6 +1,6 @@
 {-# LANGUAGE GADTs #-}
 
-module ClappingMusic where
+module Other.ClappingMusic where
 
 import Mezzo
 

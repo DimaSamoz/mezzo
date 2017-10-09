@@ -166,7 +166,7 @@ type family ChordToPitchList (c :: ChordType n) :: Vector PitchType n  where
 
 -- | Convert a chord to a partiture with the given length (one voice for each pitch).
 type family FromChord (c :: ChordType n) (l :: Nat) :: Partiture n l where
-    FromChord c l = VectorToColMatrix (ChordToPitchList c) l
+    FromChord (c :: ChordType n) l = VectorToColMatrix n (ChordToPitchList c) l
 
 -------------------------------------------------------------------------------
 -- Primitive instances

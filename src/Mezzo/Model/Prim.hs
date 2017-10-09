@@ -200,9 +200,10 @@ type family FragmentVecByVec (v :: OptVector t p) (u :: OptVector t p) :: OptVec
             ((v ** l) :- (FragmentVecByVec (v ** (k - l) :- vs) us))
 
 -- | Convert a simple vector to a column matrix.
-type family VectorToColMatrix (v :: Vector t n) (l :: Nat) :: Matrix t n l where
-    VectorToColMatrix None _ = None
-    VectorToColMatrix (v :-- vs) l = (VectorToColMatrix vs l) ++. (v ** l :- End :-- None)
+type family VectorToColMatrix (n :: Nat) (v :: Vector t n) (l :: Nat) :: Matrix t n l where
+    VectorToColMatrix 0 None _ = None
+    VectorToColMatrix n (v :-- vs) l = (VectorToColMatrix (n - 1) vs l)
+                                   ++. (v ** l :- End :-- None)
 
 -------------------------------------------------------------------------------
 -- Type-level logic and arithmetic
