@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
 
 -----------------------------------------------------------------------------
 -- |

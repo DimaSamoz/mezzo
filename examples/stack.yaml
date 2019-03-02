@@ -15,7 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-9.6
+resolver: lts-13.9
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -41,13 +41,12 @@ packages:
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
-- Euterpea-2.0.4
-- PortMidi-0.1.5.2
-- Stream-0.4.7.2
-- arrows-0.4.4.1
-- lazysmallcheck-0.6
-- stm-2.4.2
 
+- Euterpea-2.0.6
+- PortMidi-0.1.6.1
+- arrows-0.4.4.2
+- Stream-0.4.7.2
+- lazysmallcheck-0.6
 # Override default flag values for local packages and extra-deps
 flags: {}
 

@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -101,7 +102,7 @@ data OptVector :: Type -> Nat -> Type where
 -- | Get the first element of an optimised vector.
 type family Head (v :: OptVector t n) :: t where
     Head End           = TypeError (Text "Vector has no head element.")
-    Head (v :* _ :- _) = v
+    Head ((v :* t :: Elem t' l) :- (vs :: OptVector t' (n-l))) = v
 
 -- | Get the first element of a simple vector.
 type family Head' (v :: Vector t n) :: t where

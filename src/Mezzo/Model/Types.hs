@@ -83,7 +83,7 @@ module Mezzo.Model.Types
     , TransposeDownBy
     ) where
 
-import GHC.TypeLits
+import GHC.TypeLits hiding (Mod)
 import Data.Proxy
 
 import Mezzo.Model.Prim

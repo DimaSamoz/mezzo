@@ -1,4 +1,5 @@
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE ViewPatterns, NoStarIsType #-}
+{-# OPTIONS_GHC -fplugin-opt GHC.TypeLits.Normalise:allow-negated-numbers #-}
 
 -----------------------------------------------------------------------------
 -- |
@@ -53,7 +54,7 @@ import Mezzo.Model.Prim
 import Mezzo.Model.Harmony.Chords
 
 import GHC.TypeLits
-import Data.Kind (Type)
+import Data.Kind
 
 infix 5 :=
 
@@ -227,7 +228,7 @@ type family ProgTypeToChords (l :: Nat) (p :: ProgType k l) :: Vector (ChordType
         PhraseToChords l1 p ++. ProgTypeToChords (l - l1) ps
 
 -- | Convert a vector of chords ("chord progression") into a 'Partiture'.
-type family ChordsToPartiture (v :: Vector (ChordType n) l) (t :: TimeSignature) :: Partiture n (l * t * 8) where
+type family ChordsToPartiture (v :: Vector (ChordType n) (l :: Nat)) (t :: Nat) :: Partiture n (l * t * 8) where
     ChordsToPartiture None _ = (End :-- End :-- End :-- End :-- None)
     ChordsToPartiture (c :-- cs) l = FromChord c (l * 8) +|+ ChordsToPartiture cs l
 

@@ -32,7 +32,8 @@ module Mezzo.Model.Music
 
 import Data.Kind
 import GHC.TypeLits
-import Text.PrettyPrint.Boxes
+import Text.PrettyPrint.Boxes hiding ((<>))
+import qualified Text.PrettyPrint.Boxes as B ((<>))
 
 import Mezzo.Model.Prim
 import Mezzo.Model.Harmony.Motion
@@ -133,7 +134,7 @@ instance Show (Music s m) where show = render . ppMusic
 ppMusic :: Music s m -> Box
 ppMusic (Note r d) = char '|' <+> doc r <+> doc d
 ppMusic (Rest d) = char '|' <+> text "~~~~" <+> doc d
-ppMusic (m1 :|: m2) = ppMusic m1 <> emptyBox 1 1 <> ppMusic m2
+ppMusic (m1 :|: m2) = ppMusic m1 B.<> emptyBox 1 1 B.<> ppMusic m2
 ppMusic (m1 :-: m2) = ppMusic m1 // ppMusic m2
 ppMusic (Chord c d) = char '|' <+> doc c <+> doc d
 ppMusic (Progression p) = text "Prog:" <+> doc p
