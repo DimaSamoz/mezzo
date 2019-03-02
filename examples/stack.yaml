@@ -47,6 +47,7 @@ extra-deps:
 - arrows-0.4.4.1
 - lazysmallcheck-0.6
 - stm-2.4.2
+- HCodecs-0.5.1
 
 # Override default flag values for local packages and extra-deps
 flags: {}

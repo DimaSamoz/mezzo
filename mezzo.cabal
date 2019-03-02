@@ -51,7 +51,7 @@ library
   build-depends:       base >= 4.7 && < 5
                      , ghc-typelits-natnormalise
                      , template-haskell
-                     , HCodecs
+                     , HCodecs == 0.5.1
                      , boxes
                      , ghc-prim
                      , Euterpea
