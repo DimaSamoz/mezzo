@@ -4,6 +4,19 @@
 
 *Mezzo* is a Haskell library and embedded domain-specific language for music description. Its novelty is in the fact that it can enforce various rules of music composition *statically*, that is, at compile-time. This effectively means that if you write "bad" music, your composition will not compile – think of it as a **very** strict spell-checker for music.
 
+> Note: unfortunately due to changes to GHC's type checker and inference system
+> (and the rather fragile implementation), Mezzo doesn't work well with the
+> latest GHC versions. This branch uses LTS 13.9 (GHC 8.6.3) and fixes all the
+> problems arising from the `ghc-typelits-natnormalise` update. While the main
+> library compiles, the tests and examples do not -- moreover, reification
+> (converting type-level data to term-level values) is _really_ slow (most
+> likely due to the changes to type classes to support
+> `-XQuantifiedConstraints`) making Mezzo pretty much impractical for anything
+> containing more than 8-9 notes. I do not have the time to fix these issues,
+> especially given that Haskell's type system is undergoing a lot of changes and
+> things might break again with a future release. The libary seems to work well
+> with GHC 8.0.2 however, so I will leave the master branch at that version.
+
 - [Getting started](#getting-started)
 	- [Prerequisites](#prerequisites)
 	- [Installation](#installation)
@@ -19,7 +32,7 @@
 		- [Harmonic composition](#harmonic-composition)
 		- [Melodic composition](#melodic-composition)
 	- [Melodies](#melodies)
-		- [Examples:](#examples)
+		- [Examples](#examples)
 	- [Chord progressions](#chord-progressions)
 		- [Harmonic regions](#harmonic-regions)
 		- [Phrases](#phrases)
