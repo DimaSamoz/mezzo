@@ -49,7 +49,7 @@ library
                      , Mezzo.Render.Transform
 
   build-depends:       base >= 4.7 && < 5
-                     , ghc-typelits-natnormalise
+                     , ghc-typelits-natnormalise < 0.6
                      , template-haskell
                      , HCodecs == 0.5.1
                      , boxes
