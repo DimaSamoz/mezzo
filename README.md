@@ -439,7 +439,7 @@ instance {-# OVERLAPPABLE #-}
         TypeError (Text "First species counterpoint only have whole durations.")
         => ValidDur d
 ```
-  This makes use of GHC's [custom type errors](https://ghc.haskell.org/trac/ghc/wiki/Proposal/CustomTypeErrors) feature, with the correspoinding types available in the GHC.TypeLits module. We define the `ValidDur` type class (restricting its argument to a type of kind `Duration`) without any methods. The `Whole` duration is made an instance of `ValidDur`, expressing our intention to make whole durations valid. The overlappable instance for `ValidDur d` is selected only if the previous instance does not fit (i.e. the duration is not `Whole`): in this case, a custom type error is encountered and type-checking fails, displaying our custom error message.
+  This makes use of GHC's [custom type errors](https://ghc.haskell.org/trac/ghc/wiki/Proposal/CustomTypeErrors) feature, with the corresponding types available in the GHC.TypeLits module. We define the `ValidDur` type class (restricting its argument to a type of kind `Duration`) without any methods. The `Whole` duration is made an instance of `ValidDur`, expressing our intention to make whole durations valid. The overlappable instance for `ValidDur d` is selected only if the previous instance does not fit (i.e. the duration is not `Whole`): in this case, a custom type error is encountered and type-checking fails, displaying our custom error message.
 * `ChordConstraints` and `ProgConstraints` are simply equal to the "constant" (nullary) type classes `InvalidChord` and `InvalidProg`, which are defined in a similar manner to `ValidDur`:
 
 ```haskell
